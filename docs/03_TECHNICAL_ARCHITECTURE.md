@@ -1,0 +1,439 @@
+# Parvezk.lt V1 — Technical Architecture
+
+**Status:** Implementation blueprint locked; backend not yet implemented.  
+**Last consolidated:** 2026-09-11.
+
+## 1. Current stack
+
+### Existing
+
+- Next.js 15.5.25
+- TypeScript
+- Tailwind CSS
+- Hostinger managed Node.js hosting
+- GitHub repository: `e-turinys/traliukas`
+- Automatic GitHub → Hostinger deployment working
+
+### Chosen for V1
+
+- shadcn/ui design system
+- shadcn/Base UI primitives
+- Lucide icons
+- React Hook Form + Zod
+- TanStack Table for Admin data tables
+- Sonner for toasts
+- Supabase planned for PostgreSQL/Auth/Storage
+- i18n-ready UI text structure from the start
+
+## 2. Frontend architecture principles
+
+### Page components compose; shared components implement reusable UI
+
+Planned shared components include:
+
+- `LocationPicker`
+- `DateWindowPicker`
+- `RouteSummary`
+- `RouteCard`
+- `CarrierCard`
+- `CarrierTrust`
+- `VerificationBadge`
+- `RatingDisplay`
+- `VehicleSummary`
+- `RequestCard`
+- `OfferCard`
+- `BookingStatus`
+- `StatusTimeline`
+- `EmptyState`
+- `ErrorState`
+- `LoadingCards`
+- `MoneyDisplay`
+- `UserAvatar`
+- `MessageThread`
+- `NotificationItem`
+- `FileUploader`
+- `ConfirmActionDialog`
+- reusable Admin `DataTable`
+
+Rule: do not embed business eligibility rules inside visual cards. For example, `OfferCard` displays an Offer; server/business logic decides whether it may be accepted.
+
+### Design tokens
+
+Use semantic design tokens rather than hard-coded colors throughout the app.
+
+Examples:
+
+- `primary`
+- `secondary`
+- `muted`
+- `destructive`
+- `success`
+- `warning`
+
+Components should receive semantic state (`status="completed"`) rather than repeatedly embedding raw utility color choices.
+
+### Mobile/performance
+
+- Customer and Carrier UI: mobile-first.
+- Admin: desktop-first, responsive.
+- Map modules are lazy-loaded and must not block list content.
+- List must work without Map provider availability.
+- Skeletons instead of page-blocking spinners where practical.
+
+## 3. Planned Next.js routes
+
+See `02_V1_SCREEN_MAP.md` for the canonical URL map.
+
+Next.js route groups may be used for code organization, but route grouping is not an authorization boundary.
+
+## 4. Domain entities / planned tables
+
+The final SQL schema may split or merge implementation details, but the following domain entities must exist conceptually.
+
+### Identity / account
+
+- `users`
+- `carrier_profiles`
+- organization/membership support should not be blocked by the V1 schema even if V1 UI starts with one main carrier user
+- contact verification state
+
+### Carrier verification
+
+- `carrier_verifications`
+- `carrier_documents`
+
+### Customer demand
+
+- `transport_requests`
+- `request_versions`
+
+### Carrier supply
+
+- `carrier_routes`
+- `route_stops`
+- `route_versions`
+
+### Commercial flow
+
+- `offers`
+- `offer_revisions`
+- `bookings`
+
+### Communication / operations
+
+- `conversations`
+- `messages`
+- `booking_activity`
+- `notifications`
+
+### Trust / support
+
+- `reviews`
+- `reports`
+- `saved_carriers`
+- `audit_logs`
+
+## 5. Key relationships
+
+```text
+USER
+ ├─ may own/use CUSTOMER capabilities
+ └─ may have CARRIER PROFILE
+        ├─ VERIFICATION / DOCUMENTS
+        └─ CARRIER ROUTES
+              └─ ROUTE STOPS / ROUTE VERSIONS
+
+TRANSPORT REQUEST
+ ├─ REQUEST VERSIONS
+ └─ OFFERS
+      ├─ OFFER REVISIONS
+      └─ accepted → BOOKING
+
+BOOKING
+ ├─ linked CONVERSATION
+ ├─ BOOKING ACTIVITY
+ ├─ REPORTS
+ └─ REVIEWS
+```
+
+## 6. Location model
+
+Do not store only a free-text string such as `"Hamburg"`.
+
+A structured location should include enough data for matching and display, such as:
+
+- `display_name`
+- `city`
+- `region` when useful
+- `country`
+- `country_code`
+- `latitude`
+- `longitude`
+- `provider_place_id`
+
+Transport Request must distinguish public location from private operational details.
+
+Example public pickup:
+
+- Hamburg, Germany
+
+Example private operational pickup data:
+
+- exact address;
+- facility/auction name;
+- gate;
+- private contact;
+- instructions.
+
+## 7. Date and time model
+
+Calendar/business dates such as “pickup date Sep 16” should be represented as date-only values where appropriate, not accidentally shifted by UTC conversion.
+
+Event timestamps such as:
+
+- Offer created;
+- status changed;
+- message sent;
+- Offer expires;
+
+should use normalized timestamp storage and explicit timezone-aware display rules.
+
+Pickup time is displayed/interpreted in the pickup location's local time context, not blindly in the viewer's device timezone.
+
+## 8. Route capacity model
+
+Recommended fields:
+
+- `capacity_total`
+- `parvezk_reserved`
+
+Derived:
+
+`available_capacity = capacity_total - parvezk_reserved`
+
+Rules:
+
+- Offer creation does not reserve capacity.
+- Booking acceptance reserves capacity atomically.
+- eligible Booking cancellation releases reservation.
+- carrier cannot reduce `capacity_total` below `parvezk_reserved`.
+- Route may remain Active while `accepting_new_requests = false`.
+
+## 9. Versioning model
+
+Use versioning to prevent stale commercial actions.
+
+### Request
+
+Material Request edit increments `request_version` and writes Request version history.
+
+### Route
+
+Material Route edit increments `route_version` and writes Route version history.
+
+### Offer
+
+Offer edit increments `offer_version` and writes Offer revision history.
+
+Offer stores the Request version and Route version against which it was created/revalidated.
+
+### Accept Offer checks
+
+The server must confirm the versions expected by the customer still match current valid versions before accepting.
+
+If not, return a stale-data response and make the user review updated terms.
+
+## 10. Booking snapshot architecture
+
+Do not render the contractual/commercial agreement by joining only to current mutable Request/Route/Offer/Profile values.
+
+At acceptance time, Booking stores an agreement snapshot or equivalent immutable fields containing the accepted state.
+
+Important searchable Booking fields may also be duplicated in structured columns for queryability; the snapshot exists to preserve agreement meaning/history.
+
+Operational details remain mutable and logged separately.
+
+## 11. Server-side business layer
+
+Important actions must run through explicit server-side business functions/server actions/API handlers rather than a sequence of independent client mutations.
+
+Examples:
+
+- `publishTransportRequest()`
+- `updateTransportRequest()`
+- `createCarrierRoute()`
+- `updateCarrierRoute()`
+- `submitOffer()`
+- `updateOffer()`
+- `acceptOffer()`
+- `cancelBooking()`
+- `updateBookingStatus()`
+- `submitVerification()`
+- `createReport()`
+- `resolveReport()`
+- `moderateReview()`
+
+### `acceptOffer()` atomic responsibilities
+
+At minimum:
+
+1. authenticate/authorize customer;
+2. load and lock/validate relevant Offer/Request/Route data;
+3. check Offer status and expiration;
+4. check Offer version;
+5. check Request status/version;
+6. check Route lifecycle/version as required;
+7. check route acceptance/capacity;
+8. reserve capacity;
+9. set Offer Accepted;
+10. set Request Booked;
+11. mark competing eligible Offers Not Selected;
+12. create Booking agreement snapshot;
+13. link/reuse the conversation;
+14. generate activity/audit records;
+15. generate notifications;
+16. commit atomically.
+
+Double-submit must be idempotent/safely handled.
+
+## 12. Authorization model
+
+Authorization must be enforced server-side.
+
+Knowing `/bookings/123` is not sufficient to access Booking 123.
+
+Typical policy examples:
+
+- Public may search/view public routes/profiles.
+- A User may manage their own Requests.
+- Only eligible carrier users may access carrier-only Request marketplace details.
+- Only the carrier tied to a Booking may perform carrier status actions.
+- Only Booking participants/admin can view private Booking operational data/conversation.
+- Only authorized Admin roles can access verification files/internal notes.
+
+Supabase Row Level Security may be used as an additional defense, not as a substitute for well-defined application business rules.
+
+## 13. Authentication architecture
+
+V1 target: passwordless phone OTP.
+
+Flow:
+
+- user enters phone;
+- OTP verifies;
+- existing phone logs into existing User;
+- new phone creates User;
+- redirect returns to the intended task.
+
+Email verification remains separate.
+
+SMS provider selection is an implementation task and is not required before mock UI work begins.
+
+## 14. Storage / files
+
+Planned Supabase Storage use cases:
+
+- vehicle/request photos;
+- Booking/report evidence;
+- carrier verification documents.
+
+Requirements:
+
+- verification/private files must not use permanent public URLs;
+- authorization controls access;
+- uploads validate file type/size;
+- user-facing delete should not silently destroy evidence needed for active disputes/audit/legal retention.
+
+## 15. Notifications architecture
+
+Use domain-event-driven notification creation rather than scattering ad hoc notification logic across UI components.
+
+Example domain events:
+
+- `offer.created`
+- `offer.updated`
+- `offer.accepted`
+- `offer.declined`
+- `booking.created`
+- `booking.pickup_scheduled`
+- `booking.pickup_changed`
+- `booking.collected`
+- `booking.delivered`
+- `booking.cancelled`
+- `verification.approved`
+- `verification.rejected`
+- `report.created`
+- `report.resolved`
+
+V1 does not need Kafka or a complex external event bus; a simple application/domain event pattern is sufficient.
+
+## 16. Analytics architecture
+
+Track a small set of product funnel events from authoritative business actions when possible:
+
+Customer:
+
+- `search_submitted`
+- `search_no_results`
+- `route_viewed`
+- `request_started`
+- `request_published`
+- `offer_received`
+- `offer_viewed`
+- `offer_accepted`
+- `request_closed`
+- `carrier_saved`
+
+Carrier:
+
+- `carrier_onboarding_started`
+- `carrier_onboarding_completed`
+- `verification_submitted`
+- `verification_approved`
+- `route_created`
+- `match_viewed`
+- `request_viewed`
+- `offer_sent`
+- `offer_updated`
+- `offer_accepted`
+- `route_closed_to_new`
+- `booking_completed`
+
+Avoid counting the same business action solely from fragile client clicks when the authoritative server action can emit the event.
+
+## 17. Admin data architecture
+
+- Lifecycle status is separate from moderation status.
+- Admin overrides record actor, time, old/new value and reason.
+- Audit log is immutable through normal UI.
+- Admin data tables must support server-side filtering/sorting/pagination at scale.
+- User suspension does not cascade into silent Booking cancellations.
+
+## 18. Development UI catalog
+
+Create a development-only route such as `/dev/components` containing production reusable components with mock states:
+
+- RouteCard variants;
+- CarrierTrust variants;
+- RequestCard variants;
+- OfferCard variants;
+- BookingStatus variants;
+- StatusBadge variants;
+- EmptyState;
+- form controls.
+
+This acts as a lightweight component catalog without requiring Storybook in V1.
+
+## 19. Testing priorities
+
+Highest-risk flows should receive tests early:
+
+- Offer acceptance concurrency/idempotency;
+- route capacity never goes negative;
+- stale version acceptance blocked;
+- authorization of private Booking/conversation data;
+- verification-gated Offer creation;
+- material Request/Route edits invalidate only appropriate Offers;
+- Booking snapshot remains unchanged after source objects change;
+- cancellation releases reservation only once;
+- lifecycle vs moderation remain independent.
