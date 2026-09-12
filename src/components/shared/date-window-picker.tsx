@@ -1,6 +1,7 @@
 "use client"
 
 import { CalendarDays } from "lucide-react"
+import { lt } from "react-day-picker/locale"
 
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -28,6 +29,8 @@ type DateWindowPickerProps = {
   label: string
   value: DateWindowValue
   onValueChange: (value: DateWindowValue) => void
+  invalid?: boolean
+  describedBy?: string
 }
 
 const dateFormatter = new Intl.DateTimeFormat("lt-LT", {
@@ -75,6 +78,8 @@ export function DateWindowPicker({
   label,
   value,
   onValueChange,
+  invalid = false,
+  describedBy,
 }: DateWindowPickerProps) {
   return (
     <div className="space-y-2">
@@ -85,8 +90,11 @@ export function DateWindowPicker({
           render={
             <Button
               id={id}
+              type="button"
+              aria-invalid={invalid}
+              aria-describedby={describedBy}
               variant="outline"
-              className="w-full justify-start font-normal"
+              className="min-h-11 w-full justify-start font-normal"
             />
           }
         >
@@ -94,8 +102,9 @@ export function DateWindowPicker({
           {getDisplayValue(value)}
         </PopoverTrigger>
 
-        <PopoverContent className="w-auto p-4" align="start">
+        <PopoverContent className="w-auto max-w-[calc(100vw-2rem)] p-4" align="start" aria-label={label}>
           <RadioGroup
+            aria-label="Datos pasirinkimas"
             value={value.type}
             onValueChange={(nextType) => {
               switch (nextType) {
@@ -137,6 +146,7 @@ export function DateWindowPicker({
 
           {value.type === "single" && (
             <Calendar
+              locale={lt}
               mode="single"
               selected={value.date}
               onSelect={(date) =>
@@ -150,6 +160,7 @@ export function DateWindowPicker({
 
           {value.type === "range" && (
             <Calendar
+              locale={lt}
               mode="range"
               selected={{
                 from: value.from,
@@ -175,7 +186,7 @@ export function DateWindowPicker({
                 })
               }
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" aria-label="Lankstus laikotarpis">
                 <SelectValue placeholder="Pasirinkite laikotarpį" />
               </SelectTrigger>
 

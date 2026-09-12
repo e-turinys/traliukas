@@ -19,6 +19,8 @@ type LocationPickerProps = {
   onValueChange: (value: LocationOption | null) => void
   placeholder?: string
   invalid?: boolean
+  required?: boolean
+  describedBy?: string
 }
 
 export function LocationPicker({
@@ -28,6 +30,8 @@ export function LocationPicker({
   onValueChange,
   placeholder = "Pasirinkite vietą",
   invalid = false,
+  required = false,
+  describedBy,
 }: LocationPickerProps) {
   return (
     <div className="space-y-2">
@@ -43,6 +47,9 @@ export function LocationPicker({
           id={id}
           placeholder={placeholder}
           aria-invalid={invalid}
+          aria-required={required}
+          aria-describedby={describedBy}
+          className="min-h-11"
           showClear
         />
 

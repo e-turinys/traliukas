@@ -1,8 +1,20 @@
 # Parvezk.lt — Current Status
 
 **Date:** 2026-09-11  
-**Current phase:** Phase 0 — Foundation  
-**Project status:** Product/UX/implementation blueprint completed and locked; production UI coding is the next step.
+**Current phase:** Phase 1 — Public UI
+**Project status:** P01 Home review corrections applied; awaiting final browser approval before P02.
+
+## P01 implementation — 2026-09-11
+
+- Replaced starter content with the Lithuanian hero, HomeSearch, trust/value section, three steps and carrier CTA using the existing public layout and PageContainer.
+- HomeSearch reuses LocationPicker and DateWindowPicker; both actions require distinct selected locations, show associated errors and focus the first invalid control.
+- Both destinations preserve the same query contract: `from` and `to` are existing location IDs; optional dates use `dateType=single&date=YYYY-MM-DD`, `dateType=range&dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD`, or `dateType=flexible&dateOption=...`.
+- Dates serialize using local calendar fields, without UTC conversion. Empty date selections mean anytime; a started range requires an end date.
+- Picker changes add accessible descriptions/required state, larger input triggers, and Lithuanian calendar labels. Base UI `render` composition is retained.
+- Validation: production build and standalone lint passed using `npm.cmd run build` and `npm.cmd run lint` (PowerShell blocks the npm.ps1 launcher).
+- Mobile/desktop browser and keyboard review remains the next review step. Location data still comes from the existing mock list.
+- `/search`, `/request/new` and `/carrier` remain planned destinations; their screens and backend were not implemented in this task.
+- No locked product rules changed. No commit or push performed.
 
 ## Completed
 
@@ -43,29 +55,16 @@
 - Local path: `C:\Projects\traliukas`
 - GitHub → Hostinger auto-deploy: working
 - Supabase: not connected yet
-- shadcn/ui: chosen but not yet installed/configured
-- Real product UI: not yet built beyond the existing Next.js starter
+- shadcn/ui: configured with Base UI, Nova preset and neutral tokens
+- Real product UI: public layout, shared pickers and P01 Home implemented
 
 ## Immediate next task
 
-### Phase 0 — Step 1
-
-Install and configure **shadcn/ui** in `C:\Projects\traliukas` without breaking the existing Next.js 15 Hostinger build.
-
-Then:
-
-1. establish semantic theme/design tokens;
-2. create core layout/folder conventions;
-3. prepare i18n-ready string structure;
-4. add Sonner and core form conventions;
-5. create `/dev/components` development component catalog;
-6. verify `npm run build` locally;
-7. commit and push;
-8. verify Hostinger deployment.
+Review **P01 Home** on desktop and mobile, including keyboard interaction, validation and the URL query contract. Wait for approval before starting P02 Search Results. Remaining foundation tasks (including the development catalog and planned form/toast tooling) are not implied complete by P01.
 
 ## Next after Phase 0 foundation
 
-Build **P01 Home** in the real browser using production shadcn components and realistic mock data.
+P01 Home is implemented and awaiting review.
 
 Then:
 
