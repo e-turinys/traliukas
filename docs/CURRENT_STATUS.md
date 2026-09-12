@@ -1,8 +1,22 @@
 # Parvezk.lt — Current Status
 
-**Date:** 2026-09-11  
+**Date:** 2026-09-12
 **Current phase:** Phase 1 — Public UI
-**Project status:** P01 Home review corrections applied; awaiting final browser approval before P02.
+**Project status:** P01 completed, reviewed and committed. P02 completed and browser-reviewed; ready to commit. Next implementation task: P03 Carrier Route Detail. No P03 or backend work has started.
+
+## P02 implementation — 2026-09-12
+
+- Added `/search` with an inline search editor reusing LocationPicker and DateWindowPicker. Missing/unknown locations, identical locations and malformed dates require correction before results appear.
+- Search, date, verification, rating, vehicle category, non-running filters and sort persist in the URL; browser Back/Forward restores applied criteria. Mobile filters use the existing Base UI Sheet.
+- P02 accepts both `dateFlexible` and P01's existing `dateOption`; revised P02 dates use `dateFlexible`. Request fallback preserves incoming From/To/date parameters. Calendar dates use local fields without UTC conversion.
+- Six fictional route fixtures reuse LocationOption and fixed September 15–24, 2026 dates. Available spaces derive from total minus reserved capacity. Demonstration data is identified in the UI; routes have no prices.
+- Deterministic mock matching checks ordered stops, date overlap, capacity and filters. Exact matches and same-pickup/different-delivery-city alternatives appear separately. Match levels are derived per search rather than fixed carrier scores.
+- Flexible mock windows mean today through the next 7/14 days or the end of this month, using the Lithuanian calendar. This is a UI-phase assumption, not a new backend matching contract.
+- Desktop uses approximately 45% list / 55% map placeholder. Mobile defaults to List with a Map toggle. No map provider, pins or GPS data were added.
+- Added reusable RouteCard, MatchBadge, skeleton, empty and error states, with a Next.js loading/error boundary and simple “Rodyti daugiau” batches when needed.
+- P03, request creation, backend, authentication and maps remain unimplemented. No package changes or locked product changes.
+- Validation: production build passed. Focused query/matching tests cover alias compatibility, invalid inputs, date-safe serialization, request fallback, direction, date overlap, filters, capacity and sorting; run with Node 24 using `node --test tests/search.test.mjs`.
+- P02 browser review passed successfully after the presentation corrections. P02 is completed and ready to commit. No commit or push performed for P02.
 
 ## P01 implementation — 2026-09-11
 
@@ -12,9 +26,9 @@
 - Dates serialize using local calendar fields, without UTC conversion. Empty date selections mean anytime; a started range requires an end date.
 - Picker changes add accessible descriptions/required state, larger input triggers, and Lithuanian calendar labels. Base UI `render` composition is retained.
 - Validation: production build and standalone lint passed using `npm.cmd run build` and `npm.cmd run lint` (PowerShell blocks the npm.ps1 launcher).
-- Mobile/desktop browser and keyboard review remains the next review step. Location data still comes from the existing mock list.
-- `/search`, `/request/new` and `/carrier` remain planned destinations; their screens and backend were not implemented in this task.
-- No locked product rules changed. No commit or push performed.
+- P01 browser review corrections completed: global Geist token mapping, locked labels/helper copy, disabled search until distinct selected locations, and stacked mobile CTAs.
+- P01 completed/reviewed and committed as `28b82f4` (`Complete P01 home experience`), pushed to `main`.
+- `/search` is now implemented by P02; `/request/new` and `/carrier` remain planned destinations. No locked product rules changed.
 
 ## Completed
 
@@ -56,19 +70,18 @@
 - GitHub → Hostinger auto-deploy: working
 - Supabase: not connected yet
 - shadcn/ui: configured with Base UI, Nova preset and neutral tokens
-- Real product UI: public layout, shared pickers and P01 Home implemented
+- Real product UI: public layout, shared pickers, P01 Home and P02 mock Search Results implemented
 
 ## Immediate next task
 
-Review **P01 Home** on desktop and mobile, including keyboard interaction, validation and the URL query contract. Wait for approval before starting P02 Search Results. Remaining foundation tasks (including the development catalog and planned form/toast tooling) are not implied complete by P01.
+Next implementation task: **P03 Carrier Route Detail**. P02 Search Results is completed, browser-reviewed and ready to commit. No P03 or backend work has started yet. Remaining foundation tasks (including the development catalog and planned form/toast tooling) are not implied complete by P02.
 
 ## Next after Phase 0 foundation
 
-P01 Home is implemented and awaiting review.
+P01 Home is completed, reviewed and committed. P02 Search Results is completed, browser-reviewed and ready to commit.
 
 Then:
 
-- P02 Search Results
 - P03 Carrier Route Detail
 - P04 Carrier Public Profile
 - P05 Create Transport Request
