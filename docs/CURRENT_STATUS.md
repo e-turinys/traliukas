@@ -1,8 +1,31 @@
 # Parvezk.lt — Current Status
 
-**Date:** 2026-09-12
+**Date:** 2026-09-13
 **Current phase:** Phase 1 — Public UI
-**Project status:** P01 completed, reviewed and committed. P02 completed and browser-reviewed; ready to commit. Next implementation task: P03 Carrier Route Detail. No P03 or backend work has started.
+**Project status:** P01 and P02 completed, reviewed, committed and locked. P03 Carrier Route Detail completed, browser-reviewed and ready to commit. Next task: P04 Carrier Public Profile. P04, P05 and backend work have not started.
+
+## P03 final polish — 2026-09-13
+
+- Removed the public demonstration-data notice. Mock data remains internal. Route-stop country names now use a reusable Lithuanian display helper (Vokietija, Lenkija, Lietuva, Nyderlandai); canonical location values are unchanged.
+- Preserved existing uncommitted P03 work, route hierarchy, dates, capacity, timeline structure, compatibility, trust/reviews, sticky CTA and request URL behavior. No P04/P05, backend, maps, auth or new functionality.
+- Production build passed after stopping the concurrent development server that was conflicting with generated `.next` output. All 13 existing focused tests passed (5 P03 and 8 P02 regressions).
+- Mobile browser and production HTTP checks verified `baltijos-kelias-0915` (verified, 3 spaces), `baltijos-kelias-0920-full` (full, marketplace fallback), `manto-transportas-0917` (new carrier, no reviews), and `unknown-p03-route` (HTTP 404). Also checked `vakaru-kryptis-0918` for Nyderlandai display.
+- The reported “1 Issue” could not be reproduced in a fresh mobile development session: the Next.js indicator had `data-error=false`, no issue count, and no runtime exceptions or browser audit issues were captured. The original warning's cause remains unconfirmed; no speculative application or tooling changes were made.
+- Development server restored on port 3000. Diff reviewed for unrelated changes. P03 final browser review passed; P03 is completed, browser-reviewed and ready to commit. No commit or push performed.
+
+## P03 implementation — 2026-09-12
+
+- Added `/routes/[id]`, resolving the existing mock route dataset with Next.js `notFound()` for unknown IDs and a Lithuanian not-found screen.
+- Route endpoints, stops, localized date window and available spaces precede carrier trust details. An ordered stop timeline represents the planned route without a map or GPS.
+- “Ką gali vežti” uses existing supported categories and explicitly states non-running capability. Dates reuse `formatDateRange`; ISO date-only values are preserved.
+- Added stable `carrier.id` values to the existing route model for profile/targeting links. No second route model was introduced. Added `baltijos-kelias-0920-full` as a full-route fixture; P02's existing capacity filter excludes it.
+- Available routes lead to `/request/new` with `visibility=targeted`, `targetCarrier`, `targetRoute`, existing location-ID parameters `from`/`to`, and the existing single/range date contract. These additive frontend prefill names are the P03-to-P05 handoff assumption; P05 must resolve/validate context rather than trust URL eligibility.
+- Full, expired or closed-to-new-request routes omit targeted actions and offer a marketplace Request fallback with route places/dates preserved and no target IDs.
+- Mobile has a sticky bottom quote action with content clearance and safe-area padding; desktop has a sticky carrier/CTA card. No login gate was added.
+- Carrier trust uses only existing verification/reputation fields. Two fictional completed-transport review previews are shown per reviewed carrier; the original demonstration-data notice was removed during final polish. New carriers show no fabricated rating/reviews. Profile links target `/carriers/[carrier-id]`; P04 is not implemented.
+- Save-carrier persistence is deferred. P01/P02 presentation, matching, filters, URL handling, header/footer and date formatter remain unchanged. No packages, maps, auth, P04/P05 or backend were added.
+- Validation: `npm.cmd run build` and standalone lint passed; 13 focused tests passed (8 P02 regressions and 5 P03 lookup/formatting checks). Production HTTP checks passed for available, full, new-carrier and non-running-incompatible routes, plus an HTTP 404 for an unknown ID.
+- P03 final browser review passed on 2026-09-13. P03 is completed, browser-reviewed and ready to commit. No commit or push performed for P03.
 
 ## P02 implementation — 2026-09-12
 
@@ -14,9 +37,9 @@
 - Flexible mock windows mean today through the next 7/14 days or the end of this month, using the Lithuanian calendar. This is a UI-phase assumption, not a new backend matching contract.
 - Desktop uses approximately 45% list / 55% map placeholder. Mobile defaults to List with a Map toggle. No map provider, pins or GPS data were added.
 - Added reusable RouteCard, MatchBadge, skeleton, empty and error states, with a Next.js loading/error boundary and simple “Rodyti daugiau” batches when needed.
-- P03, request creation, backend, authentication and maps remain unimplemented. No package changes or locked product changes.
+- At P02 completion, P03, request creation, backend, authentication and maps remained unimplemented. No package changes or locked product changes.
 - Validation: production build passed. Focused query/matching tests cover alias compatibility, invalid inputs, date-safe serialization, request fallback, direction, date overlap, filters, capacity and sorting; run with Node 24 using `node --test tests/search.test.mjs`.
-- P02 browser review passed successfully after the presentation corrections. P02 is completed and ready to commit. No commit or push performed for P02.
+- P02 browser review passed successfully after the presentation corrections. P02 is locked and committed as `3dc823b` (`Complete P02 carrier search results`).
 
 ## P01 implementation — 2026-09-11
 
@@ -70,19 +93,18 @@
 - GitHub → Hostinger auto-deploy: working
 - Supabase: not connected yet
 - shadcn/ui: configured with Base UI, Nova preset and neutral tokens
-- Real product UI: public layout, shared pickers, P01 Home and P02 mock Search Results implemented
+- Real product UI: public layout, shared pickers, P01 Home, P02 mock Search Results and P03 mock Carrier Route Detail implemented
 
 ## Immediate next task
 
-Next implementation task: **P03 Carrier Route Detail**. P02 Search Results is completed, browser-reviewed and ready to commit. No P03 or backend work has started yet. Remaining foundation tasks (including the development catalog and planned form/toast tooling) are not implied complete by P02.
+Next task: **P04 Carrier Public Profile**. P01 and P02 are locked. P03 Carrier Route Detail is completed, browser-reviewed and ready to commit. P04/P05/backend have not started. Remaining foundation tasks (including the development catalog and planned form/toast tooling) are not implied complete by P03.
 
 ## Next after Phase 0 foundation
 
-P01 Home is completed, reviewed and committed. P02 Search Results is completed, browser-reviewed and ready to commit.
+P01 Home and P02 Search Results are completed, reviewed, committed and locked. P03 Carrier Route Detail is completed, browser-reviewed and ready to commit. P04/P05/backend have not started.
 
 Then:
 
-- P03 Carrier Route Detail
 - P04 Carrier Public Profile
 - P05 Create Transport Request
 

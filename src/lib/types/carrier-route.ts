@@ -13,6 +13,7 @@ export const vehicleCategoryLabels: Record<VehicleCategory, string> = {
 export type CarrierRoute = {
   id: string
   carrier: {
+    id: string
     name: string
     verification: "approved" | "pending" | "not_submitted"
     rating: number | null
