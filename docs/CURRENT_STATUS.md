@@ -2,7 +2,16 @@
 
 **Date:** 2026-09-14
 **Current phase:** Phase 2 — Request / Offer UI with mock data
-**Project status:** P01–P04 are completed, browser-reviewed and locked. P04 remains uncommitted. P05 Create Transport Request is completed, browser-reviewed and ready to commit. Next task: P06 Request Published. P06/backend/auth have not started.
+**Project status:** P01–P05 are completed, browser-reviewed and locked. P06 Request Published is completed, browser-reviewed and ready to commit. Next task: P07 Request Detail + Offers. P07/backend/auth have not started.
+
+## P06 implementation — 2026-09-14
+
+- Added `/request/[id]/published` with explicit demo fixture lookup and Next.js not-found behavior for every unknown ID. The reusable success card takes a public summary derived from the P05 draft model; private addresses, contacts, notes and photos are excluded. Local-calendar date formatting is reused on the server.
+- Marketplace, targeted-only and targeted-plus-marketplace states show the route, vehicle, pickup window, audience and concise next steps. The primary link points to `/requests/[id]`; P07 is not implemented, so that destination currently returns 404. A secondary link returns home.
+- The targeted-only growth action changes only the demo component's in-memory visibility and resets on reload. It does not save or notify anyone. Demo routes are excluded from indexing; no P05 navigation leads to them. P05 still requires phone verification and does not claim publication.
+- Browser review: `/request/marketplace-demo-001/published`, `/request/targeted-demo-001/published`, `/request/targeted-marketplace-demo-001/published`; unknown state: `/request/unknown-p06-request/published`.
+- Validation: production build passed, including lint/type checks. All 28 tests passed (3 P06 tests and 25 P02–P05 regressions). Production browser checks covered all three fixtures at 390/768/1280/1536px, correct headings/links, no horizontal overflow, demo expansion/reset, focus and unknown-ID HTTP 404. No runtime exceptions were captured.
+- P01–P05 application code is unchanged and remains locked. P06 final browser review passed; P06 is completed, browser-reviewed and ready to commit. P07/backend/auth have not started. No commit or push performed.
 
 ## P05 implementation and overflow correction — 2026-09-14
 
@@ -16,7 +25,7 @@
 - Overflow root causes: hidden `#request-photos` combined shared Input `w-full` with `sr-only` absolute positioning (390px client width produced 747px document width); the desktop Next button also retained full width beside Back. The file input is now a native hidden input triggered by the same visible button; the desktop Next button flexes into remaining space. No global overflow masking or product-logic changes.
 - Step 2 checks passed at 390/768/1280/1536px for default, non-running and long-filename states. Document and body scroll widths matched their client widths: 390/753/1265/1521px respectively (desktop client widths exclude the vertical scrollbar). No elements extended beyond the right viewport edge.
 - Validation: `npm.cmd run build` and all 25 tests passed (8 P05 and 17 P02–P04 regressions). End-to-end browser checks cover validation/focus, retained fields/photos, removal, targeted defaults/broadening, explicit fallback and the non-publishing handoff at mobile/desktop widths.
-- Existing uncommitted P04 work is preserved. P01–P04 remain locked. P05 final browser review passed; P05 is completed, browser-reviewed and ready to commit. P06/backend/auth have not started. No commit or push performed.
+- P05 final browser review passed. P04/P05 are now locked and included in commit `968e664` (`Complete P05 create transport request`). No commit or push was performed in the P05 implementation session.
 
 ## P04 implementation — 2026-09-13
 
@@ -28,7 +37,7 @@
 - Primary action leads to active routes, or `/request/new` when none exist. The empty state also offers the request fallback. The unavailable save action and its hint were removed during final review; no authentication or persistence.
 - Reviews reuse only completed-transport fixtures, newest first, with accessible stars and localized dates. Existing aggregate reputation remains unchanged; the latest-review list uses the available previews (up to six). No fabricated remaining reviews, infinite scroll or moderation tools.
 - Validation: production build passed; 17 tests passed (4 P04 lookup/filter/review checks and 13 P02/P03 regressions). Production browser checks passed at 390px and 1280px for verified, new, route-free and unknown profiles: HTTP 200/404, CTA destinations, no horizontal overflow, 44px link targets, and no runtime/console errors. Mobile/desktop screenshots inspected.
-- P04 final browser review passed. P04 is completed, browser-reviewed, locked and ready to commit. P01/P02/P03 are locked. At P04 completion, P05/backend had not started. No packages, maps, contact actions, messaging, auth or backend added. No commit or push performed in this P04 session.
+- P04 final browser review passed. P04 is completed, browser-reviewed and locked; included in commit `968e664`. P01/P02/P03 are locked. At P04 completion, P05/backend had not started. No packages, maps, contact actions, messaging, auth or backend added. No commit or push performed in this P04 session.
 
 ## P03 final polish — 2026-09-13
 
@@ -119,21 +128,15 @@
 - GitHub → Hostinger auto-deploy: working
 - Supabase: not connected yet
 - shadcn/ui: configured with Base UI, Nova preset and neutral tokens
-- Real product UI: public layout, shared pickers, P01 Home, P02 mock Search Results, P03 mock Carrier Route Detail P04 mock Carrier Public Profile and P05 mock Create Transport Request implemented
+- Real product UI: public layout, shared pickers, P01 Home, P02 mock Search Results, P03 mock Carrier Route Detail, P04 mock Carrier Public Profile, P05 mock Create Transport Request and P06 demo Request Published implemented
 
 ## Immediate next task
 
-Next task: **P06 Request Published**. P01–P04 are locked. P05 Create Transport Request is completed, browser-reviewed and ready to commit. P06/backend/auth have not started. Publication still requires phone verification.
+Next task: **P07 Request Detail + Offers**. P01–P05 remain locked. P06 is completed, browser-reviewed and ready to commit. P07/backend/auth have not started. P05 still stops before phone verification and publication.
 
-## Next after Phase 0 foundation
+## Next after browser approval
 
-P01–P04 are completed, browser-reviewed and locked; P04 remains ready to commit. P05 is completed, browser-reviewed and ready to commit. P06/backend/auth have not started.
-
-Then:
-
-- P06 Request Published (publication still requires phone verification)
-
-Do not start the full Supabase/backend implementation before reviewing these first real UI screens in desktop and mobile layouts unless a required UI decision cannot be made without backend work.
+P06 final browser approval has passed. Next task: P07 Request Detail + Offers. P07/backend/auth have not started.
 
 ## Do not reopen without a blocker
 
