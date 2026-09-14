@@ -23,20 +23,22 @@ function countLabel(count: number, labels: typeof reviewLabels) {
   return `${count} ${plural === "one" || plural === "few" ? labels[plural] : labels.other}`
 }
 
-type RouteCardProps = RouteMatch & {
+type RouteCardProps = Omit<RouteMatch, "level"> & {
+  level?: RouteMatch["level"]
+  context?: "search" | "profile"
   servedSegment?: { from: LocationOption; to: LocationOption }
 }
 
-export function RouteCard({ route, level, servedSegment }: RouteCardProps) {
+export function RouteCard({ route, level, servedSegment, context = "search" }: RouteCardProps) {
   const headingId = `route-${route.id}`
   const showSegment = servedSegment && (servedSegment.from.id !== route.origin.id || servedSegment.to.id !== route.destination.id)
   return (
     <article aria-labelledby={headingId}>
       <Card>
         <CardContent className="space-y-4">
-          <div className="flex flex-wrap items-start justify-between gap-2">
+          {context !== "profile" && <><div className="flex flex-wrap items-start justify-between gap-2">
             <h3 id={headingId} className="text-base font-semibold">{route.carrier.name}</h3>
-            <MatchBadge level={level} />
+            {level && <MatchBadge level={level} />}
           </div>
           <div className="space-y-1 text-sm text-muted-foreground">
             {route.carrier.verification === "approved" && <p className="flex items-center gap-1.5 text-foreground"><BadgeCheck aria-hidden="true" className="size-4" />{copy.verified}</p>}
@@ -44,10 +46,10 @@ export function RouteCard({ route, level, servedSegment }: RouteCardProps) {
               <p className="flex items-center gap-1.5"><Star aria-hidden="true" className="size-4" />{route.carrier.rating.toLocaleString("lt-LT")} · {countLabel(route.carrier.reviewCount, reviewLabels)}</p>
             ) : <p>{copy.newCarrier}</p>}
             {route.carrier.completedTransports > 0 && <p>{countLabel(route.carrier.completedTransports, transportLabels)}</p>}
-          </div>
+          </div></>}
           <div>
             <p className="mb-1 text-sm text-muted-foreground">{copy.route}</p>
-            <p className="text-lg font-semibold">{route.origin.city} → {route.destination.city}</p>
+            {context === "profile" ? <h3 id={headingId} className="text-lg font-semibold">{route.origin.city} → {route.destination.city}</h3> : <p className="text-lg font-semibold">{route.origin.city} → {route.destination.city}</p>}
             {route.stops.length > 0 && <p className="mt-1 text-sm text-muted-foreground">{copy.stops}: {route.stops.map((stop) => stop.city).join(" → ")}</p>}
             {showSegment && <p className="mt-2 text-sm font-medium">{copy.segment}: {servedSegment.from.city} → {servedSegment.to.city}</p>}
           </div>
