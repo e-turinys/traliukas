@@ -10,6 +10,7 @@ function dateQuery(date: RequestDetail["route"]["date"]) {
 
 export function serializeRequestDetail(request: RequestDetail): RequestDetailPayload {
   const { route, photos: _photos, ...rest } = request
+  void _photos // Local File objects never cross the server/client boundary.
   return { ...rest, route: { from: route.from, to: route.to, dateQuery: dateQuery(route.date) } }
 }
 
@@ -20,6 +21,14 @@ export function hydrateRequestDetail(payload: RequestDetailPayload): RequestDeta
 
 export function requestActions(request: RequestDetail) {
   return { edit: request.status === "active", close: request.status === "active", repeat: request.status === "closed", booking: request.status === "booked" && !!request.bookingId }
+}
+
+export function requestOfferGroups(request: RequestDetail) {
+  if (request.status !== "booked" && request.status !== "completed") {
+    return { selected: undefined, current: request.offers, historical: [] }
+  }
+  const selected = request.offers.find(offer => offer.status === "accepted")
+  return { selected, current: [], historical: request.offers.filter(offer => offer !== selected) }
 }
 
 export function isMaterialEdit(request: RequestDetail, edit: RequestEdit) {
@@ -50,6 +59,11 @@ export function closeRequest(request: RequestDetail, confirmed: boolean): Reques
   return { ...request, status: "closed", offers: invalidatePending(request.offers) }
 }
 
+export function repeatRequest(request: RequestDetail): RequestDetail {
+  if (!requestActions(request).repeat) throw new Error("Only closed requests can be repeated")
+  return { ...request, id: `${request.id}-repeat`, status: "draft", requestVersion: 1, offers: [], bookingId: undefined }
+}
+
 export function expandRequestVisibility(request: RequestDetail): RequestDetail {
   if (request.status !== "active" || request.visibility !== "targeted") return request
   return { ...request, visibility: "marketplace" }
@@ -58,6 +72,7 @@ export function expandRequestVisibility(request: RequestDetail): RequestDetail {
 export function visibleOfferStatus(request: RequestDetail, offer: RequestOffer, now: string): RequestOffer["status"] {
   if (offer.status !== "pending") return offer.status
   if (request.status !== "active" || offer.requestVersion !== request.requestVersion || offer.requestId !== request.id) return "unavailable"
+  if (!Number.isFinite(Date.parse(offer.expiresAt)) || !Number.isFinite(Date.parse(now))) return "unavailable"
   if (Date.parse(offer.expiresAt) <= Date.parse(now)) return "expired"
   return "pending"
 }

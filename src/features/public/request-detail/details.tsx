@@ -3,13 +3,19 @@ import { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { requestCategories } from "../create-request/model"
 import { dateLabel } from "../search-query"
-import { countryLabel } from "@/lib/format-country"
+import { formatCountry } from "@/lib/format-country"
 import type { RequestDetail } from "./model"
 
 function LocalPhoto({ file }: { file: File }) {
   const [url, setUrl] = useState<string>()
   const [failed, setFailed] = useState(false)
-  useEffect(() => { const value = URL.createObjectURL(file); setUrl(value); return () => URL.revokeObjectURL(value) }, [file])
+  useEffect(() => {
+    const reader = new FileReader()
+    reader.onload = () => setUrl(String(reader.result))
+    reader.onerror = () => setFailed(true)
+    reader.readAsDataURL(file)
+    return () => { reader.onload = null; reader.onerror = null; if (reader.readyState === FileReader.LOADING) reader.abort() }
+  }, [file])
   return <li className="min-w-0 space-y-2">
     {url && !failed && <Image unoptimized src={url} width={320} height={200} alt={`Automobilio nuotrauka: ${file.name}`} onError={() => setFailed(true)} className="h-40 w-full rounded-lg object-contain" />}
     <p className="break-all text-sm">{file.name}</p>
@@ -19,8 +25,8 @@ function LocalPhoto({ file }: { file: File }) {
 export function RequestDetails({ request }: { request: RequestDetail }) {
   const { route, vehicle } = request
   const rows = [
-    ["Paėmimo vieta", route.from ? `${route.from.city}, ${countryLabel(route.from.country)}` : "—"],
-    ["Pristatymo vieta", route.to ? `${route.to.city}, ${countryLabel(route.to.country)}` : "—"],
+    ["Paėmimo vieta", route.from ? `${route.from.city}, ${formatCountry(route.from.country)}` : "—"],
+    ["Pristatymo vieta", route.to ? `${route.to.city}, ${formatCountry(route.to.country)}` : "—"],
     ["Paėmimo laikas", dateLabel(route.date)],
     ["Kategorija", vehicle.category ? requestCategories[vehicle.category] : "—"],
     ["Markė ir modelis", `${vehicle.make} ${vehicle.model}`],

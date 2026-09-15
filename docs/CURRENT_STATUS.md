@@ -1,17 +1,31 @@
 # Parvezk.lt — Current Status
 
-**Date:** 2026-09-14
+**Date:** 2026-09-15
 **Current phase:** Phase 2 — Request / Offer UI with mock data
-**Project status:** P01–P05 are completed, browser-reviewed and locked. P06 Request Published is completed, browser-reviewed and ready to commit. Next task: P07 Request Detail + Offers. P07/backend/auth have not started.
+**Project status:** P01 locked. P02 locked. P03 locked. P04 locked. P05 locked. P06 locked. P07 Request Detail + Offers is completed, browser-reviewed and ready to commit. Next task: P08 Offer Detail. P08/backend have not started.
+
+## P07 implementation — 2026-09-15
+
+- Browser-review correction: Booked and Completed requests now present the accepted offer under “Pasirinktas vežėjas” and move non-selected offers into a collapsed, visually secondary “Ankstesni pasiūlymai (N)” section. Historical offers retain their data and “Nepasirinktas” status without a decision CTA. Active request offer comparison is unchanged. Focused grouping and browser assertions cover this presentation.
+- Resumed the existing `1c11041` WIP commit. The working tree was clean on arrival; that commit already contained the request model, lifecycle/edit helpers, offer card, details, editor, confirmation dialog and review fixtures. All existing work was retained.
+- Added `/requests/[id]`, a Lithuanian unknown-request HTTP 404, no-index metadata and the client page connecting the existing components. Summary includes route, vehicle, requested date and visibility. Offers reuse carrier verification/reputation and show total EUR transport price, pickup, delivery, expiry, updated badge and actionable-only `/offers/[id]` links.
+- Local notes/photo edits preserve the request version and pending offers. Material route/date/category/condition changes (including non-running rolling capability) require “Pakeitus šiuos duomenis esami pasiūlymai nebegalios.” confirmation, increment the internal request version and mark pending offers unavailable. Cancel preserves the original. Selected photos can be previewed and removed; nothing is uploaded.
+- Closing requires confirmation, produces Closed and makes pending offers Unavailable. There is no reopen. “Pakartoti užklausą” creates a separate in-memory Draft with copied request values and no offers, leaving the original closed. This draft is only a local preview, without publication or persistence.
+- Booked requests are read-only with “Atidaryti pervežimą” linking to `/bookings/transport-demo-001`. Completed, closed and draft fixtures have appropriate read-only states. Targeted-only zero-offer requests can demonstrate expanding visibility without sending anything. Reload restores the fixtures.
+- The existing fixed review clock (`2026-09-14T09:00:00Z`) keeps pending and expired offers reproducible; it is not live eligibility. P08 and booking screens remain unimplemented link destinations. No offer acceptance, booking creation, backend, Supabase, auth, notifications or payments were added. P01–P06 application code and fixtures are unchanged.
+- Review URLs: `/requests/marketplace-demo-001`, `/requests/targeted-demo-001`, `/requests/updated-offer-demo-001`, `/requests/booked-demo-001`, `/requests/closed-demo-001`, and `/requests/unknown-p07-request` (404). Additional states: `/requests/completed-demo-001`, `/requests/draft-demo-001`, `/requests/non-running-demo-001`, `/requests/historical-offers-demo-001`, `/requests/targeted-marketplace-demo-001`.
+- Validation: `node --test tests/*.test.mjs` passed all 38 tests (10 P07 and 28 P02–P06 regressions). `npm.cmd run build` passed lint, types and production compilation. `node tests/request-detail.browser.mjs` passed against the final production build at 390/768/1280/1536px: nine fixtures, CTA states, desktop columns, notes/photos, confirmation/cancel, invalidation, closure/repeat, visibility/reset and unknown HTTP 404. No horizontal overflow or runtime exceptions; mobile/desktop screenshots inspected. Screenshots are generated under ignored `.next/p07-review/`. Final P07 browser review passed.
+- P07 is completed, browser-reviewed and ready to commit. P01–P06 remain locked. P08/backend have not started.
+- Build integration fixed the existing WIP country-format import and photo-preview effect. A fresh generated-cache rebuild was needed to include new desktop CSS classes. No packages or locked product decisions changed. No commit or push performed in this session.
 
 ## P06 implementation — 2026-09-14
 
 - Added `/request/[id]/published` with explicit demo fixture lookup and Next.js not-found behavior for every unknown ID. The reusable success card takes a public summary derived from the P05 draft model; private addresses, contacts, notes and photos are excluded. Local-calendar date formatting is reused on the server.
-- Marketplace, targeted-only and targeted-plus-marketplace states show the route, vehicle, pickup window, audience and concise next steps. The primary link points to `/requests/[id]`; P07 is not implemented, so that destination currently returns 404. A secondary link returns home.
+- Marketplace, targeted-only and targeted-plus-marketplace states show the route, vehicle, pickup window, audience and concise next steps. The primary link points to `/requests/[id]`; at P06 completion, that planned P07 destination still returned 404. A secondary link returns home.
 - The targeted-only growth action changes only the demo component's in-memory visibility and resets on reload. It does not save or notify anyone. Demo routes are excluded from indexing; no P05 navigation leads to them. P05 still requires phone verification and does not claim publication.
 - Browser review: `/request/marketplace-demo-001/published`, `/request/targeted-demo-001/published`, `/request/targeted-marketplace-demo-001/published`; unknown state: `/request/unknown-p06-request/published`.
 - Validation: production build passed, including lint/type checks. All 28 tests passed (3 P06 tests and 25 P02–P05 regressions). Production browser checks covered all three fixtures at 390/768/1280/1536px, correct headings/links, no horizontal overflow, demo expansion/reset, focus and unknown-ID HTTP 404. No runtime exceptions were captured.
-- P01–P05 application code is unchanged and remains locked. P06 final browser review passed; P06 is completed, browser-reviewed and ready to commit. P07/backend/auth have not started. No commit or push performed.
+- At P06 completion, P01–P05 application code was unchanged and locked, while P07/backend/auth had not started. P06 final browser review passed and P06 is locked. No commit or push was performed in that session.
 
 ## P05 implementation and overflow correction — 2026-09-14
 
@@ -128,15 +142,15 @@
 - GitHub → Hostinger auto-deploy: working
 - Supabase: not connected yet
 - shadcn/ui: configured with Base UI, Nova preset and neutral tokens
-- Real product UI: public layout, shared pickers, P01 Home, P02 mock Search Results, P03 mock Carrier Route Detail, P04 mock Carrier Public Profile, P05 mock Create Transport Request and P06 demo Request Published implemented
+- Real product UI: public layout, shared pickers and P01–P07 implemented with mock data; P01–P07 are locked after browser review.
 
 ## Immediate next task
 
-Next task: **P07 Request Detail + Offers**. P01–P05 remain locked. P06 is completed, browser-reviewed and ready to commit. P07/backend/auth have not started. P05 still stops before phone verification and publication.
+Next task: **P08 Offer Detail**. P01–P07 remain locked. P08/backend have not started. P05 still stops before phone verification and publication.
 
 ## Next after browser approval
 
-P06 final browser approval has passed. Next task: P07 Request Detail + Offers. P07/backend/auth have not started.
+P07 final browser review passed. P07 is completed, browser-reviewed and ready to commit. Next task: P08 Offer Detail. P08/backend have not started.
 
 ## Do not reopen without a blocker
 

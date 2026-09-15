@@ -16,7 +16,7 @@ function offers(requestId: string): RequestOffer[] {
 
 export function findMockRequestDetail(id: string): RequestDetail | undefined {
   const published = findMockPublishedRequest(id)
-  const extra = ["updated-offer-demo-001", "booked-demo-001", "closed-demo-001", "completed-demo-001", "historical-offers-demo-001"]
+  const extra = ["updated-offer-demo-001", "booked-demo-001", "closed-demo-001", "completed-demo-001", "historical-offers-demo-001", "draft-demo-001", "non-running-demo-001"]
   if (!published && !extra.includes(id)) return undefined
   const base = published ?? findMockPublishedRequest("marketplace-demo-001")!
   const request: RequestDetail = {
@@ -27,6 +27,11 @@ export function findMockRequestDetail(id: string): RequestDetail | undefined {
   }
   if (id === "updated-offer-demo-001") {
     request.offers[0] = { ...request.offers[0], totalPriceEur: 570, offerVersion: 2 }
+  }
+  if (id === "draft-demo-001") { request.status = "draft"; request.offers = [] }
+  if (id === "non-running-demo-001") {
+    request.vehicle = { ...request.vehicle, condition: "non-running", rolls: "yes" }
+    request.offers = request.offers.slice(0, 1)
   }
   if (id === "booked-demo-001" || id === "completed-demo-001") {
     request.status = id === "booked-demo-001" ? "booked" : "completed"

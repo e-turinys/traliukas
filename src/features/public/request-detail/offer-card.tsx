@@ -7,22 +7,26 @@ import { formatDateRange } from "@/lib/format-date"
 import { formatOfferExpiry } from "./logic"
 import { offerStatusLabels, type RequestOffer } from "./model"
 
-export function OfferCard({ offer, status }: { offer: RequestOffer; status: RequestOffer["status"] }) {
+export function OfferCard({ offer, status, emphasis = "standard" }: {
+  offer: RequestOffer; status: RequestOffer["status"]; emphasis?: "standard" | "selected" | "historical"
+}) {
   const actionable = status === "pending"
-  return <Card className={actionable ? "min-w-0" : "min-w-0 bg-muted/40"}>
-    <CardContent className="space-y-5">
+  const selected = emphasis === "selected"
+  const historical = emphasis === "historical"
+  return <Card className={selected ? "min-w-0 border-primary/50 shadow-sm" : actionable ? "min-w-0" : "min-w-0 bg-muted/40"}>
+    <CardContent className={historical ? "space-y-4" : "space-y-5"}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 space-y-2">
-          <h3 className="break-words text-lg font-semibold">{offer.carrier.name}</h3>
+          <h3 className={`break-words font-semibold ${historical ? "text-base" : "text-lg"}`}>{offer.carrier.name}</h3>
           <CarrierTrust carrier={offer.carrier} />
         </div>
         <div className="space-y-1">
-          <p className="text-xl font-semibold">{new Intl.NumberFormat("lt-LT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(offer.totalPriceEur)}</p>
+          <p className={historical ? "font-semibold" : "text-xl font-semibold"}>{new Intl.NumberFormat("lt-LT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(offer.totalPriceEur)}</p>
           <p className="text-xs text-muted-foreground">Visa pervežimo kaina</p>
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
-        <Badge variant="secondary">{offerStatusLabels[status]}</Badge>
+        <Badge variant={selected ? "default" : "secondary"}>{offerStatusLabels[status]}</Badge>
         {offer.offerVersion > 1 && <Badge variant="outline">Atnaujintas pasiūlymas</Badge>}
       </div>
       <dl className="grid gap-3 text-sm sm:grid-cols-2">
