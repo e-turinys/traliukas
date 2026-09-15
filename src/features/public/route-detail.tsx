@@ -22,6 +22,7 @@ const copy = {
   otherQuotes: "Gauti pasiūlymų iš kitų vežėjų", next: "Kitas žingsnis",
   targetedHint: "Pateikite automobilio pervežimo užklausą šiam vežėjui. Vežėjas pasiūlyme patvirtins datas, kainą ir sąlygas.",
   fallbackHint: "Pateikite užklausą kitiems vežėjams. Maršruto vietos ir datos bus perkeltos į užklausą.",
+  fullHint: "Šis maršrutas pilnas ir naujos užklausos jam nepriimamos.",
   reviews: "Klientų atsiliepimai", reviewHint: "Apie ankstesnius užbaigtus šio vežėjo pervežimus.",
   verifiedReview: "Patvirtintas pervežimas", noReviews: "Šis vežėjas dar neturi klientų atsiliepimų.",
 }
@@ -95,8 +96,8 @@ export function RouteDetail({ route, today }: { route: CarrierRoute; today: stri
             <Button variant="outline" nativeButton={false} render={<Link href={`/carriers/${route.carrier.id}`} />} className="h-auto min-h-11 w-full py-3 whitespace-normal">{copy.profile}</Button>
             <div className="space-y-3 border-t pt-5">
               <h3 className="font-semibold">{copy.next}</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">{availability.available ? copy.targetedHint : copy.fallbackHint}</p>
-              <div className="hidden lg:block"><QuoteLink href={requestUrl} available={availability.available} /></div>
+              <p className="text-sm leading-relaxed text-muted-foreground">{availability.full ? copy.fullHint : availability.available ? copy.targetedHint : copy.fallbackHint}</p>
+              {!availability.full && <div className="hidden lg:block"><QuoteLink href={requestUrl} available={availability.available} /></div>}
             </div>
           </CardContent></Card>
         </aside>
@@ -121,8 +122,8 @@ export function RouteDetail({ route, today }: { route: CarrierRoute; today: stri
       </section>
     </PageContainer>
 
-    <div className="sticky bottom-0 z-20 border-t bg-background pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
+    {!availability.full && <div className="sticky bottom-0 z-20 border-t bg-background pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
       <PageContainer><QuoteLink href={requestUrl} available={availability.available} /></PageContainer>
-    </div>
+    </div>}
   </div>
 }

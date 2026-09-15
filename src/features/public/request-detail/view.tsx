@@ -30,7 +30,7 @@ export function RequestDetailView({ initialRequest, reviewNow }: { initialReques
       <Badge variant="secondary">{requestStatusLabels[request.status]}</Badge>
       <h1 ref={heading} tabIndex={-1} className="break-words text-3xl font-semibold tracking-tight outline-none">{summary.route}</h1>
       <dl className="grid gap-4 text-sm sm:grid-cols-3">
-        <div className="min-w-0"><dt className="text-muted-foreground">Automobilis</dt><dd className="break-words">{summary.vehicle}</dd></div>
+        <div className="min-w-0"><dt className="text-muted-foreground">Automobiliai</dt><dd className="break-words">{summary.vehicleSummary}</dd></div>
         <div><dt className="text-muted-foreground">Pageidaujamas paėmimas</dt><dd>{summary.date}</dd></div>
         <div className="min-w-0"><dt className="text-muted-foreground">Matomumas</dt><dd className="break-words">{publicationCopy(summary).audience}</dd></div>
       </dl>
@@ -57,8 +57,8 @@ export function RequestDetailView({ initialRequest, reviewNow }: { initialReques
     }} /> : <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <section aria-labelledby="offers-heading" className="min-w-0 space-y-4">
         <h2 id="offers-heading" className="text-xl font-semibold">{offerGroups.selected ? "Pasirinktas vežėjas" : "Vežėjų pasiūlymai"}</h2>
-        {offerGroups.selected && <OfferCard offer={offerGroups.selected} status={visibleOfferStatus(request, offerGroups.selected, reviewNow)} emphasis="selected" />}
-        {offerGroups.current.length ? offerGroups.current.map(offer => <OfferCard key={offer.id} offer={offer} status={visibleOfferStatus(request, offer, reviewNow)} />) : !offerGroups.selected && request.offers.length === 0 ? <div className="space-y-4 rounded-xl border p-5">
+        {offerGroups.selected && <OfferCard offer={offerGroups.selected} status={visibleOfferStatus(request, offerGroups.selected, reviewNow)} vehicleCount={request.vehicles.length} emphasis="selected" />}
+        {offerGroups.current.length ? offerGroups.current.map(offer => <OfferCard key={offer.id} offer={offer} status={visibleOfferStatus(request, offer, reviewNow)} vehicleCount={request.vehicles.length} />) : !offerGroups.selected && request.offers.length === 0 ? <div className="space-y-4 rounded-xl border p-5">
           <h3 className="font-semibold">Pasiūlymų dar nėra</h3>
           {request.status === "active" && <p className="text-sm text-muted-foreground">Čia galėsite palyginti vežėjų kainas ir pervežimo datas.</p>}
           {request.status === "active" && request.visibility === "targeted" && <Button className="h-auto min-h-11 w-full whitespace-normal py-3" onClick={() => { setRequest(expandRequestVisibility(request)); setNotice("Matomumas pakeistas tik šiame puslapyje. Vežėjams nieko neišsiųsta.") }}>Parodyti ir kitiems tinkamiems vežėjams</Button>}
@@ -68,7 +68,7 @@ export function RequestDetailView({ initialRequest, reviewNow }: { initialReques
             <span>Ankstesni pasiūlymai ({offerGroups.historical.length})</span>
             <ChevronDown aria-hidden="true" className="size-4 shrink-0 transition-transform group-open/history:rotate-180" />
           </summary>
-          <div className="space-y-3 p-3 sm:p-4">{offerGroups.historical.map(offer => <OfferCard key={offer.id} offer={offer} status={visibleOfferStatus(request, offer, reviewNow)} emphasis="historical" />)}</div>
+          <div className="space-y-3 p-3 sm:p-4">{offerGroups.historical.map(offer => <OfferCard key={offer.id} offer={offer} status={visibleOfferStatus(request, offer, reviewNow)} vehicleCount={request.vehicles.length} emphasis="historical" />)}</div>
         </details>}
       </section>
       <RequestDetails request={request} />

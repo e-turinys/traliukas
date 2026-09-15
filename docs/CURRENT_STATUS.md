@@ -2,7 +2,29 @@
 
 **Date:** 2026-09-15
 **Current phase:** Phase 2 — Request / Offer UI with mock data
-**Project status:** P01–P07 are locked. P08 Offer Detail is completed, browser-reviewed and ready to commit. P09/backend/booking have not started.
+**Project status:** P01–P04 remain locked. The Multi-Vehicle Core Revision, Carrier Route Capacity and per-vehicle multi-location extension are implemented across P05–P09 and await consolidated browser review. Backend/auth/B01 have not started.
+
+## Multi-Vehicle Core Revision — 2026-09-15
+
+- One Transport Request contains 1–10 vehicles with one shared requested pickup date/window. Each vehicle has structured pickup and delivery locations, initially inherited from the Step 1 default route and independently overridable. Vehicle photos belong to individual vehicles.
+- One Offer covers the complete Request and its `totalPriceEur` is the total price for all vehicles. Partial Offers, per-vehicle acceptance, split Bookings and multiple carriers per Request remain outside V1.
+- Adding/removing a vehicle or changing vehicle category, make/model, year, condition or rolling ability when relevant is material and invalidates Pending Offers. Request notes and vehicle photos remain non-material.
+- The canonical frontend Request model now uses `vehicles[]` only. P05 supports 1–10 independently validated vehicles while preserving the four-step flow; P06–P09 use shared compact or detailed multi-vehicle presentations as appropriate.
+- P07 keeps Request-level route/date/notes and Offer invalidation rules. P08 makes the complete-request price and acceptance scope explicit without per-vehicle pricing or partial acceptance. P09 preserves its locked lifecycle and attention rules with a representative multi-vehicle fixture.
+- D-038 locks integer Route capacity: each vehicle consumes one space; `capacityAvailable` derives from `capacityTotal` and `capacityReserved`; Offers do not reserve; future successful Booking creation reserves the complete Request vehicle count; eligible cancellation releases the same count. Full Routes remain viewable but do not match or show a public request CTA.
+- D-039 locks per-vehicle structured pickup/delivery locations, Step 1 default-route inheritance, one shared requested date window and one complete carrier Offer/Booking. Matching must accept the complete vehicle/location set; partial matching, route optimization and segment-capacity reuse remain outside V1. D-039 supersedes D-037's same-route restriction.
+- Review URLs: P02 insufficient capacity `/search?from=hamburg-de&to=kaunas-lt&vehicle=car&vehicleCount=2`; P03 available `/routes/baltijos-kelias-0915`; P03 full `/routes/baltijos-kelias-0920-full`; P05 two pickups `/request/new?from=hamburg-de&to=kaunas-lt&dateType=range&dateFrom=2026-09-15&dateTo=2026-09-17&review=multi-location-pickups`; P05 mixed `/request/new?from=hamburg-de&to=kaunas-lt&dateType=range&dateFrom=2026-09-15&dateTo=2026-09-17&review=multi-location-mixed`; P06 `/request/multi-location-pickups-demo-001/published`; P07 `/requests/multi-location-pickups-demo-001` and `/requests/multi-location-mixed-demo-001`; P08 `/offers/multi-location-pickups-demo-001-offer-1` and `/offers/multi-location-mixed-demo-001-offer-2`; P09 `/dashboard`.
+- Validation: `npm.cmd run build` passed. All 77 P01–P09 unit tests passed. Production browser checks passed P02/P03 capacity, P05 route inheritance/override and final summaries, P06–P09 multi-location states, plus the full P07/P08/P09 regressions at 390/768/1280/1536px with no horizontal overflow or runtime exceptions.
+- P01–P04 remain locked. P05–P09 are awaiting consolidated browser review. Backend/auth/B01 have not started. No commit or push performed.
+
+## P09 implementation — 2026-09-15
+
+- Locked the detailed P09 product rules in `02_V1_SCREEN_MAP.md` and added D-036 to `05_DECISIONS_LOG.md`: Active Requests belong to Užklausos, Booked Requests to Pervežimai, Completed/Closed Requests to Istorija, Drafts are excluded, attention derives only from actionable Pending Offers, detail actions remain off the Dashboard, and vanity KPIs are prohibited.
+- Added `/dashboard` with a page header and “Sukurti naują užklausą”, conditional “Reikia dėmesio”, and responsive Užklausos / Pervežimai / Istorija tabs. Cards reuse P07/P08 Request, Offer, carrier, selected-Offer, Booking-link, status and formatting data through a derived view model; no second Request model or private contact data was added.
+- Attention cards count only currently actionable Pending Offers using the existing P07 validity rules. Requests with updated actionable Offers sort first and show “Atnaujintas pasiūlymas”; other qualifying Requests show “Naujas pasiūlymas”. Dashboard actions only navigate to P07 or the future Booking route.
+- Added compact whole-page and per-tab empty states, a skeleton loading route and a retry error boundary. Review fixtures use the non-UI `view` query selector: mixed `/dashboard`, Requests-only `/dashboard?view=requests`, transport-only `/dashboard?view=transport`, History-only `/dashboard?view=history`, and empty `/dashboard?view=empty`.
+- Validation: `npm.cmd run build` passed lint, TypeScript and production compilation. All 55 unit tests passed: 9 focused P09 tests and 46 P01–P08 regressions. Production P09 browser checks passed all five fixtures, tab navigation, destinations, touch targets and no horizontal overflow at 390/768/1280/1536px. Full P07 and P08 production browser regressions also passed at all four widths with no runtime exceptions.
+- At the P09 implementation checkpoint, P01–P08 were locked and P09 awaited browser review. D-037 and the Multi-Vehicle Core Revision above now supersede that checkpoint status. B01/backend/auth, persistence, payments, notifications, messages, analytics and P10 were not started.
 
 ## P08 implementation — 2026-09-15
 
@@ -152,15 +174,15 @@
 - GitHub → Hostinger auto-deploy: working
 - Supabase: not connected yet
 - shadcn/ui: configured with Base UI, Nova preset and neutral tokens
-- Real product UI: public layout, shared pickers and P01–P08 implemented with mock data; P01–P07 are locked and P08 awaits browser review.
+- Real product UI: public layout, shared pickers and P01–P09 implemented with mock data; P01–P04 are locked and revised P05–P09 await consolidated browser review.
 
 ## Immediate next task
 
-Next task: **P09**. P01–P07 remain locked. P08 is completed, browser-reviewed and ready to commit. P09/backend/booking have not started. P05 still stops before phone verification and publication.
+Next task: **Consolidated browser review of the P05–P09 Multi-Vehicle Core Revision**. P01–P04 remain locked. Backend/auth/B01 have not started.
 
 ## Next after browser approval
 
-Stop after this status update. P09/backend/booking have not started. Do not commit or push without a separate instruction.
+Stop for consolidated P05–P09 browser review. Do not mark revised P05–P09 locked until that review passes. B01/backend/auth have not started. Do not commit or push without a separate instruction.
 
 ## Do not reopen without a blocker
 

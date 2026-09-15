@@ -18,7 +18,7 @@ export function RequestSuccessCard({ id, summary, onExpand }: {
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{copy.heading}</h1>
         </div>
         <dl className="space-y-4 rounded-lg bg-muted p-4">
-          {[["Maršrutas", summary.route], ["Automobilis", summary.vehicle], ["Paėmimo laikas", summary.date], ["Kas mato užklausą", copy.audience]].map(([label, value]) => (
+          {[["Maršrutas", summary.route], [summary.vehicleCount === 1 ? "Automobilis" : "Automobiliai", summary.vehicleSummary], ["Paėmimo laikas", summary.date], ["Kas mato užklausą", copy.audience]].map(([label, value]) => (
             <div key={label} className="min-w-0 space-y-1">
               <dt className="text-sm text-muted-foreground">{label}</dt>
               <dd className="font-medium">{value}</dd>

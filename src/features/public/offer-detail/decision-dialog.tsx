@@ -4,12 +4,14 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { formatDateRange } from "@/lib/format-date"
 import { formatEur } from "@/lib/format-money"
 import type { RequestOffer } from "../request-detail/model"
+import { vehicleTransportScope } from "../vehicle-summary"
 
-export function OfferDecisionDialog({ open, onOpenChange, decision, offer, onConfirm, finalFocus }: {
+export function OfferDecisionDialog({ open, onOpenChange, decision, offer, vehicleCount, onConfirm, finalFocus }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   decision: "accept" | "decline"
   offer: RequestOffer
+  vehicleCount: number
   onConfirm: () => void
   finalFocus?: RefObject<HTMLElement | null>
 }) {
@@ -20,7 +22,7 @@ export function OfferDecisionDialog({ open, onOpenChange, decision, offer, onCon
       <DialogHeader>
         <DialogTitle className="leading-snug">{accepting ? "Priimti pasiūlymą?" : "Atmesti pasiūlymą?"}</DialogTitle>
         <DialogDescription>{accepting
-          ? "Pasirinkus šį vežėją, kiti pasiūlymai taptų nebepasirenkami. Šioje demonstracijoje tik pakeisime vietinę puslapio būseną."
+          ? `Priimate ${formatEur(offer.totalPriceEur)} pasiūlymą už ${vehicleTransportScope(vehicleCount)} pagal visus užklausoje nurodytus maršrutus. Pasirinkus šį vežėją, kiti pasiūlymai taptų nebepasirenkami. Šioje demonstracijoje tik pakeisime vietinę puslapio būseną.`
           : "Šioje demonstracijoje pasiūlymas bus atmestas tik šiame puslapyje."}</DialogDescription>
       </DialogHeader>
       <dl className="grid gap-3 rounded-lg bg-muted p-4 text-sm sm:grid-cols-2">

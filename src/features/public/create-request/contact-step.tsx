@@ -1,7 +1,9 @@
 import Link from "next/link"
 import { Choices, FieldError, TextField } from "./fields"
-import { requestCategories, type Errors, type TransportRequestDraft } from "./model"
+import { type Errors, type TransportRequestDraft } from "./model"
 import { dateLabel } from "../search-query"
+import { compactVehicleSummary } from "../vehicle-summary"
+import { requestRouteSummary, transportLocationLabel } from "../request-route-summary"
 
 export function visibilityLabel(draft: TransportRequestDraft) {
   const name = draft.target.route?.carrier.name
@@ -12,6 +14,7 @@ export function visibilityLabel(draft: TransportRequestDraft) {
 
 export function ContactStep({ draft, update, errors }: { draft: TransportRequestDraft; update: (value: Partial<TransportRequestDraft>) => void; errors: Errors }) {
   const carrier = draft.target.route?.carrier
+  const routeSummary = requestRouteSummary(draft.vehicles)
   return <div className="space-y-6">
     <p className="text-sm text-muted-foreground">Kontaktai nėra vieši. Telefoną reikės patvirtinti prieš paskelbiant užklausą.</p>
     <TextField id="request-name" label="Vardas" autoComplete="given-name" required maxLength={100} value={draft.contact.name} onChange={e => update({ contact: { ...draft.contact, name: e.target.value } })} error={errors.name} />
@@ -24,9 +27,9 @@ export function ContactStep({ draft, update, errors }: { draft: TransportRequest
     <section aria-labelledby="summary-heading" className="space-y-3 rounded-lg bg-muted/40 p-4">
       <h3 id="summary-heading" className="font-medium">Jūsų užklausa</h3>
       <dl className="space-y-3 text-sm">
-        <div><dt className="text-muted-foreground">Maršrutas</dt><dd>{draft.route.from?.city} → {draft.route.to?.city}</dd></div>
+        <div><dt className="text-muted-foreground">Maršrutas</dt><dd>{routeSummary.compact}{routeSummary.compact === "Kelių vietų pervežimas" && ` · ${transportLocationLabel(routeSummary.locationCount)}`}</dd></div>
         <div><dt className="text-muted-foreground">Paėmimo data</dt><dd>{dateLabel(draft.route.date)}</dd></div>
-        <div><dt className="text-muted-foreground">Automobilis</dt><dd className="break-words">{draft.vehicle.make} {draft.vehicle.model}{draft.vehicle.year && `, ${draft.vehicle.year}`} · {draft.vehicle.category && requestCategories[draft.vehicle.category]} · {draft.vehicle.condition === "running" ? "Važiuojantis" : "Nevažiuojantis"}</dd></div>
+        <div><dt className="text-muted-foreground">Automobiliai</dt><dd className="break-words">{compactVehicleSummary(draft.vehicles)}</dd></div>
         <div><dt className="text-muted-foreground">Matomumas</dt><dd>{visibilityLabel(draft)}</dd></div>
       </dl>
     </section>

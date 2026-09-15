@@ -7,6 +7,7 @@ import { vehicleCategoryLabels, type RouteMatch } from "@/lib/types/carrier-rout
 import { cn } from "@/lib/utils"
 import type { LocationOption } from "@/lib/types/location"
 import { formatDateRange } from "@/lib/format-date"
+import { getAvailableCapacity } from "@/lib/route-capacity"
 
 const copy = {
   verified: "Patvirtintas vežėjas", newCarrier: "Naujas vežėjas",
@@ -55,7 +56,7 @@ export function RouteCard({ route, level, servedSegment, context = "search" }: R
           </div>
           <div className="space-y-2 text-sm">
             <p className="flex items-center gap-2"><CalendarDays aria-hidden="true" className="size-4 shrink-0" /><span>{formatDateRange(route.dateFrom, route.dateTo)}</span></p>
-            <p>{copy.spaces}: <strong>{route.capacityTotal - route.parvezkReserved}</strong></p>
+            <p>{copy.spaces}: <strong>{getAvailableCapacity(route)}</strong></p>
             <p className="flex items-start gap-2"><Car aria-hidden="true" className="size-4 shrink-0" /><span>{route.vehicleCategories.map((category) => vehicleCategoryLabels[category]).join(" · ")}</span></p>
             <p className="text-muted-foreground">{route.supportsNonRunning ? copy.nonRunning : copy.running}</p>
           </div>

@@ -105,7 +105,10 @@ The final SQL schema may split or merge implementation details, but the followin
 ### Customer demand
 
 - `transport_requests`
+- `request_vehicles`
 - `request_versions`
+
+`transport_requests` owns default pickup/delivery locations and the shared pickup window. Each Request owns 1–10 ordered `request_vehicles` with a stable vehicle ID and vehicle-specific structured pickup/delivery locations, category, make/model, optional year, condition, rolling ability and photos. Vehicle locations become canonical after an override; Request defaults exist for inheritance and convenience.
 
 ### Carrier supply
 
@@ -144,6 +147,7 @@ USER
               └─ ROUTE STOPS / ROUTE VERSIONS
 
 TRANSPORT REQUEST
+ ├─ 1–10 REQUEST VEHICLES
  ├─ REQUEST VERSIONS
  └─ OFFERS
       ├─ OFFER REVISIONS
@@ -205,18 +209,20 @@ Pickup time is displayed/interpreted in the pickup location's local time context
 Recommended fields:
 
 - `capacity_total`
-- `parvezk_reserved`
+- `capacity_reserved`
 
 Derived:
 
-`available_capacity = capacity_total - parvezk_reserved`
+`available_capacity = max(0, capacity_total - capacity_reserved)`
 
 Rules:
 
 - Offer creation does not reserve capacity.
-- Booking acceptance reserves capacity atomically.
-- eligible Booking cancellation releases reservation.
-- carrier cannot reduce `capacity_total` below `parvezk_reserved`.
+- Each Request vehicle consumes exactly one space regardless of category or route segment. V1 has no fractional capacity, size coefficients or segment-based capacity reuse.
+- Request capacity demand is its complete `request_vehicles` count. Every vehicle pickup/delivery must be directionally compatible with the Route, and the Route must have available capacity and category/non-running capability for the complete set; matching remains advisory until acceptance checks.
+- Booking acceptance atomically increases `capacity_reserved` by the Request vehicle count; eligible Booking cancellation releases the same count.
+- Available capacity never becomes negative, reservation cannot exceed available capacity, and carrier capacity cannot be reduced below `capacity_reserved`.
+- Zero available capacity derives the Full state and excludes the Route from new recommendations without deleting the Route.
 - Route may remain Active while `accepting_new_requests = false`.
 
 ## 9. Versioning model
@@ -225,7 +231,7 @@ Use versioning to prevent stale commercial actions.
 
 ### Request
 
-Material Request edit increments `request_version` and writes Request version history.
+Material Request edit increments `request_version` and writes Request version history. Material edits include default route/date changes; adding/removing a vehicle; and vehicle pickup/delivery, category, make/model, year, condition or rolling-ability changes when relevant. Vehicle photo and Request note changes are non-material.
 
 ### Route
 
@@ -236,6 +242,8 @@ Material Route edit increments `route_version` and writes Route version history.
 Offer edit increments `offer_version` and writes Offer revision history.
 
 Offer stores the Request version and Route version against which it was created/revalidated.
+
+One Offer covers all Request vehicles and all their routes, and stores one total price for the complete Request. V1 has no Offer line items, partial vehicle selection or partial acceptance. All vehicles share one requested pickup date/window; per-vehicle requested date windows and route optimization are deferred.
 
 ### Accept Offer checks
 

@@ -23,8 +23,8 @@ export function findMockRequestDetail(id: string): RequestDetail | undefined {
   if (!published && !extra.includes(id)) return undefined
   const base = published ?? findMockPublishedRequest("marketplace-demo-001")!
   const request: RequestDetail = {
-    ...base, id, status: "active", requestVersion: 1, photos: [],
-    vehicle: { ...base.vehicle, year: "2020" },
+    ...base, id, status: "active", requestVersion: 1,
+    vehicles: base.vehicles.map(vehicle => ({ ...vehicle, year: vehicle.year || "2020", photos: [...vehicle.photos] })),
     notes: "Raktai vietoje. Automobilį galima paimti darbo dienomis.",
     offers: base.visibility === "targeted" ? [] : offers(id),
   }
@@ -39,9 +39,13 @@ export function findMockRequestDetail(id: string): RequestDetail | undefined {
       }],
     }
   }
+  if (["multi-vehicle-demo-001", "multi-location-pickups-demo-001", "multi-location-mixed-demo-001"].includes(id)) {
+    request.offers = request.offers.map((offer, index) => ({ ...offer, totalPriceEur: index === 0 ? 900 : 1040 }))
+  }
+  if (id === "multi-location-mixed-demo-001") request.offers = request.offers.slice(1).map(offer => ({ ...offer, totalPriceEur: 1100 }))
   if (id === "draft-demo-001") { request.status = "draft"; request.offers = [] }
   if (id === "non-running-demo-001") {
-    request.vehicle = { ...request.vehicle, condition: "non-running", rolls: "yes" }
+    request.vehicles[0] = { ...request.vehicles[0], condition: "non-running", rolls: "yes" }
     request.offers = request.offers.slice(0, 1)
   }
   if (id === "request-changed-demo-001") request.requestVersion = 2

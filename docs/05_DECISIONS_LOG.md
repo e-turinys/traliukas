@@ -53,7 +53,7 @@ This file records important product/architecture decisions that should not be ca
 
 ### D-010 — Capacity uses total vs reserved
 
-**Decision:** Store `capacity_total` and `parvezk_reserved`; available capacity is derived.  
+**Decision:** Store `capacity_total` and `capacity_reserved`; available capacity is derived.
 **Reason:** Supports both offline/private loads and Parvezk reservations without pretending Parvezk controls all carrier capacity.
 
 ### D-011 — Route can stop accepting new work without cancellation
@@ -180,6 +180,26 @@ This file records important product/architecture decisions that should not be ca
 
 **Decision:** Admin filtering/sorting/pagination must be server-side at scale even if TanStack Table renders the UI.  
 **Reason:** Avoid browser-side loading/filtering of tens of thousands of records.
+
+### D-036 — Customer Dashboard is a lifecycle overview
+
+**Decision:** P09 classifies each customer Request into one Dashboard area: Active appears in Requests, Booked appears in Transports, and Completed or Closed appears in History. Persisted Drafts are excluded from the V1 Dashboard. “Reikia dėmesio” is derived only from an Active Request with an actionable Pending Offer, with updated actionable Offers prioritized. Dashboard actions navigate to detail screens; they do not accept/decline Offers or edit, close, reopen or modify Bookings. The Dashboard has no vanity KPIs.
+**Reason:** Give customers one actionable overview without duplicating lifecycle objects, inventing notification state or moving detailed business actions into a summary screen.
+
+### D-037 — Multi-vehicle Transport Request in V1
+
+**Decision:** One V1 Transport Request contains 1–10 vehicles with stable per-vehicle identities. All vehicles share one pickup location, delivery location and requested pickup window; different routes require separate Requests. Photos belong to individual vehicles. One carrier Offer covers the complete vehicle set, and `totalPriceEur` is the total price for transporting all vehicles. Partial Offers, per-vehicle acceptance, split Bookings and multiple carriers for one Request are unsupported. A Route must support the complete set's capacity, categories and any non-running vehicle. Adding/removing a vehicle or changing category, make/model, year, condition or rolling ability when relevant invalidates Pending Offers; vehicle photo and Request note changes do not. This supersedes the previous single-vehicle V1 assumption.
+**Reason:** Customers commonly need several vehicles moved together while one route, one commercial Offer and one responsible carrier keep V1 fulfillment clear and atomic.
+
+### D-038 — V1 Carrier Route Capacity
+
+**Decision:** Every supported vehicle consumes one Route capacity space in V1, regardless of category. Store `capacity_total` and `capacity_reserved`; derive available capacity as `max(0, capacity_total - capacity_reserved)`. An Offer does not reserve capacity. Successful Booking creation reserves the complete Request vehicle count, and eligible cancellation releases the same count. Zero available capacity means Full and excludes the Route from new matching without deleting it. Partial Offers and split Bookings remain unsupported. Future carrier route management may provide a quick mobile capacity control, but `capacity_total` can never be reduced below `capacity_reserved`.
+**Reason:** Integer spaces make complete-request matching and atomic reservation predictable while leaving physical loading suitability for carrier confirmation.
+
+### D-039 — V1 Multi-Vehicle Multi-Location Requests
+
+**Decision:** Each vehicle in a 1–10 vehicle Request may have its own structured pickup and delivery location. P05 Step 1 supplies default locations inherited by vehicle cards, and any vehicle, including Vehicle 1, may override them. The Request remains one complete job for one carrier, one Offer and one eventual Booking; partial Offers and split Bookings are unsupported. All vehicles share one requested pickup date/window in V1. Matching evaluates every vehicle's direction, category and non-running capability and uses the complete vehicle count for capacity, without route optimization or segment-capacity reuse. Per-vehicle pickup or delivery edits are material and invalidate Pending Offers. This supersedes D-037's same-route requirement while retaining its 1–10 vehicle, complete-Offer and material-vehicle-change rules.
+**Reason:** Customers can group vehicles that start or finish in different cities while keeping one commercial agreement and a simple V1 scheduling and capacity model.
 
 ## How to add a new decision
 

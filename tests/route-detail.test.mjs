@@ -17,7 +17,7 @@ registerHooks({
 })
 
 const { findMockCarrierRoute, mockCarrierRoutes } = await import("../src/lib/mock/carrier-routes.ts")
-const { routeRequestHref } = await import("../src/features/public/route-detail-context.ts")
+const { routeAvailability, routeRequestHref } = await import("../src/features/public/route-detail-context.ts")
 const { formatCount } = await import("../src/lib/format-count.ts")
 const { formatDateRange } = await import("../src/lib/format-date.ts")
 
@@ -25,7 +25,7 @@ test("route lookup reuses the existing dataset for available, full and new-carri
   const available = findMockCarrierRoute("baltijos-kelias-0915")
   assert.equal(available, mockCarrierRoutes[0])
   const full = findMockCarrierRoute("baltijos-kelias-0920-full")
-  assert.equal(full.capacityTotal - full.parvezkReserved, 0)
+  assert.equal(full.capacityTotal - full.capacityReserved, 0)
   assert.equal(full.carrier.id, available.carrier.id)
   assert.equal(findMockCarrierRoute("manto-transportas-0917").carrier.reviewCount, 0)
   assert.equal(findMockCarrierRoute("unknown"), undefined)
@@ -68,4 +68,8 @@ test("Lithuanian capacity and date formatting remains human-readable", () => {
   assert.equal(formatCount(2, labels), "2 laisvos vietos")
   assert.equal(formatCount(11, labels), "11 laisvų vietų")
   assert.equal(formatDateRange("2026-09-15", "2026-09-17"), "2026 m. rugs. 15–17 d.")
+  const route = findMockCarrierRoute("baltijos-kelias-0915")
+  assert.equal(routeAvailability({ ...route, capacityTotal: 2, capacityReserved: 1 }, "2026-09-15").label, "1 laisva vieta")
+  assert.equal(routeAvailability({ ...route, capacityTotal: 3, capacityReserved: 1 }, "2026-09-15").label, "2 laisvos vietos")
+  assert.equal(routeAvailability({ ...route, capacityTotal: 3, capacityReserved: 3 }, "2026-09-15").label, "Maršrutas pilnas")
 })

@@ -1,16 +1,17 @@
 import type { CarrierRoute } from "@/lib/types/carrier-route"
 import { formatCount } from "@/lib/format-count"
+import { getAvailableCapacity } from "@/lib/route-capacity"
 
 export function routeAvailability(route: CarrierRoute, today: string) {
-  const spaces = Math.max(0, route.capacityTotal - route.parvezkReserved)
+  const spaces = getAvailableCapacity(route)
   const expired = route.dateTo < today
   const available = spaces > 0 && route.acceptingNewRequests && !expired
   const label = spaces === 0
-    ? "Šiame maršrute laisvų vietų nebėra"
+    ? "Maršrutas pilnas"
     : expired ? "Šio maršruto datos jau praėjo"
     : !route.acceptingNewRequests ? "Šiam maršrutui naujos užklausos nebepriimamos"
     : formatCount(spaces, { one: "laisva vieta", few: "laisvos vietos", other: "laisvų vietų" })
-  return { spaces, available, label }
+  return { spaces, available, full: spaces === 0, label }
 }
 
 export function routeRequestHref(route: CarrierRoute, available: boolean) {

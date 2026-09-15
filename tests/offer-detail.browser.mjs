@@ -77,6 +77,7 @@ const fixtures = {
   notSelected: ["booked-demo-001-offer-2", "Nepasirinktas"],
   accepted: ["booked-demo-001-offer-1", "Pasirinktas"],
   declined: ["historical-offers-demo-001-offer-2", "Atmestas"],
+  multi: ["multi-vehicle-demo-001-offer-1", "Laukia jūsų sprendimo"],
 }
 
 try {
@@ -96,7 +97,13 @@ try {
       assert.ok(await evaluate(text("Jūsų užklausa")))
       assert.equal(await evaluate("document.querySelector('a[href^=\"/carriers/\"]').getAttribute('href')"), id.endsWith("offer-2") ? "/carriers/siaures-autovezis" : "/carriers/baltijos-kelias")
       const decisions = await evaluate("[...document.querySelectorAll('button')].filter(button => ['Priimti pasiūlymą', 'Atmesti pasiūlymą'].includes(button.textContent.trim())).length")
-      assert.equal(decisions, state === "pending" || state === "updated" ? 2 : 0)
+      assert.equal(decisions, ["pending", "updated", "multi"].includes(state) ? 2 : 0)
+      if (state === "multi") {
+        assert.ok(await evaluate(text("Visa pervežimo kaina už 2 automobilius")))
+        assert.ok(await evaluate(text("Automobiliai (2)")))
+        assert.ok(await evaluate(text("BMW X5 · SUV / Crossover")))
+        assert.ok(await evaluate(text("Audi Q5 · SUV / Crossover")))
+      }
       if (state === "updated") {
         assert.ok(await evaluate(text("Atnaujintas pasiūlymas")))
         assert.equal(await evaluate("document.querySelector('details').open"), false)
@@ -129,6 +136,15 @@ try {
     await visit(fixtures.pending[0])
     assert.ok(await evaluate(text("Laukia jūsų sprendimo")))
 
+    await visit(fixtures.multi[0])
+    await click("Priimti pasiūlymą")
+    await until(text("Priimate 900"))
+    assert.ok(await evaluate(text("pasiūlymą už 2 automobilių pervežimą pagal visus užklausoje nurodytus maršrutus.")))
+    assert.ok(await evaluate(text("Pasirinkus šį vežėją, kiti pasiūlymai taptų nebepasirenkami.")))
+    await overflow(`multi-vehicle accept dialog ${width}`)
+    await click("Atšaukti")
+
+    await visit(fixtures.pending[0])
     await click("Atmesti pasiūlymą")
     await until(text("Atmesti pasiūlymą?"))
     await click("Patvirtinti atmetimą")
@@ -137,7 +153,7 @@ try {
     assert.equal(await evaluate("[...document.querySelectorAll('button')].some(button => button.textContent.trim() === 'Priimti pasiūlymą')"), false)
     await visit(fixtures.pending[0])
     assert.ok(await evaluate(text("Laukia jūsų sprendimo")))
-    console.log(`PASS ${width}px: seven states, history, accept/decline confirmation and reload reset; no overflow`)
+    console.log(`PASS ${width}px: eight states, multi-vehicle scope, history, accept/decline confirmation and reload reset; no overflow`)
   }
   assert.equal((await fetch(`${base}/offers/unknown-p08-offer`)).status, 404)
   await visit("unknown-p08-offer")

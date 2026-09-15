@@ -1,5 +1,6 @@
 import type { CarrierRoute, RouteMatch } from "@/lib/types/carrier-route"
-import { calendarDate, parseCalendarDate, readFilters, readSearch } from "./search-query"
+import { calendarDate, parseCalendarDate, readFilters, readRequestedVehicleCount, readSearch } from "./search-query"
+import { canFitVehicleCount } from "@/lib/route-capacity"
 import type { DateWindowValue } from "@/lib/types/date-window"
 
 function dateBounds(value: DateWindowValue, today: string) {
@@ -20,9 +21,10 @@ export function matchRoutes(routes: CarrierRoute[], params: URLSearchParams, tod
   const alternatives: RouteMatch[] = []
   if (search.invalid || !search.from || !search.to) return { exact, alternatives }
   const filters = readFilters(params)
+  const vehicleCount = readRequestedVehicleCount(params)
   const bounds = dateBounds(search.date, today)
   for (const route of routes) {
-    if (!route.acceptingNewRequests || route.capacityTotal - route.parvezkReserved <= 0 || route.dateTo < today) continue
+    if (!route.acceptingNewRequests || !canFitVehicleCount(route, vehicleCount) || route.dateTo < today) continue
     if (filters.verified && route.carrier.verification !== "approved") continue
     if (filters.rating !== "any" && (route.carrier.rating ?? 0) < Number(filters.rating)) continue
     if (filters.vehicle !== "any" && !route.vehicleCategories.includes(filters.vehicle)) continue

@@ -15,12 +15,13 @@ import { VehicleStep } from "./vehicle-step"
 import { createRequestDraft, targetIssue, switchToMarketplace, validateStep } from "./logic"
 import type { Errors, Step, TransportRequestDraft } from "./model"
 
-const steps = ["Maršrutas", "Automobilis", "Papildoma informacija", "Kontaktai ir matomumas"]
-const headings = ["Kur reikia pervežti automobilį?", "Kokį automobilį reikia pervežti?", "Papildoma informacija", "Kontaktai"]
+const steps = ["Maršrutas", "Automobiliai", "Papildoma informacija", "Kontaktai ir matomumas"]
+const headings = ["Kur reikia pervežti automobilius?", "Kokius automobilius reikia pervežti?", "Papildoma informacija", "Kontaktai"]
 
 export function CreateRequestWizard({ query, today }: { query: string; today: string }) {
+  const reviewStep = new URLSearchParams(query).get("review")?.startsWith("multi-") ?? false
   const [draft, setDraft] = useState(() => createRequestDraft(new URLSearchParams(query)))
-  const [step, setStep] = useState<Step>(1)
+  const [step, setStep] = useState<Step>(reviewStep ? 2 : 1)
   const [errors, setErrors] = useState<Errors>({})
   // Future U01/U02 integration starts here; this state never means verified or published.
   const [handoff, setHandoff] = useState(false)
@@ -32,6 +33,11 @@ export function CreateRequestWizard({ query, today }: { query: string; today: st
 
   function update(value: Partial<TransportRequestDraft>) {
     const next = { ...draft, ...value }
+    if (value.route && !value.vehicles) {
+      next.vehicles = draft.vehicles.map(vehicle => vehicle.usesDefaultRoute ? {
+        ...vehicle, pickupLocation: value.route?.from ?? null, deliveryLocation: value.route?.to ?? null,
+      } : vehicle)
+    }
     setDraft(next)
     const nextErrors = validateStep(next, step, today)
     setErrors(current => Object.fromEntries(Object.keys(current)
@@ -45,7 +51,11 @@ export function CreateRequestWizard({ query, today }: { query: string; today: st
   function showErrors(nextErrors: Errors) {
     setErrors(nextErrors)
     requestAnimationFrame(() => {
-      const element = document.getElementById(`request-${Object.keys(nextErrors)[0]}`)
+      const vehicleEntry = nextErrors.vehicles && Object.entries(nextErrors.vehicles).find(([, fields]) => Object.keys(fields).length)
+      const vehicleField = vehicleEntry && Object.keys(vehicleEntry[1])[0]
+      const element = vehicleEntry && vehicleField
+        ? document.getElementById(`request-${vehicleEntry[0]}-${vehicleField}`)
+        : document.getElementById(`request-${Object.keys(nextErrors)[0]}`)
       const input = element?.querySelector<HTMLElement>('[role="radio"],input,button')
       ;(input ?? element)?.focus()
     })
@@ -68,7 +78,7 @@ export function CreateRequestWizard({ query, today }: { query: string; today: st
   return <div className="mx-auto max-w-2xl space-y-6">
     <header className="space-y-3">
       <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Pervežimo užklausa</h1>
-      <p className="text-sm text-muted-foreground">Vieno automobilio pervežimas. Privalomus laukus užpildykite kiekviename žingsnyje.</p>
+      <p className="text-sm text-muted-foreground">Vienoje užklausoje galite nurodyti 1–10 automobilių su bendru pageidaujamu paėmimo laiku.</p>
       <p aria-live="polite" className="font-medium">{step} iš 4 · {steps[step - 1]}</p>
       <Progress value={step} max={4} aria-label="Užklausos žingsniai" aria-valuetext={`${step} iš 4: ${steps[step - 1]}`} />
     </header>

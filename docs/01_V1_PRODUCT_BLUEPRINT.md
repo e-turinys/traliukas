@@ -17,23 +17,17 @@ Carrier Offer capability requires the carrier verification conditions defined by
 
 ### Transport Request
 
-A Transport Request is a customer's need to transport one vehicle from a pickup area to a delivery area.
-
-V1 UI supports one vehicle per Request. The architecture should not prevent multi-vehicle/B2B support later.
+A Transport Request is a customer's need to transport 1–10 vehicles in one shared requested pickup date/date window. Each vehicle may have its own pickup and delivery location, while the Request remains one complete job for one carrier, one Offer and one eventual Booking.
 
 A Request contains:
 
-- public pickup location;
-- public delivery location;
+- default public pickup location;
+- default public delivery location;
 - optional private operational pickup details;
 - optional private operational delivery details;
 - pickup date/date window/flexible date;
-- vehicle category;
-- make/model;
-- optional year;
-- running/non-running state;
-- if non-running, whether it can roll/be loaded normally: yes/no/unknown;
-- optional photos;
+- 1–10 vehicles, each with a stable identity, structured pickup and delivery locations, category, make/model, optional year, running/non-running state and rolling ability when non-running;
+- optional photos belonging to their individual vehicle;
 - optional notes;
 - visibility: `targeted` or `marketplace`;
 - if targeted, target carrier and target route references;
@@ -46,10 +40,11 @@ Material fields include:
 - pickup location;
 - delivery location;
 - date/date window;
-- vehicle category;
-- running/non-running condition.
+- adding or removing a vehicle;
+- changing any vehicle pickup or delivery location;
+- any vehicle category, make/model, year, running/non-running condition or rolling-ability change when relevant.
 
-Non-material fields such as notes or photos do not automatically invalidate Offers.
+Non-material fields such as Request notes or vehicle photos do not automatically invalidate Offers.
 
 ### Carrier Route
 
@@ -67,17 +62,19 @@ Route fields include:
 - supported vehicle categories;
 - non-running vehicle capability;
 - `capacity_total`;
-- `parvezk_reserved`;
+- `capacity_reserved`;
 - `accepting_new_requests`;
 - current route version.
 
 Derived available capacity:
 
-`available = capacity_total - parvezk_reserved`
+`available = max(0, capacity_total - capacity_reserved)`
 
-A carrier may reduce `capacity_total` when offline/private work uses capacity, but never below `parvezk_reserved`.
+A carrier specifies a positive integer number of vehicle spaces. V1 intentionally uses one space per vehicle for every supported category; it has no fractional capacity or size coefficients. Physical loading suitability remains for the carrier to confirm.
 
-Accepted Parvezk Bookings increment `parvezk_reserved`; eligible Booking cancellations decrement it.
+A carrier may adjust `capacity_total`, including through a future quick mobile control, but never below `capacity_reserved`.
+
+Submitting an Offer does not change capacity. Successful Booking creation increments `capacity_reserved` by the Request's complete vehicle count, and an eligible Booking cancellation releases that same count. Zero available capacity means the Route is full and unavailable for new matching, while the Route remains directly viewable.
 
 Route lifecycle:
 
@@ -96,13 +93,13 @@ V1 matching is deterministic, not AI-first.
 
 A Request can match a Carrier Route using:
 
-- pickup proximity to the route;
-- delivery proximity to the route;
-- correct pickup-before-delivery order in the carrier's travel direction;
+- every vehicle's pickup proximity to the route;
+- every vehicle's delivery proximity to the route;
+- correct pickup-before-delivery order for every vehicle in the carrier's travel direction;
 - date compatibility with the overall route window;
 - vehicle category compatibility;
 - non-running capability if required;
-- available capacity;
+- available capacity for the complete vehicle set (`vehicles.length`);
 - route accepting new requests.
 
 V1 UI uses qualitative labels:
@@ -134,6 +131,8 @@ An Offer includes:
 - request version seen by the carrier;
 - route version used for the Offer;
 - current offer version.
+
+One Offer covers the complete 1–10 vehicle set and all vehicle routes in its Request. Its final customer transport price is the total price for transporting all Request vehicles. Partial Offers, per-vehicle acceptance and splitting one Request between carriers are not supported in V1. The carrier must be able to transport the complete vehicle set.
 
 An Offer does **not** reserve route capacity.
 
@@ -180,7 +179,7 @@ The Booking snapshot stores the accepted commercial/transport agreement, includi
 
 - customer and carrier identity references/names relevant to the agreement;
 - public route/location values at acceptance;
-- vehicle information;
+- information for every vehicle in the Request;
 - agreed pickup date;
 - agreed delivery estimate;
 - final price;
@@ -423,7 +422,7 @@ A real Route cancellation means the journey will not happen. A route with active
 
 V1 Offer currency: EUR.
 
-The Offer price shown to the customer is the final transport price for the Offer. Required undisclosed mandatory fees must not be added after acceptance.
+The Offer price shown to the customer is the final transport price for every vehicle in the Request together. Required undisclosed mandatory fees must not be added after acceptance. V1 does not expose a per-vehicle price or partial Offer.
 
 V1 does not process or guarantee payment.
 

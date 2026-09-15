@@ -10,6 +10,9 @@ const requestIds = [
   "closed-demo-001",
   "booked-demo-001",
   "request-changed-demo-001",
+  "multi-vehicle-demo-001",
+  "multi-location-pickups-demo-001",
+  "multi-location-mixed-demo-001",
 ] as const
 
 export function findMockOfferDetail(id: string): MockOfferDetail | undefined {

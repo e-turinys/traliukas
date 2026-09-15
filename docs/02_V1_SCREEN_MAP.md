@@ -38,14 +38,16 @@ This document defines the canonical V1 screen IDs and intended URLs. Screen IDs 
 - V1 uses “Rodyti daugiau”, not infinite scroll.
 - No results → CTA to P05 with prefilled search values.
 - Approximate/alternative results are visually separated from exact results.
+- Matching uses the requested vehicle count and excludes a Route when derived available capacity is smaller. Route cards continue to show “Laisvos vietos: N”; full Routes do not appear as available results.
 
 ### P03 Route detail key rules
 
 - Route information precedes carrier marketing.
 - Show planned route, dates, capacity, vehicle compatibility, carrier trust.
 - Public route does not expose live GPS.
-- One primary CTA: “Gauti pasiūlymą iš šio vežėjo”.
-- If route becomes full/unavailable, offer marketplace Request fallback.
+- One primary CTA: “Gauti pasiūlymą iš šio vežėjo” when capacity is available.
+- Capacity uses “1 laisva vieta”, “2 laisvos vietos” and “Maršrutas pilnas”. A full Route remains directly viewable in a read-only state and does not show a misleading active Request CTA.
+- Other unavailable states may retain the marketplace Request fallback where appropriate.
 
 ### P04 Carrier profile key rules
 
@@ -57,10 +59,12 @@ This document defines the canonical V1 screen IDs and intended URLs. Screen IDs 
 
 4 steps:
 
-1. Route + pickup date/date window/flexible date.
-2. Vehicle category/make/model/year/condition/photos.
+1. Default route + shared pickup date/date window/flexible date.
+2. “Automobiliai”: 1–10 vertically stacked vehicle cards, each with category/make/model/year/condition, conditional rolling ability, its own photos and structured pickup/delivery locations. The first vehicle cannot be removed; additional vehicles can be added or removed without clearing other values.
 3. Additional notes.
 4. Contact + visibility + legal acknowledgement + Phone OTP if needed.
+
+Each vehicle initially inherits the Step 1 default route. Its card shows “Naudoti pagrindinį maršrutą: [From] → [To]” and an accessible “Keisti šio automobilio maršrutą” control that reveals vehicle-specific pickup and delivery pickers. Vehicle 1 may also override. Vehicles retain independent locations; all share the Request pickup date/window. Every vehicle validates independently before continuing. Step 4 uses compact route and vehicle summaries rather than repeating all cards.
 
 Targeted flow must tell the customer before publish whether only the selected carrier or also other matching carriers will see the Request.
 
@@ -69,6 +73,8 @@ Phone OTP is required to publish. Email verification does not block customer pub
 ### P06 Published key rules
 
 Success state only. No fake “X carriers notified” claims.
+
+Summary supports 1–10 vehicles and same-route, multiple-pickup, multiple-delivery or mixed-location Requests using shared compact summaries. It does not expose vehicle photos.
 
 Targeted-only Requests can be expanded to Marketplace visibility.
 
@@ -84,13 +90,17 @@ Customer UI uses human labels, e.g.:
 
 Offers live in this screen; there is no separate Offer List screen.
 
-Material Request edits increment Request version and invalidate pending Offers.
+Show a dedicated “Automobiliai (N)” section with each vehicle's pickup → delivery route, category, make/model, optional year, condition, conditional rolling ability and photos.
+
+Adding/removing a vehicle or changing its pickup/delivery, category, make/model, year, condition or rolling ability when relevant is material. Default route and pickup-date changes remain material. Material Request edits increment Request version and invalidate pending Offers; Request notes and vehicle photos remain non-material.
 
 Closing a Request does not later re-open the same object; repeating creates a new Draft.
 
 ### P08 Offer detail key rules
 
 - Price shown as final transport price.
+- For multiple vehicles, price copy explicitly says it covers the complete vehicle set. One Offer remains Request-level; there is no per-vehicle price, selection or partial acceptance.
+- “Jūsų užklausa” lists every vehicle with its pickup → delivery route, and acceptance confirmation states that the Offer covers all vehicles and routes in the complete Request.
 - Payment terms shown separately.
 - Contextual conversation is the same thread that later becomes Booking chat.
 - Accept uses confirmation screen/dialog and atomic server transaction.
@@ -98,9 +108,22 @@ Closing a Request does not later re-open the same object; repeating creates a ne
 
 ### P09 Dashboard key rules
 
-- “Needs attention” first when relevant.
-- Tabs/sections: Requests, Transports, History.
-- No vanity KPI dashboard.
+- Customer overview route: `/dashboard`.
+- Page order: title, primary “Sukurti naują užklausą” action to `/request/new`, conditional “Reikia dėmesio”, then the “Užklausos”, “Pervežimai” and “Istorija” tabs.
+- “Reikia dėmesio” appears only when an Active Request has at least one actionable Pending Offer. Show route, vehicle, Request status, actionable Offer count and whether it is a new or updated Offer. An actionable Offer with `offer_version > 1` uses “Atnaujintas pasiūlymas”; otherwise use “Naujas pasiūlymas”. Updated Offers sort before other actionable Offers. The only action is “Peržiūrėti pasiūlymus” to `/requests/[id]`.
+- “Užklausos” contains Active targeted and marketplace Requests only. Cards show route, vehicle, requested pickup date/window, visibility, “Ieškoma vežėjo”, Offer count and “Peržiūrėti užklausą” to `/requests/[id]`. A zero-Offer card says “Pasiūlymų dar nėra”. Persisted Drafts, Booked, Completed and Closed Requests do not appear here.
+- “Pervežimai” contains Booked Requests only. Cards derive the accepted Offer and Booking link from existing data and show route, vehicle, selected carrier, pickup, planned delivery, “Vežėjas pasirinktas” and “Atidaryti pervežimą” to `/bookings/[bookingId]`. Competing Offers are omitted. P09 does not add Booking lifecycle states; B01 may remain unavailable during the frontend phase.
+- “Istorija” contains Completed and Closed Requests only. Cards show route, vehicle, “Pervežimas užbaigtas” or “Užklausa uždaryta”, a relevant date, carrier where relevant and a read-only detail link, preferring `/requests/[id]`. Booked Requests do not appear and Closed Requests cannot be reopened.
+- Objects belong to exactly one lifecycle tab. Ordering within tabs is stable and deterministic; there is no complex ranking.
+- Dashboard actions only navigate. Accept, decline, edit, close, reopen and Booking changes remain on detail screens.
+- Whole-dashboard empty state: “Čia dar nieko nėra”, “Sukurkite pirmą pervežimo užklausą ir gaukite vežėjų pasiūlymus.” and “Sukurti užklausą” to `/request/new`. Tab empty states are “Aktyvių užklausų nėra”, “Aktyvių pervežimų nėra” and “Istorija tuščia”.
+- Loading uses skeletons. Error UI is concise and includes retry; do not use a fullscreen spinner.
+- Mobile keeps “Reikia dėmesio”, tabs and vertically stacked cards in that order. Use a responsive three-item tab control with approximately 44px touch targets and no page-level horizontal scrolling or desktop tables.
+- Browser-review fixtures cover mixed (default), Requests-only, active-transport-only, History-only and completely empty Dashboard states. A non-UI query selector may select these fixtures. Do not show mock/demo notices.
+- P09 reuses P07/P08 Request, Offer, carrier, status, accepted-Offer and Booking-link data. A small derived view model and the minimum Completed history fixture are allowed; do not create an incompatible Dashboard Request model.
+- Attention, Request, Transport and History cards use shared compact vehicle and route summaries; multi-location cards use wording such as “2 paėmimo vietos → Kaunas” or “Kelių vietų pervežimas” and never expand all vehicle routes. At least one mixed review fixture contains multiple vehicles.
+- Real authentication is deferred. The frontend/mock route must expose no private customer contacts.
+- No vanity KPI dashboard, spending totals, response analytics, marketplace statistics, fake unread state/counts, fake notifications, backend, persistence, payments, messages or direct management actions.
 
 ### P10 Saved carriers key rules
 
@@ -135,6 +158,8 @@ Closing a Request does not later re-open the same object; repeating creates a ne
 - Send Offer requires required carrier verification.
 - Browse may happen without a route; Send Offer requires a concrete Route.
 - Route wizard stores ordered stops; direction order is used in matching.
+- Route create/edit requires a positive-integer “Laisvos vietos” / “Kiek vietų automobiliams turite?” value. A sensible V1 UI control may cap ordinary entry at 10 while the domain model remains flexible.
+- Future route management should provide a quick mobile capacity control such as “Laisvos vietos [-] 3 [+]”; it must never reduce `capacity_total` below already reserved Bookings. This control does not belong on public Route pages.
 - Route has separate `accepting_new_requests` control; closing to new work does not cancel the Route.
 - Route material edits revalidate pending Offers, but never rewrite accepted Bookings.
 - Offer does not reserve capacity.

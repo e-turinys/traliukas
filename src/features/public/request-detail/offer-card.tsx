@@ -6,9 +6,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { formatDateRange } from "@/lib/format-date"
 import { formatOfferExpiry } from "./logic"
 import { offerStatusLabels, type RequestOffer } from "./model"
+import { vehiclePriceScope } from "../vehicle-summary"
 
-export function OfferCard({ offer, status, emphasis = "standard" }: {
-  offer: RequestOffer; status: RequestOffer["status"]; emphasis?: "standard" | "selected" | "historical"
+export function OfferCard({ offer, status, vehicleCount, emphasis = "standard" }: {
+  offer: RequestOffer; status: RequestOffer["status"]; vehicleCount: number; emphasis?: "standard" | "selected" | "historical"
 }) {
   const actionable = status === "pending"
   const selected = emphasis === "selected"
@@ -22,7 +23,7 @@ export function OfferCard({ offer, status, emphasis = "standard" }: {
         </div>
         <div className="space-y-1">
           <p className={historical ? "font-semibold" : "text-xl font-semibold"}>{new Intl.NumberFormat("lt-LT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(offer.totalPriceEur)}</p>
-          <p className="text-xs text-muted-foreground">Visa pervežimo kaina</p>
+          <p className="text-xs text-muted-foreground">{vehicleCount === 1 ? "Visa pervežimo kaina" : `Visa pervežimo kaina už ${vehiclePriceScope(vehicleCount)}`}</p>
         </div>
       </div>
       <div className="flex flex-wrap gap-2">

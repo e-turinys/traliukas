@@ -38,7 +38,7 @@ export type RequestOffer = {
 }
 
 // Extends the P05/P06 public request projection, never its private contacts/addresses.
-export type RequestDetail = PublishedRequestInput & Pick<TransportRequestDraft, "notes" | "photos"> & {
+export type RequestDetail = PublishedRequestInput & Pick<TransportRequestDraft, "notes"> & {
   id: string
   status: keyof typeof requestStatusLabels
   requestVersion: number
@@ -46,11 +46,10 @@ export type RequestDetail = PublishedRequestInput & Pick<TransportRequestDraft, 
   offers: RequestOffer[]
 }
 
-export type RequestEdit = Pick<RequestDetail, "route" | "notes" | "photos"> & {
-  vehicle: Pick<TransportRequestDraft["vehicle"], "category" | "condition" | "rolls">
-}
+export type RequestEdit = Pick<RequestDetail, "route" | "notes" | "vehicles">
 
 // Date-only query serialization uses the existing P05 contract across the server/client boundary.
-export type RequestDetailPayload = Omit<RequestDetail, "route" | "photos"> & {
+export type RequestDetailPayload = Omit<RequestDetail, "route" | "vehicles"> & {
   route: Omit<RequestDetail["route"], "date"> & { dateQuery: string }
+  vehicles: Omit<TransportRequestDraft["vehicles"][number], "photos">[]
 }

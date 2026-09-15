@@ -5,15 +5,30 @@ import type { CarrierRoute } from "@/lib/types/carrier-route"
 export const requestCategories = { car: "Lengvasis automobilis", suv: "SUV / Crossover", van: "Van / LCV", other: "Kita" } as const
 export type RequestCategory = keyof typeof requestCategories
 export type Step = 1 | 2 | 3 | 4
+export type VehicleDraft = {
+  id: string
+  category: RequestCategory | ""
+  make: string
+  model: string
+  year: string
+  condition: "running" | "non-running" | ""
+  rolls: "yes" | "no" | "unknown" | ""
+  photos: File[]
+  pickupLocation: LocationOption | null
+  deliveryLocation: LocationOption | null
+  usesDefaultRoute: boolean
+}
 export type TransportRequestDraft = {
   route: { from: LocationOption | null; to: LocationOption | null; date: DateWindowValue }
   privateDetails: { pickup: string; delivery: string }
-  vehicle: { category: RequestCategory | ""; make: string; model: string; year: string; condition: "running" | "non-running" | ""; rolls: "yes" | "no" | "unknown" | "" }
-  photos: File[]
+  vehicles: VehicleDraft[]
   notes: string
   contact: { name: string; phone: string; email: string }
   visibility: "targeted" | "marketplace"
   target: { requested: boolean; route: CarrierRoute | null }
   termsAccepted: boolean
 }
-export type Errors = Partial<Record<"from" | "to" | "date" | "category" | "make" | "model" | "year" | "condition" | "rolls" | "name" | "phone" | "email" | "terms" | "target", string>>
+export type VehicleErrors = Partial<Record<"category" | "make" | "model" | "year" | "condition" | "rolls" | "photos" | "pickupLocation" | "deliveryLocation", string>>
+export type Errors = Partial<Record<"from" | "to" | "date" | "name" | "phone" | "email" | "terms" | "target" | "vehicleCount", string>> & {
+  vehicles?: Record<string, VehicleErrors>
+}

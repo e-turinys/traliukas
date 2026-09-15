@@ -16,7 +16,7 @@ registerHooks({
   },
 })
 
-const { createRequestDraft, validateStep, targetIssue, switchToMarketplace, photoSelectionError } = await import("../src/features/public/create-request/logic.ts")
+const { createRequestDraft, validateStep, targetIssue, switchToMarketplace, photoSelectionError, addRequestVehicle, removeRequestVehicle, maxRequestVehicles } = await import("../src/features/public/create-request/logic.ts")
 const { calendarDate, writeDate } = await import("../src/features/public/search-query.ts")
 const { routeRequestHref } = await import("../src/features/public/route-detail-context.ts")
 const { mockCarrierRoutes } = await import("../src/lib/mock/carrier-routes.ts")
@@ -26,6 +26,8 @@ const targeted = () => createRequestDraft(new URL(routeRequestHref(mockCarrierRo
 
 test("blank and invalid locations require selected, distinct public locations", () => {
   const blank = createRequestDraft(new URLSearchParams())
+  assert.equal(blank.vehicles.length, 1)
+  assert.equal(blank.vehicle, undefined)
   assert.equal(blank.visibility, "marketplace")
   assert.equal(blank.target.requested, false)
   assert.deepEqual(Object.keys(validateStep(blank, 1, today)), ["from", "to"])
@@ -73,12 +75,13 @@ test("actual P03 URL resolves target names and defaults to only that carrier", (
 
 test("unavailable and edited incompatible targets require explicit marketplace fallback", () => {
   const draft = targeted()
-  for (const route of [{ ...draft.target.route, parvezkReserved: 8 }, { ...draft.target.route, acceptingNewRequests: false }, { ...draft.target.route, dateTo: "2026-09-12" }]) {
+  for (const route of [{ ...draft.target.route, capacityReserved: draft.target.route.capacityTotal }, { ...draft.target.route, acceptingNewRequests: false }, { ...draft.target.route, dateTo: "2026-09-12" }]) {
     assert.ok(targetIssue({ ...draft, target: { requested: true, route } }, today))
   }
   assert.ok(targetIssue({ ...draft, route: { ...draft.route, from: draft.route.to, to: draft.route.from } }, today))
-  assert.ok(targetIssue({ ...draft, vehicle: { ...draft.vehicle, category: "van" } }, today))
-  assert.ok(targetIssue({ ...draft, vehicle: { ...draft.vehicle, category: "other" } }, today))
+  assert.ok(targetIssue({ ...draft, vehicles: [{ ...draft.vehicles[0], category: "van" }] }, today))
+  assert.ok(targetIssue({ ...draft, vehicles: [{ ...draft.vehicles[0], category: "other" }] }, today))
+  assert.ok(targetIssue({ ...draft, vehicles: Array.from({ length: 4 }, (_, index) => ({ ...draft.vehicles[0], id: `vehicle-${index + 1}`, category: "car" })) }, today))
   const fallback = switchToMarketplace(draft)
   assert.equal(fallback.visibility, "marketplace")
   assert.deepEqual(fallback.target, { requested: false, route: null })
@@ -89,15 +92,62 @@ test("unavailable and edited incompatible targets require explicit marketplace f
 
 test("vehicle validates required fields and rolling answer only when non-running", () => {
   const draft = prefilled()
-  assert.deepEqual(Object.keys(validateStep(draft, 2, today)), ["category", "make", "model", "condition"])
-  draft.vehicle = { category: "car", make: "VW", model: "Golf", year: "", condition: "running", rolls: "" }
+  assert.deepEqual(Object.keys(validateStep(draft, 2, today)), ["vehicles"])
+  assert.deepEqual(Object.keys(validateStep(draft, 2, today).vehicles["vehicle-1"]), ["category", "make", "model", "condition"])
+  draft.vehicles[0] = { ...draft.vehicles[0], category: "car", make: "VW", model: "Golf", year: "", condition: "running", rolls: "" }
   assert.deepEqual(validateStep(draft, 2, today), {})
-  draft.vehicle.condition = "non-running"
-  assert.ok(validateStep(draft, 2, today).rolls)
-  draft.vehicle.rolls = "unknown"
+  draft.vehicles[0].condition = "non-running"
+  assert.ok(validateStep(draft, 2, today).vehicles["vehicle-1"].rolls)
+  draft.vehicles[0].rolls = "unknown"
   assert.deepEqual(validateStep(draft, 2, today), {})
-  draft.vehicle.year = "abcd"
-  assert.ok(validateStep(draft, 2, today).year)
+  draft.vehicles[0].year = "abcd"
+  assert.ok(validateStep(draft, 2, today).vehicles["vehicle-1"].year)
+})
+
+test("vehicles add and remove with stable IDs while preserving values and enforcing 1–10", () => {
+  const first = { ...prefilled().vehicles[0], category: "suv", make: "BMW", model: "X5", condition: "running" }
+  let vehicles = addRequestVehicle([first], first.pickupLocation, first.deliveryLocation)
+  vehicles[1] = { ...vehicles[1], category: "suv", make: "Audi", model: "Q5", condition: "non-running", rolls: "yes" }
+  assert.equal(vehicles.length, 2)
+  assert.equal(vehicles[0], first)
+  assert.equal(vehicles[1].id, "vehicle-2")
+  assert.deepEqual(validateStep({ ...prefilled(), vehicles }, 2, today), {})
+  assert.equal(removeRequestVehicle(vehicles, vehicles[0].id), vehicles)
+  assert.deepEqual(removeRequestVehicle(vehicles, vehicles[1].id), [first])
+  assert.equal(removeRequestVehicle([first], first.id)[0], first)
+  while (vehicles.length < maxRequestVehicles) vehicles = addRequestVehicle(vehicles, first.pickupLocation, first.deliveryLocation)
+  assert.equal(vehicles.length, 10)
+  assert.equal(addRequestVehicle(vehicles), vehicles)
+  assert.ok(validateStep({ ...prefilled(), vehicles: [] }, 2, today).vehicleCount)
+  assert.ok(validateStep({ ...prefilled(), vehicles: [...vehicles, { ...first, id: "vehicle-11" }] }, 2, today).vehicleCount)
+})
+
+test("new vehicles inherit the default route and per-vehicle overrides remain independent", () => {
+  const draft = prefilled()
+  const vehicles = addRequestVehicle(draft.vehicles, draft.route.from, draft.route.to)
+  assert.equal(vehicles[1].pickupLocation.id, "hamburg-de")
+  assert.equal(vehicles[1].deliveryLocation.id, "kaunas-lt")
+  assert.equal(vehicles[1].usesDefaultRoute, true)
+
+  const berlin = createRequestDraft(new URLSearchParams("from=berlin-de&to=kaunas-lt")).route.from
+  const overridden = vehicles.map((vehicle, index) => index === 1
+    ? { ...vehicle, usesDefaultRoute: false, pickupLocation: berlin }
+    : vehicle)
+  assert.equal(overridden[0].pickupLocation.id, "hamburg-de")
+  assert.equal(overridden[1].pickupLocation.id, "berlin-de")
+})
+
+test("target matching rejects the complete request when one vehicle route is incompatible", () => {
+  const draft = targeted()
+  const vilnius = createRequestDraft(new URLSearchParams("from=vilnius-lt&to=kaunas-lt")).route.from
+  const vehicles = addRequestVehicle(draft.vehicles, vilnius, draft.route.to).map((vehicle, index) => ({
+    ...vehicle,
+    category: "suv",
+    make: index === 0 ? "BMW" : "Audi",
+    model: index === 0 ? "X5" : "Q5",
+    condition: "running",
+  }))
+  assert.ok(targetIssue({ ...draft, vehicles }, today))
 })
 
 test("contact requires name phone email and terms, never email verification or OTP", () => {

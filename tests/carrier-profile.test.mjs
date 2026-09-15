@@ -37,7 +37,7 @@ test("active routes exclude full, expired, closed and other-carrier routes witho
     { ...route, id: "later", dateFrom: "2026-09-16" }, route,
     { ...route, id: "expired", dateTo: "2026-09-12" },
     { ...route, id: "closed", acceptingNewRequests: false },
-    { ...route, id: "full", parvezkReserved: route.capacityTotal },
+    { ...route, id: "full", capacityReserved: route.capacityTotal },
     mockCarrierRoutes[2],
   ]
   const before = structuredClone(routes)

@@ -8,7 +8,7 @@ export default async function CreateRequestPage({ searchParams }: PageProps<"/re
   const values = await searchParams
   const params = new URLSearchParams()
   // Only the public P01/P03 prefill contract crosses into the client wizard.
-  for (const key of ["from", "to", "dateType", "date", "dateFrom", "dateTo", "dateFlexible", "dateOption", "visibility", "targetCarrier", "targetRoute"]) {
+  for (const key of ["from", "to", "dateType", "date", "dateFrom", "dateTo", "dateFlexible", "dateOption", "visibility", "targetCarrier", "targetRoute", "review"]) {
     const value = values[key]
     if (typeof value === "string") params.set(key, value)
   }

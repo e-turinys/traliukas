@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { formatDateRange } from "@/lib/format-date"
 import { formatEur } from "@/lib/format-money"
 import { publishedRequestSummary } from "../request-published/context"
+import { vehiclePriceScope } from "../vehicle-summary"
 import { hydrateRequestDetail } from "../request-detail/logic"
 import type { RequestDetailPayload, RequestOffer } from "../request-detail/model"
 import { OfferDecisionDialog } from "./decision-dialog"
@@ -60,8 +61,8 @@ export function OfferDetailView({ initialRequest, offerId, reviewNow }: {
         <h1 className="break-words text-3xl font-semibold tracking-tight">Pasiūlymas iš vežėjo „{offer.carrier.name}“</h1>
       </div>
       <div className="min-w-0 sm:text-right">
-        <p className="text-3xl font-semibold" aria-label={`Visa pervežimo kaina ${formatEur(offer.totalPriceEur)}`}>{formatEur(offer.totalPriceEur)}</p>
-        <p className="text-sm text-muted-foreground">Visa pervežimo kaina</p>
+        <p className="text-3xl font-semibold" aria-label={`Visa pervežimo kaina ${formatEur(offer.totalPriceEur)} už visus užklausos automobilius`}>{formatEur(offer.totalPriceEur)}</p>
+        <p className="text-sm text-muted-foreground">{requestSummary.vehicleCount === 1 ? "Visa pervežimo kaina" : `Visa pervežimo kaina už ${vehiclePriceScope(requestSummary.vehicleCount)}`}</p>
       </div>
     </header>
 
@@ -82,9 +83,10 @@ export function OfferDetailView({ initialRequest, offerId, reviewNow }: {
           <h2 className="text-lg font-semibold">Jūsų užklausa</h2>
           <dl className="space-y-3 text-sm">
             <div className="min-w-0"><dt className="text-muted-foreground">Maršrutas</dt><dd className="break-words">{requestSummary.route}</dd></div>
-            <div className="min-w-0"><dt className="text-muted-foreground">Automobilis</dt><dd className="break-words">{requestSummary.vehicle}</dd></div>
+            <div className="min-w-0"><dt className="text-muted-foreground">Automobiliai ({requestSummary.vehicleCount})</dt><dd><ul className="space-y-1">{requestSummary.vehicleLines.map((line, index) => <li key={`${line}-${index}`} className="break-words">{line}</li>)}</ul></dd></div>
             <div><dt className="text-muted-foreground">Pageidaujamas paėmimas</dt><dd>{requestSummary.date}</dd></div>
           </dl>
+          <p className="text-sm text-muted-foreground">Pasiūlymas apima visus automobilius ir visus šioje užklausoje nurodytus maršrutus.</p>
         </CardContent></Card>
       </aside>
 
@@ -132,6 +134,6 @@ export function OfferDetailView({ initialRequest, offerId, reviewNow }: {
       </main>
     </div>
 
-    {decision && <OfferDecisionDialog open onOpenChange={open => { if (!open) setDecision(null) }} decision={decision} offer={offer} onConfirm={confirm} finalFocus={decision === "accept" ? acceptButton : declineButton} />}
+    {decision && <OfferDecisionDialog open onOpenChange={open => { if (!open) setDecision(null) }} decision={decision} offer={offer} vehicleCount={requestSummary.vehicleCount} onConfirm={confirm} finalFocus={decision === "accept" ? acceptButton : declineButton} />}
   </div>
 }

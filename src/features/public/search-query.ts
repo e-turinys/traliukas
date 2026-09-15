@@ -88,6 +88,11 @@ export function readFilters(params: URLSearchParams) {
   }
 }
 
+export function readRequestedVehicleCount(params: URLSearchParams) {
+  const value = Number(params.get("vehicleCount") ?? "1")
+  return Number.isInteger(value) && value >= 1 ? value : 1
+}
+
 export function requestHref(params: URLSearchParams) {
   const query = new URLSearchParams()
   searchKeys.forEach((key) => params.getAll(key).forEach((value) => query.append(key, value)))

@@ -26,7 +26,7 @@ export type CarrierRoute = {
   dateFrom: string
   dateTo: string
   capacityTotal: number
-  parvezkReserved: number
+  capacityReserved: number
   acceptingNewRequests: boolean
   vehicleCategories: VehicleCategory[]
   supportsNonRunning: boolean

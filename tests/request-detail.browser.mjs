@@ -60,7 +60,7 @@ const screenshot = async name => {
   await writeFile(path.join(artifacts, `${name}.png`), Buffer.from(data, "base64"))
 }
 try {
-  const states = ["marketplace", "targeted", "updated-offer", "booked", "closed", "completed", "draft", "non-running", "historical-offers"]
+  const states = ["marketplace", "multi-vehicle", "targeted", "updated-offer", "booked", "closed", "completed", "draft", "non-running", "historical-offers"]
   for (const width of [390, 768, 1280, 1536]) {
     await cdp("Emulation.setDeviceMetricsOverride", { width, height: 900, deviceScaleFactor: 1, mobile: false })
     for (const state of states) {
@@ -69,7 +69,13 @@ try {
       await visit(id)
       await overflow(`${state} ${width}`)
       if (width >= 1280) assert.equal(await evaluate("getComputedStyle(document.querySelector('[aria-labelledby=\"offers-heading\"]').parentElement).gridTemplateColumns.split(' ').length"), 2, 'Desktop offers and details must use two columns')
-      assert.equal(await offers(), ["marketplace", "updated-offer"].includes(state) ? 2 : state === "non-running" ? 1 : 0)
+      assert.equal(await offers(), ["marketplace", "multi-vehicle", "updated-offer"].includes(state) ? 2 : state === "non-running" ? 1 : 0)
+      if (state === "multi-vehicle") {
+        assert.ok(await evaluate(text("Automobiliai (2)")))
+        assert.ok(await evaluate(text("BMW X5")))
+        assert.ok(await evaluate(text("Audi Q5")))
+        assert.ok(await evaluate(text("Visa pervežimo kaina už 2 automobilius")))
+      }
       if (state === "targeted") assert.ok(await evaluate(text("Pasiūlymų dar nėra")))
       if (state === "updated-offer") assert.ok(await evaluate(text("Atnaujintas pasiūlymas")))
       if (state === "booked" || state === "completed") {
@@ -94,7 +100,7 @@ try {
     await evaluate(`(() => {
       const png = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a9S8AAAAASUVORK5CYII='), c => c.charCodeAt(0));
       const data = new DataTransfer(); data.items.add(new File([png], 'automobilis-' + 'a'.repeat(180) + '.png', { type: 'image/png' }));
-      const input = document.querySelector('#request-photos'); input.files = data.files; input.dispatchEvent(new Event('change', { bubbles: true }));
+      const input = document.querySelector('#edit-vehicle-1-photos'); input.files = data.files; input.dispatchEvent(new Event('change', { bubbles: true }));
     })()`)
     await pause(100)
     await overflow(`editor with long photo filename ${width}`)
@@ -105,7 +111,7 @@ try {
     assert.equal(await offers(), 2)
     await click("Redaguoti užklausą")
     await click("Pašalinti")
-    await evaluate("[...document.querySelectorAll('#edit-category [role=radio]')][0].click()")
+    await evaluate("[...document.querySelectorAll('#edit-vehicle-1-category [role=radio]')][0].click()")
     await click("Išsaugoti pakeitimus")
     await until(text("Pakeitus šiuos duomenis esami pasiūlymai nebegalios."))
     await overflow(`confirmation ${width}`)
@@ -133,7 +139,7 @@ try {
     await until(text("Baltijos kelias ir kiti tinkami vežėjai"))
     await visit("targeted-demo-001")
     assert.ok(await evaluate(text("Tik Baltijos kelias")))
-    console.log(`PASS ${width}px: nine fixtures, editor, material confirmation, closure, repeat, visibility, reset; no overflow`)
+    console.log(`PASS ${width}px: ten fixtures, multi-vehicle details, editor, material confirmation, closure, repeat, visibility, reset; no overflow`)
   }
   assert.equal((await fetch(`${base}/requests/unknown-p07-request`)).status, 404)
   await visit("unknown-p07-request")

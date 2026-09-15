@@ -5,6 +5,7 @@ import { requestCategories } from "../create-request/model"
 import { dateLabel } from "../search-query"
 import { formatCountry } from "@/lib/format-country"
 import type { RequestDetail } from "./model"
+import { vehicleRouteLabel } from "../request-route-summary"
 
 function LocalPhoto({ file }: { file: File }) {
   const [url, setUrl] = useState<string>()
@@ -23,21 +24,28 @@ function LocalPhoto({ file }: { file: File }) {
 }
 
 export function RequestDetails({ request }: { request: RequestDetail }) {
-  const { route, vehicle } = request
+  const { route } = request
   const rows = [
-    ["Paėmimo vieta", route.from ? `${route.from.city}, ${formatCountry(route.from.country)}` : "—"],
-    ["Pristatymo vieta", route.to ? `${route.to.city}, ${formatCountry(route.to.country)}` : "—"],
+    ["Pagrindinis maršrutas", route.from && route.to ? `${route.from.city}, ${formatCountry(route.from.country)} → ${route.to.city}, ${formatCountry(route.to.country)}` : "—"],
     ["Paėmimo laikas", dateLabel(route.date)],
-    ["Kategorija", vehicle.category ? requestCategories[vehicle.category] : "—"],
-    ["Markė ir modelis", `${vehicle.make} ${vehicle.model}`],
-    ...(vehicle.year ? [["Metai", vehicle.year]] : []),
-    ["Būklė", vehicle.condition === "running" ? "Važiuojantis" : "Nevažiuojantis"],
-    ...(vehicle.condition === "non-running" ? [["Ar automobilis rieda?", { yes: "Taip", no: "Ne", unknown: "Nežinoma", "": "Nenurodyta" }[vehicle.rolls]]] : []),
   ]
   return <Card className="min-w-0"><CardContent className="space-y-5">
     <h2 className="text-xl font-semibold">Užklausos duomenys</h2>
     <dl className="grid gap-4 text-sm sm:grid-cols-2">{rows.map(([label, value]) => <div key={label} className="min-w-0 space-y-1"><dt className="text-muted-foreground">{label}</dt><dd className="break-words">{value}</dd></div>)}</dl>
+    <section className="space-y-4 border-t pt-4" aria-labelledby="request-vehicles-heading">
+      <h3 id="request-vehicles-heading" className="font-semibold">Automobiliai ({request.vehicles.length})</h3>
+      <div className="space-y-4">{request.vehicles.map((vehicle, index) => <article key={vehicle.id} className="space-y-3 rounded-lg bg-muted/35 p-4">
+        <h4 className="font-medium">Automobilis {index + 1}: {vehicle.make} {vehicle.model}</h4>
+        <p className="text-sm font-medium">{vehicleRouteLabel(vehicle)}</p>
+        <dl className="grid gap-3 text-sm sm:grid-cols-2">
+          <div><dt className="text-muted-foreground">Kategorija</dt><dd>{vehicle.category ? requestCategories[vehicle.category] : "—"}</dd></div>
+          {vehicle.year && <div><dt className="text-muted-foreground">Metai</dt><dd>{vehicle.year}</dd></div>}
+          <div><dt className="text-muted-foreground">Būklė</dt><dd>{vehicle.condition === "running" ? "Važiuojantis" : "Nevažiuojantis"}</dd></div>
+          {vehicle.condition === "non-running" && <div><dt className="text-muted-foreground">Ar automobilis rieda?</dt><dd>{{ yes: "Taip", no: "Ne", unknown: "Nežinoma", "": "Nenurodyta" }[vehicle.rolls]}</dd></div>}
+        </dl>
+        {vehicle.photos.length > 0 && <div className="space-y-3"><h5 className="text-sm font-medium">Nuotraukos</h5><ul className="grid gap-4 sm:grid-cols-2">{vehicle.photos.map((file, photoIndex) => <LocalPhoto key={`${file.name}-${photoIndex}`} file={file} />)}</ul></div>}
+      </article>)}</div>
+    </section>
     <div className="space-y-2 border-t pt-4"><h3 className="font-medium">Informacija vežėjui</h3><p className="whitespace-pre-wrap break-words text-sm">{request.notes || "Papildomos informacijos nėra."}</p></div>
-    {request.photos.length > 0 && <div className="space-y-3"><h3 className="font-medium">Automobilio nuotraukos</h3><ul className="grid gap-4 sm:grid-cols-2">{request.photos.map((file, index) => <LocalPhoto key={`${file.name}-${index}`} file={file} />)}</ul></div>}
   </CardContent></Card>
 }

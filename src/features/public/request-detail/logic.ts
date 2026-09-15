@@ -1,4 +1,4 @@
-import { createRequestDraft, photoSelectionError, validateStep } from "../create-request/logic"
+import { createRequestDraft, validateStep } from "../create-request/logic"
 import { readDate, writeDate } from "../search-query"
 import type { RequestDetail, RequestDetailPayload, RequestEdit, RequestOffer } from "./model"
 
@@ -9,14 +9,17 @@ function dateQuery(date: RequestDetail["route"]["date"]) {
 }
 
 export function serializeRequestDetail(request: RequestDetail): RequestDetailPayload {
-  const { route, photos: _photos, ...rest } = request
-  void _photos // Local File objects never cross the server/client boundary.
-  return { ...rest, route: { from: route.from, to: route.to, dateQuery: dateQuery(route.date) } }
+  const { route, vehicles, ...rest } = request
+  return {
+    ...rest,
+    route: { from: route.from, to: route.to, dateQuery: dateQuery(route.date) },
+    vehicles: vehicles.map(({ photos: _photos, ...vehicle }) => { void _photos; return vehicle }),
+  }
 }
 
 export function hydrateRequestDetail(payload: RequestDetailPayload): RequestDetail {
   const { dateQuery: query, ...places } = payload.route
-  return { ...payload, route: { ...places, date: readDate(new URLSearchParams(query)).value }, photos: [] }
+  return { ...payload, route: { ...places, date: readDate(new URLSearchParams(query)).value }, vehicles: payload.vehicles.map(vehicle => ({ ...vehicle, photos: [] })) }
 }
 
 export function requestActions(request: RequestDetail) {
@@ -32,14 +35,19 @@ export function requestOfferGroups(request: RequestDetail) {
 }
 
 export function isMaterialEdit(request: RequestDetail, edit: RequestEdit) {
-  return request.route.from?.id !== edit.route.from?.id || request.route.to?.id !== edit.route.to?.id ||
-    dateQuery(request.route.date) !== dateQuery(edit.route.date) || request.vehicle.category !== edit.vehicle.category ||
-    request.vehicle.condition !== edit.vehicle.condition ||
-    (edit.vehicle.condition === "non-running" && request.vehicle.rolls !== edit.vehicle.rolls)
+  if (request.route.from?.id !== edit.route.from?.id || request.route.to?.id !== edit.route.to?.id || dateQuery(request.route.date) !== dateQuery(edit.route.date)) return true
+  if (request.vehicles.length !== edit.vehicles.length) return true
+  return request.vehicles.some((vehicle, index) => {
+    const next = edit.vehicles[index]
+    return !next || vehicle.id !== next.id || vehicle.category !== next.category || vehicle.make !== next.make ||
+      vehicle.model !== next.model || vehicle.year !== next.year || vehicle.condition !== next.condition ||
+      vehicle.pickupLocation?.id !== next.pickupLocation?.id || vehicle.deliveryLocation?.id !== next.deliveryLocation?.id ||
+      (next.condition === "non-running" && vehicle.rolls !== next.rolls)
+  })
 }
 
 export function validateRequestEdit(request: RequestDetail, edit: RequestEdit, today: string) {
-  const draft = { ...createRequestDraft(new URLSearchParams()), route: edit.route, vehicle: { ...request.vehicle, ...edit.vehicle } }
+  const draft = { ...createRequestDraft(new URLSearchParams()), route: edit.route, vehicles: edit.vehicles }
   return { ...validateStep(draft, 1, today), ...validateStep(draft, 2, today) }
 }
 
@@ -47,10 +55,10 @@ const invalidatePending = (offers: RequestOffer[]) => offers.map(offer => offer.
 
 export function applyRequestEdit(request: RequestDetail, edit: RequestEdit, confirmed: boolean, today: string): RequestDetail {
   if (!requestActions(request).edit) throw new Error("Request is read-only")
-  if (Object.keys(validateRequestEdit(request, edit, today)).length || photoSelectionError(edit.photos, 0)) throw new Error("Invalid request edit")
+  if (Object.keys(validateRequestEdit(request, edit, today)).length) throw new Error("Invalid request edit")
   const material = isMaterialEdit(request, edit)
   if (material && !confirmed) throw new Error("Material edit requires confirmation")
-  return { ...request, route: edit.route, notes: edit.notes, photos: edit.photos, vehicle: { ...request.vehicle, ...edit.vehicle },
+  return { ...request, route: edit.route, notes: edit.notes, vehicles: edit.vehicles,
     requestVersion: request.requestVersion + (material ? 1 : 0), offers: material ? invalidatePending(request.offers) : request.offers }
 }
 

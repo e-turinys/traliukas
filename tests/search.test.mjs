@@ -76,7 +76,7 @@ test("verification, rating, category and non-running filters combine", () => {
 
 test("unavailable routes are excluded and rating sort puts new carriers last", () => {
   const first = mockCarrierRoutes[0]
-  assert.equal(match(query(), [{ ...first, capacityTotal: 5, parvezkReserved: 5 }]).exact.length, 0)
+  assert.equal(match(query(), [{ ...first, capacityTotal: 5, capacityReserved: 5 }]).exact.length, 0)
   assert.equal(match(query(), [{ ...first, acceptingNewRequests: false }]).exact.length, 0)
   assert.equal(match(query(), [{ ...first, dateFrom: "2026-09-01", dateTo: "2026-09-02" }]).exact.length, 0)
   const sorted = match(query("&sort=rating")).exact
@@ -84,4 +84,11 @@ test("unavailable routes are excluded and rating sort puts new carriers last", (
   assert.equal(sorted.at(-1).route.carrier.rating, null)
   const dates = match(query("&sort=date")).exact.map((item) => item.route.dateFrom)
   assert.deepEqual(dates, [...dates].sort())
+})
+
+test("requested vehicle count excludes routes without capacity for the complete request", () => {
+  const oneSpace = mockCarrierRoutes.find(route => route.id === "manto-transportas-0917")
+  assert.equal(match(query("&vehicleCount=1"), [oneSpace]).exact.length, 1)
+  assert.equal(match(query("&vehicleCount=2"), [oneSpace]).exact.length, 0)
+  assert.equal(match(query("&vehicleCount=2"), [{ ...oneSpace, capacityTotal: 4, capacityReserved: 2 }]).exact.length, 1)
 })

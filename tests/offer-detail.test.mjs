@@ -27,6 +27,7 @@ const ids = {
   unavailable: "request-changed-demo-001-offer-1",
   notSelected: "booked-demo-001-offer-2",
   accepted: "booked-demo-001-offer-1",
+  multi: "multi-vehicle-demo-001-offer-1",
 }
 
 test("offer lookup reuses explicit P07 offer and request fixtures", () => {
@@ -109,4 +110,14 @@ test("pickup differences are neutral and only derived from explicit requested da
 
 test("offer timestamps use the Lithuanian calendar display while preserving Vilnius time", () => {
   assert.equal(formatOfferTimestamp("2026-09-14T18:00:00Z"), "2026 m. rugs. 14 d. 21:00")
+})
+
+test("one request-level offer covers the complete multi-vehicle request without partial selection", () => {
+  const detail = find(ids.multi)
+  assert.equal(detail.request.vehicles.length, 2)
+  assert.equal(detail.offer.totalPriceEur, 900)
+  assert.equal("vehicleId" in detail.offer, false)
+  assert.equal("vehicleIds" in detail.offer, false)
+  assert.equal("lineItems" in detail.offer, false)
+  assert.equal(isOfferActionable(offerDetailStatus(detail.request, detail.offer, now)), true)
 })
