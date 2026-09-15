@@ -11,6 +11,14 @@ export const offerStatusLabels = {
   expired: "Galiojimas baigėsi", unavailable: "Nebegalioja", not_selected: "Nepasirinktas", withdrawn: "Atšauktas vežėjo",
 } as const
 
+export type OfferRevision = {
+  totalPriceEur: number
+  pickupDate: string
+  deliveryDate: string
+  paymentTerms: string
+  revisedAt?: string
+}
+
 export type RequestOffer = {
   id: string
   requestId: string
@@ -21,6 +29,9 @@ export type RequestOffer = {
   pickupDate: string
   deliveryDate: string
   expiresAt: string
+  paymentTerms: string
+  carrierComment?: string
+  revisions: OfferRevision[]
   requestVersion: number
   routeVersion: number
   offerVersion: number

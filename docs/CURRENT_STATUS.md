@@ -2,7 +2,17 @@
 
 **Date:** 2026-09-15
 **Current phase:** Phase 2 — Request / Offer UI with mock data
-**Project status:** P01 locked. P02 locked. P03 locked. P04 locked. P05 locked. P06 locked. P07 Request Detail + Offers is completed, browser-reviewed and ready to commit. Next task: P08 Offer Detail. P08/backend have not started.
+**Project status:** P01–P07 are locked. P08 Offer Detail is completed, browser-reviewed and ready to commit. P09/backend/booking have not started.
+
+## P08 implementation — 2026-09-15
+
+- Added `/offers/[id]` as a no-index customer decision page using the existing P07 `RequestOffer` and request fixtures. Unknown IDs use Next.js not-found behavior with a Lithuanian P08 404. The page links back to its request and to the existing P04 carrier profile without exposing private contact, address or verification-document data.
+- The page places human-readable status, final EUR transport price and carrier name first, then shows pickup, planned delivery, expiry, explicit payment terms, optional carrier comment, carrier trust and compact “Jūsų užklausa” context. Only city-level route and the existing public vehicle/date projection are used. A neutral comparison notice appears only when an explicitly offered pickup date falls outside a single requested date or date window; the request has no delivery deadline to compare, so no delivery conflict is invented.
+- Minimally extended the shared P07 offer model with payment terms, optional carrier comment and prior revision snapshots. Added a shared EUR formatter. The updated-offer fixture keeps its current fields as the latest actionable terms and exposes the previous €590 terms in collapsed “Pasiūlymo istorija”, sorted newest first. Previous revisions have no action controls and internal version numbers are not presented as primary UI.
+- Pending offers alone show “Priimti pasiūlymą” and “Atmesti pasiūlymą”. Both require accessible confirmation dialogs. Accept confirmation summarizes carrier, final price, pickup, delivery and payment terms and explains the effect on competing offers. Confirming either action changes only the local offer state; accepting creates no Booking, changes no Request, reserves no capacity and explicitly says real booking creation awaits backend integration. Reload restores the fixture.
+- Expired, request-version-invalidated, Not Selected, Accepted and Declined fixtures are read-only with specific customer context. Review URLs: pending `/offers/marketplace-demo-001-offer-1`; updated `/offers/updated-offer-demo-001-offer-1`; expired `/offers/historical-offers-demo-001-offer-1`; unavailable after request change `/offers/request-changed-demo-001-offer-1`; not selected `/offers/booked-demo-001-offer-2`; accepted `/offers/booked-demo-001-offer-1`; declined `/offers/historical-offers-demo-001-offer-2`; unknown `/offers/unknown-p08-offer` (404).
+- Validation: `npm.cmd run build` passed lint, TypeScript and production compilation. All 46 tests passed: 8 focused P08 tests and 38 P02–P07 regressions. Production P08 browser checks passed seven states, revision disclosure, carrier/request links, both confirmation dialogs, local action/reset behavior, HTTP 404 and no horizontal overflow at 390/768/1280/1536px. The full P07 production browser regression also passed at all four widths. No runtime exceptions were captured. Review screenshots are generated under ignored `.next/p08-review/`.
+- P01–P07 remain locked. P08 is completed, browser-reviewed and ready to commit. No P09, B01, real booking creation, backend, Supabase, auth, payments, notifications, messaging or Admin work was added. No commit or push performed.
 
 ## P07 implementation — 2026-09-15
 
@@ -12,10 +22,10 @@
 - Local notes/photo edits preserve the request version and pending offers. Material route/date/category/condition changes (including non-running rolling capability) require “Pakeitus šiuos duomenis esami pasiūlymai nebegalios.” confirmation, increment the internal request version and mark pending offers unavailable. Cancel preserves the original. Selected photos can be previewed and removed; nothing is uploaded.
 - Closing requires confirmation, produces Closed and makes pending offers Unavailable. There is no reopen. “Pakartoti užklausą” creates a separate in-memory Draft with copied request values and no offers, leaving the original closed. This draft is only a local preview, without publication or persistence.
 - Booked requests are read-only with “Atidaryti pervežimą” linking to `/bookings/transport-demo-001`. Completed, closed and draft fixtures have appropriate read-only states. Targeted-only zero-offer requests can demonstrate expanding visibility without sending anything. Reload restores the fixtures.
-- The existing fixed review clock (`2026-09-14T09:00:00Z`) keeps pending and expired offers reproducible; it is not live eligibility. P08 and booking screens remain unimplemented link destinations. No offer acceptance, booking creation, backend, Supabase, auth, notifications or payments were added. P01–P06 application code and fixtures are unchanged.
+- The existing fixed review clock (`2026-09-14T09:00:00Z`) keeps pending and expired offers reproducible; it is not live eligibility. At P07 completion, P08 and booking screens remained unimplemented link destinations. No offer acceptance, booking creation, backend, Supabase, auth, notifications or payments were added. P01–P06 application code and fixtures were unchanged.
 - Review URLs: `/requests/marketplace-demo-001`, `/requests/targeted-demo-001`, `/requests/updated-offer-demo-001`, `/requests/booked-demo-001`, `/requests/closed-demo-001`, and `/requests/unknown-p07-request` (404). Additional states: `/requests/completed-demo-001`, `/requests/draft-demo-001`, `/requests/non-running-demo-001`, `/requests/historical-offers-demo-001`, `/requests/targeted-marketplace-demo-001`.
 - Validation: `node --test tests/*.test.mjs` passed all 38 tests (10 P07 and 28 P02–P06 regressions). `npm.cmd run build` passed lint, types and production compilation. `node tests/request-detail.browser.mjs` passed against the final production build at 390/768/1280/1536px: nine fixtures, CTA states, desktop columns, notes/photos, confirmation/cancel, invalidation, closure/repeat, visibility/reset and unknown HTTP 404. No horizontal overflow or runtime exceptions; mobile/desktop screenshots inspected. Screenshots are generated under ignored `.next/p07-review/`. Final P07 browser review passed.
-- P07 is completed, browser-reviewed and ready to commit. P01–P06 remain locked. P08/backend have not started.
+- At P07 completion, P07 was browser-reviewed and ready to commit, P01–P06 remained locked, and P08/backend had not started.
 - Build integration fixed the existing WIP country-format import and photo-preview effect. A fresh generated-cache rebuild was needed to include new desktop CSS classes. No packages or locked product decisions changed. No commit or push performed in this session.
 
 ## P06 implementation — 2026-09-14
@@ -142,15 +152,15 @@
 - GitHub → Hostinger auto-deploy: working
 - Supabase: not connected yet
 - shadcn/ui: configured with Base UI, Nova preset and neutral tokens
-- Real product UI: public layout, shared pickers and P01–P07 implemented with mock data; P01–P07 are locked after browser review.
+- Real product UI: public layout, shared pickers and P01–P08 implemented with mock data; P01–P07 are locked and P08 awaits browser review.
 
 ## Immediate next task
 
-Next task: **P08 Offer Detail**. P01–P07 remain locked. P08/backend have not started. P05 still stops before phone verification and publication.
+Next task: **P09**. P01–P07 remain locked. P08 is completed, browser-reviewed and ready to commit. P09/backend/booking have not started. P05 still stops before phone verification and publication.
 
 ## Next after browser approval
 
-P07 final browser review passed. P07 is completed, browser-reviewed and ready to commit. Next task: P08 Offer Detail. P08/backend have not started.
+Stop after this status update. P09/backend/booking have not started. Do not commit or push without a separate instruction.
 
 ## Do not reopen without a blocker
 
