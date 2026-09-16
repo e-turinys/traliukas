@@ -1,15 +1,26 @@
 # Parvezk.lt — Current Status
 
 **Date:** 2026-09-16
-**Current phase:** Phase 2 — Request / Offer / Conversation UI with mock data
-**Project status:** P01–P09 and the Multi-Vehicle + Multi-Location + Carrier Capacity baseline remain LOCKED. Conversation / Chat V1 and the Messages Inbox are implemented, browser-reviewed and LOCKED. Backend, realtime messaging, email, SMS and notifications are not implemented. B01 Booking Detail is the next major screen and has not started.
+**Current phase:** Phase 2 — Request / Offer / Conversation / Booking UI with mock data
+**Project status:** P01–P09, Conversation / Chat V1, the Messages Inbox and B01 Booking Detail are implemented, browser-reviewed and LOCKED. Multi-Vehicle + Multi-Location Booking behavior and Carrier Capacity V1 are also LOCKED. Backend, authentication, Supabase, realtime messaging, notifications, email and SMS have not started.
+
+## B01 Booking / Transport Detail locked baseline — 2026-09-16
+
+- Added `/bookings/[id]` as the customer source of truth for an accepted complete-request transport, plus loading and Lithuanian 404 states. The existing P09 “Atidaryti pervežimą” destination now resolves without changing the locked Dashboard design or behavior.
+- Added canonical Booking/BookingVehicle types derived from existing Vehicle, Location and Carrier types. D-041 locks the immutable accepted agreement snapshot and one aggregate lifecycle: Booked, Pickup Scheduled, Collected, In Transit, Delivered and Completed. Per-vehicle statuses are intentionally excluded from V1.
+- B01 shows compact route/vehicle context, agreed dates, all per-vehicle routes/details, responsive aggregate timeline, selected carrier trust, total price/payment terms and the accepted Conversation link. It never shows competing Offers or editing controls for the Request, carrier, price or terms.
+- Delivered alone offers customer confirmation and transitions locally to Completed after an accessible confirmation dialog. No persistence, payments, cancellation, reports, documents, photos, GPS or carrier operational controls were added.
+- Booking snapshot tests prove later Request/Offer/carrier/location mutation does not change accepted values. Review fixtures cover every lifecycle state, a €900 two-vehicle/two-pickup Booking and unknown-ID 404.
+- Future `booking.created`, `booking.pickupScheduled`, `booking.collected`, `booking.inTransit`, `booking.delivered` and `booking.completed` events are documented as notification boundaries only. B01 does not send notifications, email, SMS or push; Chat retains its separate `message.created` boundary.
+- Human browser review passed. B01 Booking Detail, its immutable complete-Booking snapshot, one aggregate count-aware lifecycle, per-vehicle pickup/delivery data, multi-vehicle + multi-location behavior, total complete-Booking price and reuse of the accepted-offer Conversation are now LOCKED as the approved V1 baseline.
+- Final lock validation: `npm.cmd run build` passed compilation, lint/type checks and static generation; all 101 unit tests passed. The 42-test focused B01, Chat, P08 and P09 subset also passed. Production browser regressions for B01, Chat, P08 and P09 passed at 390/768/1280/1536px without horizontal overflow or runtime exceptions.
 
 ## V1 Conversation / Chat locked baseline — 2026-09-16
 
 - Locked D-040: chat begins after Offer, exactly one Conversation exists per Request + Carrier, Offer revisions reuse it, the winning Conversation continues into Booking and losing/terminal conversations archive read-only. There is no arbitrary user messaging or second Booking chat.
 - Added canonical `Conversation` and `Message` types, lifecycle/acceptance/send/order/unread helpers, and a `message.created` domain-event boundary for future in-app and transactional email notifications. V1 chat is text-only; SMS is off by default and attachments are deferred to V1.2.
 - Added and browser-reviewed the Messages Inbox at `/messages` and canonical detail at `/messages/[conversationId]`, with compact multi-location context, explicit customer/carrier/system identity, timestamps, unread presentation, immutable system events, local active-thread send behavior, and read-only historical states. Unknown IDs use Next.js 404 handling.
-- Added P07/P08 conversation entry points without adding chat before an Offer. Winning Booking-linked conversations keep the same ID; future B01 should link to it with “Atidaryti pokalbį”. No B01 lifecycle was implemented.
+- Added P07/P08 conversation entry points without adding chat before an Offer. Winning Booking-linked conversations keep the same ID; B01 links to that existing Conversation at `/messages/[conversationId]` and does not create another chat.
 - Review fixtures cover active pre-Booking, updated Offer, Booking-linked winner, archived loser, completed/read-only and multi-vehicle/multi-location states.
 - Human browser review passed. Conversation / Chat V1 and the Messages Inbox are now LOCKED. Backend persistence, realtime transport, email, SMS and notification delivery remain unimplemented; `message.created` is only the documented future notification event boundary.
 - Final lock validation: all 90 unit tests passed, including 11 focused Conversation cases; `npm.cmd run build` passed compilation, lint/type validation and static generation; Conversation and P07/P08/P09 production browser regressions passed at 390/768/1280/1536px without horizontal overflow or runtime exceptions.
@@ -25,7 +36,7 @@
 - D-039 locks per-vehicle structured pickup/delivery locations, Step 1 default-route inheritance, one shared requested date window and one complete carrier Offer/Booking. Matching must accept the complete vehicle/location set; partial matching, route optimization and segment-capacity reuse remain outside V1. D-039 supersedes D-037's same-route restriction.
 - Review URLs: P02 insufficient capacity `/search?from=hamburg-de&to=kaunas-lt&vehicle=car&vehicleCount=2`; P03 available `/routes/baltijos-kelias-0915`; P03 full `/routes/baltijos-kelias-0920-full`; P05 two pickups `/request/new?from=hamburg-de&to=kaunas-lt&dateType=range&dateFrom=2026-09-15&dateTo=2026-09-17&review=multi-location-pickups`; P05 mixed `/request/new?from=hamburg-de&to=kaunas-lt&dateType=range&dateFrom=2026-09-15&dateTo=2026-09-17&review=multi-location-mixed`; P06 `/request/multi-location-pickups-demo-001/published`; P07 `/requests/multi-location-pickups-demo-001` and `/requests/multi-location-mixed-demo-001`; P08 `/offers/multi-location-pickups-demo-001-offer-1` and `/offers/multi-location-mixed-demo-001-offer-2`; P09 `/dashboard`.
 - Final validation: `npm.cmd run build` passed and all 79 P01–P09 regression tests passed. Production browser review passed P02/P03 capacity, P05 route inheritance/override and final summaries, P06–P09 multi-location states, and the full P07/P08/P09 flows at 390/768/1280/1536px without horizontal overflow or runtime exceptions.
-- P01–P09 are LOCKED and browser-reviewed. Multi-Vehicle Requests, per-vehicle Multi-Location transport and Carrier Route Capacity V1 are the approved baseline. Backend, authentication, Supabase and B01 have not started. No commit or push performed.
+- P01–P09 are LOCKED and browser-reviewed. Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior and Carrier Route Capacity V1 are the approved baseline. Backend, authentication and Supabase have not started. No commit or push performed.
 
 ## P09 implementation — 2026-09-15
 
@@ -188,11 +199,11 @@
 
 ## Immediate next task
 
-Next major screen: **B01 Booking Detail.** Define its implementation task separately before coding. Do not start B01, backend, realtime messaging, email, SMS or notifications from this status update.
+No next feature is selected. Do not start B02–B07, backend, authentication, Supabase, realtime messaging, notifications, email or SMS without a separately scoped instruction.
 
 ## Locked baseline handoff
 
-P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Carrier Route Capacity V1, Conversation / Chat V1 and the Messages Inbox are approved, browser-reviewed and LOCKED. Start no new feature until it is separately selected and scoped. B01, backend, authentication, Supabase, realtime messaging, email, SMS and notifications remain unstarted. Do not commit or push without a separate instruction.
+P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior, Carrier Route Capacity V1, Conversation / Chat V1, the Messages Inbox and B01 Booking Detail are approved, browser-reviewed and LOCKED. Start no new feature until it is separately selected and scoped. Backend, authentication, Supabase, realtime messaging, email, SMS and notifications remain unstarted. Do not commit or push without a separate instruction.
 
 ## Do not reopen without a blocker
 

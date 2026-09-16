@@ -206,6 +206,11 @@ This file records important product/architecture decisions that should not be ca
 **Decision:** A Conversation begins after a carrier submits an Offer, with exactly one Conversation per Request + Carrier. Offer revisions reuse it. The winning Conversation remains active and gains the Booking link at acceptance; competing Conversations archive as read-only history, and no second Booking chat is created. `/messages/[conversationId]` is canonical before and after Booking. V1 is text-only with explicit user/system messages and read state; attachments are deferred to V1.2. There is no arbitrary user-to-user messaging. `message.created` is the future notification boundary for in-app and transactional email delivery, with no SMS by default and no channel calls from chat UI.
 **Reason:** One durable contextual thread preserves the complete commercial and transport history without duplicate chats, while keeping V1 communication scope and future notification integration explicit.
 
+### D-041 — B01 Booking Snapshot + Aggregate Lifecycle
+
+**Decision:** B01 renders immutable accepted transport terms from the Booking snapshot, including the accepted Offer ID/version, complete vehicle/location set, carrier reference/identity, requested and planned dates, total price and payment terms. V1 has one aggregate Booking lifecycle for all vehicles and no per-vehicle status. The accepted Conversation continues into Booking and B01 links to `/messages/[conversationId]` without creating another thread. Delivered may be confirmed by the customer as Completed. The customer cannot edit the accepted carrier, price, payment terms or original Request from B01.
+**Reason:** Preserve the actual complete-request agreement while keeping multi-vehicle operations understandable and preventing mutable Request/Offer data or partial per-vehicle state from rewriting the accepted transport.
+
 ## How to add a new decision
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:

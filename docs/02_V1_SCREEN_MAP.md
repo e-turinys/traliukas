@@ -183,11 +183,15 @@ Closing a Request does not later re-open the same object; repeating creates a ne
 
 ### Booking screen rules
 
+- B01 is the customer source of truth after one complete Request Offer is accepted. It shows the immutable accepted agreement, one selected carrier, one aggregate Booking lifecycle, every vehicle and its own pickup/delivery route, current progress, price/payment terms, carrier trust and the linked Conversation. It does not compare rejected Offers or permit editing accepted terms.
+- Booking snapshots the accepted Offer ID/version, total price, payment terms, carrier identity/reference, requested pickup window, planned pickup/delivery and every vehicle/location. B01 does not derive these agreed terms from the current mutable Request or Offer.
+- V1 has one Booking status for the complete vehicle set: Booked → Pickup Scheduled → Collected → In Transit → Delivered → Completed. There is no per-vehicle lifecycle even for multi-location Bookings.
 - Agreement snapshot and operational data are visually distinct.
 - Required operational pickup data must exist before pickup process proceeds.
 - Carrier only sees valid next status action.
 - Normal cancellation ends after Vehicle Collected.
 - Delivered waits for customer confirmation; no automatic V1 completion timer.
+- Customer B01 shows “Patvirtinti, kad automobiliai gauti” only for Delivered; confirmation transitions the local/mock review state to Completed. Accepted price, terms, carrier and Request cannot be edited from B01.
 - Report state is independent from Booking transport status.
 - B01 opens the linked winning Conversation through “Atidaryti pokalbį” to `/messages/[conversationId]`; it never creates a Booking-specific duplicate thread.
 

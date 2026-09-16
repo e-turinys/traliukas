@@ -292,6 +292,14 @@ Do not render the contractual/commercial agreement by joining only to current mu
 
 At acceptance time, Booking stores an agreement snapshot or equivalent immutable fields containing the accepted state.
 
+Canonical B01 Booking fields include `id`, `request_id`, `accepted_offer_id`, `accepted_offer_version`, `carrier_id`, `conversation_id`, snapshotted `vehicles`, `agreed_total_price`, `currency`, `payment_terms`, `requested_pickup_window`, `planned_pickup`, `planned_delivery`, one aggregate `status` and `created_at`. The carrier identity needed to render the agreement is snapshotted or otherwise preserved alongside its reference.
+
+Every snapshotted vehicle retains its accepted make/model/category/year/condition plus its own pickup and delivery location. Later Request, Offer, Route or Profile mutation must not change those B01 agreement values.
+
+V1 uses one aggregate Booking lifecycle for the complete Request: `booked` → `pickup_scheduled` → `collected` → `in_transit` → `delivered` → `completed`. There is no per-vehicle status model. Delivered becomes Completed only after customer confirmation (or a future explicit Admin override path); accepted terms remain read-only in B01.
+
+The Booking stores the accepted Offer Conversation ID and B01 links to `/messages/[conversationId]`. It never creates `/bookings/[id]/chat` or another Conversation.
+
 Important searchable Booking fields may also be duplicated in structured columns for queryability; the snapshot exists to preserve agreement meaning/history.
 
 Operational details remain mutable and logged separately.
@@ -399,10 +407,12 @@ Example domain events:
 - `offer.declined`
 - `message.created`
 - `booking.created`
-- `booking.pickup_scheduled`
-- `booking.pickup_changed`
+- `booking.pickupScheduled`
+- `booking.pickupChanged`
 - `booking.collected`
+- `booking.inTransit`
 - `booking.delivered`
+- `booking.completed`
 - `booking.cancelled`
 - `verification.approved`
 - `verification.rejected`
@@ -412,6 +422,8 @@ Example domain events:
 V1 does not need Kafka or a complex external event bus; a simple application/domain event pattern is sufficient.
 
 `message.created` should produce an in-app notification and may produce transactional email through this layer. It does not produce SMS by default. The chat UI never calls email/SMS providers directly.
+
+The camel-case Booking lifecycle events above establish the future notification boundary for B01. The current frontend does not emit notifications or call email, SMS or push providers.
 
 ## 17. Analytics architecture
 
