@@ -54,6 +54,24 @@ test("dashboard fixtures are visually distinct while attention repeats its reque
   ])
   assert.equal(dashboard.attention[0].id, dashboard.requests[0].id)
   assert.equal(dashboard.attention[1].id, dashboard.requests[1].id)
+  assert.deepEqual(dashboard.requests.map(item => item.vehicleCount), [2, 1, 1])
+  assert.deepEqual(dashboard.attention.map(item => item.vehicleCount), [2, 1])
+})
+
+test("vehicle count is preserved for count-aware labels in every dashboard card type", () => {
+  const multi = findMockRequestDetail("multi-location-pickups-demo-001")
+  const secondVehicle = multi.vehicles[1]
+  const booked = findMockRequestDetail("booked-demo-001")
+  const completed = findMockRequestDetail("completed-demo-001")
+  const dashboard = deriveDashboard([
+    multi,
+    { ...booked, vehicles: [...booked.vehicles, secondVehicle] },
+    { ...completed, vehicles: [...completed.vehicles, secondVehicle] },
+  ], requestReviewNow)
+  assert.equal(dashboard.attention[0].vehicleCount, 2)
+  assert.equal(dashboard.requests[0].vehicleCount, 2)
+  assert.equal(dashboard.transports[0].vehicleCount, 2)
+  assert.equal(dashboard.history[0].vehicleCount, 2)
 })
 
 test("an object cannot be duplicated across lifecycle tabs", () => {

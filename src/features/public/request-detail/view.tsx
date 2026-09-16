@@ -52,7 +52,7 @@ export function RequestDetailView({ initialRequest, reviewNow }: { initialReques
     {editing ? <RequestEditSection request={request} today={reviewNow.slice(0, 10)} onCancel={finishEditing} onSave={(edit, confirmed) => {
       const next = applyRequestEdit(request, edit, confirmed, reviewNow.slice(0, 10))
       setRequest(next)
-      setNotice(next.requestVersion !== request.requestVersion ? "Užklausa pakeista šiame puslapyje. Ankstesni pasiūlymai nebegalioja." : "Pakeitimai pritaikyti šiame puslapyje. Pasiūlymai lieka galioti.")
+      setNotice(next.requestVersion !== request.requestVersion ? "Užklausa atnaujinta. Ankstesni pasiūlymai nebegalioja." : "Pakeitimai pritaikyti šiame puslapyje. Pasiūlymai lieka galioti.")
       finishEditing()
     }} /> : <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <section aria-labelledby="offers-heading" className="min-w-0 space-y-4">

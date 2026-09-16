@@ -22,7 +22,7 @@ export function OfferDecisionDialog({ open, onOpenChange, decision, offer, vehic
       <DialogHeader>
         <DialogTitle className="leading-snug">{accepting ? "Priimti pasiūlymą?" : "Atmesti pasiūlymą?"}</DialogTitle>
         <DialogDescription>{accepting
-          ? `Priimate ${formatEur(offer.totalPriceEur)} pasiūlymą už ${vehicleTransportScope(vehicleCount)} pagal visus užklausoje nurodytus maršrutus. Pasirinkus šį vežėją, kiti pasiūlymai taptų nebepasirenkami. Šioje demonstracijoje tik pakeisime vietinę puslapio būseną.`
+          ? `Priimate ${formatEur(offer.totalPriceEur)} pasiūlymą už ${vehicleTransportScope(vehicleCount)} pagal visus užklausoje nurodytus maršrutus. Pasirinkus šį vežėją, kiti pasiūlymai taptų nebepasirenkami.`
           : "Šioje demonstracijoje pasiūlymas bus atmestas tik šiame puslapyje."}</DialogDescription>
       </DialogHeader>
       <dl className="grid gap-3 rounded-lg bg-muted p-4 text-sm sm:grid-cols-2">

@@ -4,6 +4,7 @@ export type DashboardAttentionItem = {
   id: string
   route: string
   vehicle: string
+  vehicleCount: number
   status: string
   actionableOfferCount: number
   updated: boolean
@@ -13,6 +14,7 @@ export type DashboardRequestItem = {
   id: string
   route: string
   vehicle: string
+  vehicleCount: number
   requestedDate: string
   visibility: string
   status: string
@@ -24,6 +26,7 @@ export type DashboardTransportItem = {
   bookingId: string
   route: string
   vehicle: string
+  vehicleCount: number
   carrier: string
   pickupDate: string
   deliveryDate: string
@@ -34,6 +37,7 @@ export type DashboardHistoryItem = {
   id: string
   route: string
   vehicle: string
+  vehicleCount: number
   status: string
   dateLabel: string
   date: string

@@ -25,8 +25,10 @@ function LocalPhoto({ file }: { file: File }) {
 
 export function RequestDetails({ request }: { request: RequestDetail }) {
   const { route } = request
+  const hasVehicleRouteOverride = request.vehicles.some(vehicle =>
+    vehicle.pickupLocation?.id !== route.from?.id || vehicle.deliveryLocation?.id !== route.to?.id)
   const rows = [
-    ["Pagrindinis maršrutas", route.from && route.to ? `${route.from.city}, ${formatCountry(route.from.country)} → ${route.to.city}, ${formatCountry(route.to.country)}` : "—"],
+    [hasVehicleRouteOverride ? "Numatytasis maršrutas" : "Pagrindinis maršrutas", route.from && route.to ? `${route.from.city}, ${formatCountry(route.from.country)} → ${route.to.city}, ${formatCountry(route.to.country)}` : "—"],
     ["Paėmimo laikas", dateLabel(route.date)],
   ]
   return <Card className="min-w-0"><CardContent className="space-y-5">

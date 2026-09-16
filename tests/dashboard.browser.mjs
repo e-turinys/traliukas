@@ -79,6 +79,8 @@ try {
     for (const copy of ["Reikia dėmesio", "Atnaujintas pasiūlymas", "Naujas pasiūlymas", "Ieškoma vežėjo"]) assert.ok(await evaluate(text(copy)))
     for (const copy of ["2 paėmimo vietos → Kaunas", "Berlin → Vilnius", "Warsaw → Kaunas", "BMW X5", "Audi Q5", "Volkswagen Passat"]) assert.ok(await evaluate(text(copy)))
     assert.ok(await evaluate(text("2 automobiliai · BMW X5, Audi Q5")))
+    assert.equal(await evaluate("[...document.querySelectorAll('dt')].filter(item => item.textContent.trim() === 'Automobiliai').length >= 2"), true)
+    assert.equal(await evaluate("[...document.querySelectorAll('dt')].some(item => item.textContent.trim() === 'Automobilis' && item.parentElement.innerText.includes('Audi Q5'))"), true)
     assert.equal(await evaluate("[...document.querySelectorAll('[data-slot=\"card-title\"]')].filter(item => item.textContent.trim() === '2 paėmimo vietos → Kaunas').length"), 2)
     assert.equal(await evaluate("[...document.querySelectorAll('section[aria-labelledby=\"attention-heading\"] [data-slot=\"card\"]')].map(card => card.innerText.includes('Atnaujintas pasiūlymas'))[0]"), true)
     assert.equal(await evaluate("document.querySelector('a[href=\"/requests/updated-offer-demo-001\"]')?.textContent.trim()"), "Peržiūrėti pasiūlymus")

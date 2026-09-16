@@ -52,7 +52,7 @@ export function offerReadOnlyCopy(request: RequestDetail, offer: RequestOffer, n
   if (status === "expired") return "Šio pasiūlymo galiojimo laikas baigėsi."
   if (status === "not_selected") return "Pasirinkote kitą vežėją."
   if (status === "declined") return "Šį pasiūlymą atmetėte."
-  if (status === "accepted") return "Šis pasiūlymas pažymėtas kaip pasirinktas."
+  if (status === "accepted") return "Pasiūlymas pasirinktas."
   if (status === "withdrawn") return "Vežėjas atšaukė šį pasiūlymą."
   if (status === "unavailable" && offer.requestVersion !== request.requestVersion) {
     return "Šis pasiūlymas nebegalioja, nes užklausos duomenys pasikeitė."

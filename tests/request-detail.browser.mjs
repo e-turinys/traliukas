@@ -60,7 +60,7 @@ const screenshot = async name => {
   await writeFile(path.join(artifacts, `${name}.png`), Buffer.from(data, "base64"))
 }
 try {
-  const states = ["marketplace", "multi-vehicle", "targeted", "updated-offer", "booked", "closed", "completed", "draft", "non-running", "historical-offers"]
+  const states = ["marketplace", "multi-vehicle", "multi-location-pickups", "targeted", "updated-offer", "booked", "closed", "completed", "draft", "non-running", "historical-offers"]
   for (const width of [390, 768, 1280, 1536]) {
     await cdp("Emulation.setDeviceMetricsOverride", { width, height: 900, deviceScaleFactor: 1, mobile: false })
     for (const state of states) {
@@ -69,12 +69,18 @@ try {
       await visit(id)
       await overflow(`${state} ${width}`)
       if (width >= 1280) assert.equal(await evaluate("getComputedStyle(document.querySelector('[aria-labelledby=\"offers-heading\"]').parentElement).gridTemplateColumns.split(' ').length"), 2, 'Desktop offers and details must use two columns')
-      assert.equal(await offers(), ["marketplace", "multi-vehicle", "updated-offer"].includes(state) ? 2 : state === "non-running" ? 1 : 0)
+      assert.equal(await offers(), ["marketplace", "multi-vehicle", "multi-location-pickups", "updated-offer"].includes(state) ? 2 : state === "non-running" ? 1 : 0)
       if (state === "multi-vehicle") {
         assert.ok(await evaluate(text("Automobiliai (2)")))
         assert.ok(await evaluate(text("BMW X5")))
         assert.ok(await evaluate(text("Audi Q5")))
         assert.ok(await evaluate(text("Visa pervežimo kaina už 2 automobilius")))
+      }
+      if (state === "multi-location-pickups") {
+        assert.ok(await evaluate(text("Numatytasis maršrutas")))
+        assert.equal(await evaluate(text("Pagrindinis maršrutas")), false)
+        assert.ok(await evaluate(text("Hamburg → Kaunas")))
+        assert.ok(await evaluate(text("Berlin → Kaunas")))
       }
       if (state === "targeted") assert.ok(await evaluate(text("Pasiūlymų dar nėra")))
       if (state === "updated-offer") assert.ok(await evaluate(text("Atnaujintas pasiūlymas")))

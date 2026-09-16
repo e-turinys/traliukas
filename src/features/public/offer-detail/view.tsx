@@ -42,7 +42,7 @@ export function OfferDetailView({ initialRequest, offerId, reviewNow }: {
     if (!decision) return
     setOffer(applyMockOfferDecision(request, offer, decision, reviewNow))
     setNotice(decision === "accept"
-      ? "Pasiūlymas pažymėtas kaip pasirinktas tik šiame puslapyje. Tikras užsakymas nebuvo sukurtas; tai bus galima atlikti prijungus sistemą."
+      ? ""
       : "Pasiūlymas atmestas tik šiame puslapyje. Pakeitimas neišsaugotas.")
     setDecision(null)
   }

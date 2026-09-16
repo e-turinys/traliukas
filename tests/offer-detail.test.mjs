@@ -92,7 +92,7 @@ test("read-only copy explains terminal states including request-change invalidat
     expired: "Šio pasiūlymo galiojimo laikas baigėsi.",
     unavailable: "Šis pasiūlymas nebegalioja, nes užklausos duomenys pasikeitė.",
     notSelected: "Pasirinkote kitą vežėją.",
-    accepted: "Šis pasiūlymas pažymėtas kaip pasirinktas.",
+    accepted: "Pasiūlymas pasirinktas.",
     declined: "Šį pasiūlymą atmetėte.",
   }
   for (const [key, copy] of Object.entries(expected)) {
@@ -120,4 +120,9 @@ test("one request-level offer covers the complete multi-vehicle request without 
   assert.equal("vehicleIds" in detail.offer, false)
   assert.equal("lineItems" in detail.offer, false)
   assert.equal(isOfferActionable(offerDetailStatus(detail.request, detail.offer, now)), true)
+})
+
+test("multi-vehicle fixture uses a comment that applies to the complete vehicle set", () => {
+  const detail = find("multi-location-pickups-demo-001-offer-1")
+  assert.equal(detail.offer.carrierComment, "Automobilius paimsime sutartu laiku ir pristatysime į nurodytas vietas.")
 })

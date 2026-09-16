@@ -1,8 +1,8 @@
 # Parvezk.lt — Current Status
 
-**Date:** 2026-09-15
+**Date:** 2026-09-16
 **Current phase:** Phase 2 — Request / Offer UI with mock data
-**Project status:** P01–P04 remain locked. The Multi-Vehicle Core Revision, Carrier Route Capacity and per-vehicle multi-location extension are implemented across P05–P09 and await consolidated browser review. Backend/auth/B01 have not started.
+**Project status:** P01–P09 are completed, browser-reviewed and LOCKED. The Multi-Vehicle + Multi-Location Request baseline and Carrier Route Capacity V1 are LOCKED. Backend, authentication, Supabase and B01 have not started. The next major work begins only after this approved baseline.
 
 ## Multi-Vehicle Core Revision — 2026-09-15
 
@@ -14,8 +14,8 @@
 - D-038 locks integer Route capacity: each vehicle consumes one space; `capacityAvailable` derives from `capacityTotal` and `capacityReserved`; Offers do not reserve; future successful Booking creation reserves the complete Request vehicle count; eligible cancellation releases the same count. Full Routes remain viewable but do not match or show a public request CTA.
 - D-039 locks per-vehicle structured pickup/delivery locations, Step 1 default-route inheritance, one shared requested date window and one complete carrier Offer/Booking. Matching must accept the complete vehicle/location set; partial matching, route optimization and segment-capacity reuse remain outside V1. D-039 supersedes D-037's same-route restriction.
 - Review URLs: P02 insufficient capacity `/search?from=hamburg-de&to=kaunas-lt&vehicle=car&vehicleCount=2`; P03 available `/routes/baltijos-kelias-0915`; P03 full `/routes/baltijos-kelias-0920-full`; P05 two pickups `/request/new?from=hamburg-de&to=kaunas-lt&dateType=range&dateFrom=2026-09-15&dateTo=2026-09-17&review=multi-location-pickups`; P05 mixed `/request/new?from=hamburg-de&to=kaunas-lt&dateType=range&dateFrom=2026-09-15&dateTo=2026-09-17&review=multi-location-mixed`; P06 `/request/multi-location-pickups-demo-001/published`; P07 `/requests/multi-location-pickups-demo-001` and `/requests/multi-location-mixed-demo-001`; P08 `/offers/multi-location-pickups-demo-001-offer-1` and `/offers/multi-location-mixed-demo-001-offer-2`; P09 `/dashboard`.
-- Validation: `npm.cmd run build` passed. All 77 P01–P09 unit tests passed. Production browser checks passed P02/P03 capacity, P05 route inheritance/override and final summaries, P06–P09 multi-location states, plus the full P07/P08/P09 regressions at 390/768/1280/1536px with no horizontal overflow or runtime exceptions.
-- P01–P04 remain locked. P05–P09 are awaiting consolidated browser review. Backend/auth/B01 have not started. No commit or push performed.
+- Final validation: `npm.cmd run build` passed and all 79 P01–P09 regression tests passed. Production browser review passed P02/P03 capacity, P05 route inheritance/override and final summaries, P06–P09 multi-location states, and the full P07/P08/P09 flows at 390/768/1280/1536px without horizontal overflow or runtime exceptions.
+- P01–P09 are LOCKED and browser-reviewed. Multi-Vehicle Requests, per-vehicle Multi-Location transport and Carrier Route Capacity V1 are the approved baseline. Backend, authentication, Supabase and B01 have not started. No commit or push performed.
 
 ## P09 implementation — 2026-09-15
 
@@ -174,15 +174,15 @@
 - GitHub → Hostinger auto-deploy: working
 - Supabase: not connected yet
 - shadcn/ui: configured with Base UI, Nova preset and neutral tokens
-- Real product UI: public layout, shared pickers and P01–P09 implemented with mock data; P01–P04 are locked and revised P05–P09 await consolidated browser review.
+- Real product UI: public layout, shared pickers and P01–P09 implemented with mock data; P01–P09 and the Multi-Vehicle, Multi-Location and Carrier Capacity V1 baseline are locked and browser-reviewed.
 
 ## Immediate next task
 
-Next task: **Consolidated browser review of the P05–P09 Multi-Vehicle Core Revision**. P01–P04 remain locked. Backend/auth/B01 have not started.
+Next task: **Select and define the next major work after the locked P01–P09 baseline.** Do not start it from this status update. Backend, authentication, Supabase and B01 have not started.
 
-## Next after browser approval
+## Locked baseline handoff
 
-Stop for consolidated P05–P09 browser review. Do not mark revised P05–P09 locked until that review passes. B01/backend/auth have not started. Do not commit or push without a separate instruction.
+P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport and Carrier Route Capacity V1 are approved and locked. Start no new feature until it is separately selected and scoped. B01, backend, authentication and Supabase remain unstarted. Do not commit or push without a separate instruction.
 
 ## Do not reopen without a blocker
 

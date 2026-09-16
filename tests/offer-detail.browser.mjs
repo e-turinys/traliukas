@@ -77,7 +77,7 @@ const fixtures = {
   notSelected: ["booked-demo-001-offer-2", "Nepasirinktas"],
   accepted: ["booked-demo-001-offer-1", "Pasirinktas"],
   declined: ["historical-offers-demo-001-offer-2", "Atmestas"],
-  multi: ["multi-vehicle-demo-001-offer-1", "Laukia jūsų sprendimo"],
+  multi: ["multi-location-pickups-demo-001-offer-1", "Laukia jūsų sprendimo"],
 }
 
 try {
@@ -103,6 +103,7 @@ try {
         assert.ok(await evaluate(text("Automobiliai (2)")))
         assert.ok(await evaluate(text("BMW X5 · SUV / Crossover")))
         assert.ok(await evaluate(text("Audi Q5 · SUV / Crossover")))
+        assert.ok(await evaluate(text("Automobilius paimsime sutartu laiku ir pristatysime į nurodytas vietas.")))
       }
       if (state === "updated") {
         assert.ok(await evaluate(text("Atnaujintas pasiūlymas")))
@@ -130,7 +131,11 @@ try {
     assert.ok(await evaluate(text("Laukia jūsų sprendimo")))
     await click("Priimti pasiūlymą")
     await click("Patvirtinti pasirinkimą")
-    await until(text("Tikras užsakymas nebuvo sukurtas"))
+    await until(text("Pasiūlymas pasirinktas."))
+    assert.equal(await evaluate("document.querySelector('[role=status]').textContent"), "")
+    assert.equal(await evaluate("[...document.querySelectorAll('p')].filter(item => item.textContent.trim() === 'Pasiūlymas pasirinktas.').length"), 1)
+    assert.equal(await evaluate(text("Tikras užsakymas nebuvo sukurtas")), false)
+    assert.equal(await evaluate(text("tik šiame puslapyje")), false)
     assert.ok(await evaluate(text("Pasirinktas")))
     assert.equal(await evaluate("[...document.querySelectorAll('button')].some(button => button.textContent.trim() === 'Priimti pasiūlymą')"), false)
     await visit(fixtures.pending[0])
@@ -141,6 +146,7 @@ try {
     await until(text("Priimate 900"))
     assert.ok(await evaluate(text("pasiūlymą už 2 automobilių pervežimą pagal visus užklausoje nurodytus maršrutus.")))
     assert.ok(await evaluate(text("Pasirinkus šį vežėją, kiti pasiūlymai taptų nebepasirenkami.")))
+    assert.equal(await evaluate(text("Šioje demonstracijoje tik pakeisime vietinę puslapio būseną.")), false)
     await overflow(`multi-vehicle accept dialog ${width}`)
     await click("Atšaukti")
 

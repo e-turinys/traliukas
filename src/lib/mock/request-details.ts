@@ -40,7 +40,11 @@ export function findMockRequestDetail(id: string): RequestDetail | undefined {
     }
   }
   if (["multi-vehicle-demo-001", "multi-location-pickups-demo-001", "multi-location-mixed-demo-001"].includes(id)) {
-    request.offers = request.offers.map((offer, index) => ({ ...offer, totalPriceEur: index === 0 ? 900 : 1040 }))
+    request.offers = request.offers.map((offer, index) => ({
+      ...offer,
+      totalPriceEur: index === 0 ? 900 : 1040,
+      carrierComment: offer.carrierComment ? "Automobilius paimsime sutartu laiku ir pristatysime į nurodytas vietas." : undefined,
+    }))
   }
   if (id === "multi-location-mixed-demo-001") request.offers = request.offers.slice(1).map(offer => ({ ...offer, totalPriceEur: 1100 }))
   if (id === "draft-demo-001") { request.status = "draft"; request.offers = [] }
