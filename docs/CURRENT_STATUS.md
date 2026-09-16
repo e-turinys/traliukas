@@ -1,8 +1,18 @@
 # Parvezk.lt — Current Status
 
 **Date:** 2026-09-16
-**Current phase:** Phase 2 — Request / Offer / Conversation / Booking UI with mock data
-**Project status:** P01–P09, Conversation / Chat V1, the Messages Inbox and B01 Booking Detail are implemented, browser-reviewed and LOCKED. Multi-Vehicle + Multi-Location Booking behavior and Carrier Capacity V1 are also LOCKED. Backend, authentication, Supabase, realtime messaging, notifications, email and SMS have not started.
+**Current phase:** Phase 2 — Request / Offer / Conversation / Booking / Notification UI with mock data
+**Project status:** P01–P09, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and N01 Notifications V1 are implemented, browser-reviewed and LOCKED. Multi-Vehicle + Multi-Location Booking behavior and Carrier Capacity V1 are also LOCKED. Real authentication, backend, Supabase, realtime messaging and email/SMS notification delivery have not started.
+
+## N01 Notifications V1 locked baseline — 2026-09-16
+
+- Added `/notifications` with “Visi” and “Neperskaityti” filters, explicit unread presentation, local mark-one-on-navigation behavior, “Pažymėti visus kaip perskaitytus”, stored canonical deep links, loading UI and the required empty states. Review selectors cover default, unread, empty and all-read states without technical/mock wording.
+- Added the canonical Notification model and separate future NotificationDelivery concept. D-042 locks domain-event recipient/channel policy, self-notification suppression, `Notification.href`, delayed unread/debounced Chat email fallback and future event/recipient/channel idempotency. `offer.accepted` is internal-only; `booking.created` is the sole customer-facing accepted-Booking notification and points to `/bookings/[bookingId]`.
+- Fixtures cover new/updated Offers, a Chat message, the canonical `booking.created` confirmation, every Booking progress event and a compact €900 two-vehicle/two-pickup Booking context. Count-aware collected/delivered copy reuses the current vehicle wording rules.
+- Header integration is intentionally deferred: the current shared header is public/unauthenticated, so adding a customer account unread badge would create an auth and global-state assumption across locked screens. The future auth-aware header must use authoritative server unread state.
+- No provider or SDK was selected or installed. N01 sends no email, SMS or push and adds no credentials, service worker, preferences persistence, backend, Supabase or realtime behavior.
+- Validation: `npm.cmd run build` passed compilation, lint/type checks and static generation. All 111 unit tests passed, including 10 focused N01 tests; the focused N01/B01/Chat/P08/P09 group passed all 52 tests. Production browser checks passed N01 plus locked B01, Chat, P08 and P09 at 390/768/1280/1536px without horizontal overflow or runtime exceptions. N01 click navigation uses the stored Notification `href`.
+- Human browser review passed. Notifications V1 / N01 and its event-driven policy, authoritative in-app history, self-notification suppression, canonical stored destinations, `offer.accepted` internal-only boundary, single `booking.created` accepted-Booking delivery set and future idempotency requirement are now LOCKED as the approved baseline.
 
 ## B01 Booking / Transport Detail locked baseline — 2026-09-16
 
@@ -199,11 +209,11 @@
 
 ## Immediate next task
 
-No next feature is selected. Do not start B02–B07, backend, authentication, Supabase, realtime messaging, notifications, email or SMS without a separately scoped instruction.
+No next feature is selected. Do not start another feature, backend, authentication, Supabase, realtime messaging, email or SMS delivery without a separately scoped instruction.
 
 ## Locked baseline handoff
 
-P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior, Carrier Route Capacity V1, Conversation / Chat V1, the Messages Inbox and B01 Booking Detail are approved, browser-reviewed and LOCKED. Start no new feature until it is separately selected and scoped. Backend, authentication, Supabase, realtime messaging, email, SMS and notifications remain unstarted. Do not commit or push without a separate instruction.
+P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior, Carrier Route Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and N01 Notifications V1 are approved, browser-reviewed and LOCKED. Start no new feature until it is separately selected and scoped. Real authentication, backend, Supabase, realtime messaging and email/SMS notification delivery remain unstarted. Do not commit or push without a separate instruction.
 
 ## Do not reopen without a blocker
 

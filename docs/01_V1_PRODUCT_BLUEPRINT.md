@@ -432,6 +432,8 @@ Payment terms are stored in the Offer and Booking snapshot so the customer can c
 
 Notifications are event-driven and link directly to the relevant object.
 
+The V1 event boundary is `offer.created`, `offer.updated`, `offer.accepted`, `message.created`, `booking.created`, `booking.pickupScheduled`, `booking.collected`, `booking.inTransit`, `booking.delivered` and `booking.completed`. Offer, Chat and Booking UI must not call email or SMS providers directly. A user never receives a notification for their own action; independently generated system events notify the relevant parties according to policy.
+
 Examples:
 
 Customer:
@@ -455,11 +457,13 @@ Carrier:
 - verification result;
 - document expiry warning.
 
-V1 channels:
+In-app notification history is the authoritative/default channel. New and updated Offers use in-app + email, without SMS. `offer.accepted` remains an internal lifecycle/Booking trigger event but creates no customer-facing delivery. `booking.created` is the single canonical accepted-Booking notification and uses in-app + email + SMS for the customer and selected carrier, linking to `/bookings/[bookingId]`. Pickup scheduled and Delivered use in-app + email + SMS for the customer. Collected and In Transit use in-app + email without SMS for the customer. Completed uses in-app + email without SMS for customer and carrier.
 
-- in-app;
-- email;
-- SMS for OTP, with broader SMS notifications deferred.
+`message.created` notifies the other Conversation participant in-app and has no SMS. Email is a delayed unread fallback rather than one email per message: the future backend should wait approximately 10 minutes, confirm the message/Conversation remains unread, and debounce or batch repeated messages.
+
+Future user preferences may reduce optional email/SMS delivery, but in-app history remains authoritative. OTP/auth, accepted Booking, pickup schedule and Delivered are critical transactional categories; Offers, Chat fallback and routine transport progress are normal transactional categories. No provider is selected and no email/SMS is sent by the frontend/mock implementation.
+
+Every Notification stores its canonical destination `href`; UI does not reconstruct navigation from event type. Future event processing and channel delivery must use idempotency keys so retries cannot create duplicate in-app records or duplicate email/SMS sends.
 
 Essential security/booking notifications cannot be completely disabled in notification preferences.
 

@@ -222,6 +222,15 @@ Closing a Request does not later re-open the same object; repeating creates a ne
 - Deep links return the user to the exact requested object after authentication.
 - Authorization is server-side, not based on hidden UI.
 
+### N01 Notifications key rules
+
+- `/notifications` shows event-driven marketplace activity with stored canonical deep links. Each item has a title, concise description, timestamp and explicit read/unread presentation; destinations are read from `Notification.href`, never reconstructed in the UI.
+- Filters are “Visi” and “Neperskaityti”. Local/mock state supports opening one Notification as read and “Pažymėti visus kaip perskaitytus”. Empty states are “Pranešimų nėra” and “Visus pranešimus perskaitėte”. Persistence remains a backend responsibility.
+- Representative deep links are Offer events → `/offers/[offerId]`, Message events → `/messages/[conversationId]`, and accepted/lifecycle Booking events → `/bookings/[bookingId]`.
+- Lifecycle titles are count-aware: one vehicle uses “Automobilis paimtas / pristatytas”; two or more use “Automobiliai paimti / pristatyti”. Multi-location context stays compact.
+- The current shared header is public and unauthenticated, so N01 does not add a misleading global account unread count. An auth-aware customer navigation entry and server-derived count belong to the account/backend integration phase.
+- N01 does not send email, SMS or push, expose provider state, or implement notification preferences. It renders local review data for the future event-driven notification layer.
+
 ---
 
 ## 5. Admin screens

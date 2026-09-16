@@ -211,6 +211,11 @@ This file records important product/architecture decisions that should not be ca
 **Decision:** B01 renders immutable accepted transport terms from the Booking snapshot, including the accepted Offer ID/version, complete vehicle/location set, carrier reference/identity, requested and planned dates, total price and payment terms. V1 has one aggregate Booking lifecycle for all vehicles and no per-vehicle status. The accepted Conversation continues into Booking and B01 links to `/messages/[conversationId]` without creating another thread. Delivered may be confirmed by the customer as Completed. The customer cannot edit the accepted carrier, price, payment terms or original Request from B01.
 **Reason:** Preserve the actual complete-request agreement while keeping multi-vehicle operations understandable and preventing mutable Request/Offer data or partial per-vehicle state from rewriting the accepted transport.
 
+### D-042 — Notifications V1 — Event-Driven Delivery Policy
+
+**Decision:** Notifications are derived from Offer, Message and Booking domain events through recipient resolution and policy, never direct email/SMS calls from UI. Self-notifications are suppressed. `offer.accepted` remains an internal Offer/Conversation/Booking transition event but produces no external delivery; `booking.created` is the sole accepted-Booking notification, reaches customer + selected carrier through in-app + email + SMS, and links to `/bookings/[bookingId]`. In-app history is authoritative; email carries transactional updates, while SMS is otherwise limited to selected critical pickup-scheduled and Delivered events. `message.created` uses in-app immediately and a future delayed unread/debounced email fallback, with no SMS. Every Notification stores its canonical `href`. Future event processing and channel delivery require stable event + recipient + channel idempotency keys; channel delivery state is separate from the base Notification. Provider choice, real delivery, preferences and auth-aware global unread counts remain deferred.
+**Reason:** Central policy keeps customer communication consistent, retry-safe and provider-independent without coupling locked Offer, Chat or Booking interfaces to delivery infrastructure.
+
 ## How to add a new decision
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:

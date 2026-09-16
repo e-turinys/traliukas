@@ -399,29 +399,53 @@ Requirements:
 
 Use domain-event-driven notification creation rather than scattering ad hoc notification logic across UI components.
 
-Example domain events:
+Locked N01 domain events:
 
 - `offer.created`
 - `offer.updated`
 - `offer.accepted`
-- `offer.declined`
 - `message.created`
 - `booking.created`
 - `booking.pickupScheduled`
-- `booking.pickupChanged`
 - `booking.collected`
 - `booking.inTransit`
 - `booking.delivered`
 - `booking.completed`
-- `booking.cancelled`
-- `verification.approved`
-- `verification.rejected`
-- `report.created`
-- `report.resolved`
 
 V1 does not need Kafka or a complex external event bus; a simple application/domain event pattern is sufficient.
 
-`message.created` should produce an in-app notification and may produce transactional email through this layer. It does not produce SMS by default. The chat UI never calls email/SMS providers directly.
+Future backend flow:
+
+`Domain Event → Recipient Resolution → Notification Policy → In-App Notification → optional Email Delivery → optional SMS Delivery`
+
+Recipient resolution removes the event actor after resolving the policy, preventing self-notifications. An actor-free system event notifies the relevant parties according to its policy.
+
+Canonical Notification fields are `id`, `source_event_id`, `recipient_id`, `event_type`, optional `actor_id`, `title`, `body`, stored canonical `href`, `created_at`, optional `read_at`, `entity_type` and `entity_id`. Entity types in this boundary are Offer, Conversation and Booking.
+
+Channel delivery state is separate from Notification. A future `notification_deliveries` record contains `notification_id`, channel (`in_app`, `email`, `sms`), delivery status, idempotency key, optional sent timestamp and optional failure reason. Provider credentials/state do not belong in the base Notification model.
+
+V1 policy:
+
+| Event | Recipients before self-suppression | In-app | Email | SMS |
+|---|---|---:|---:|---:|
+| `offer.created` | Customer | Yes | Immediate | No |
+| `offer.updated` | Customer | Yes | Immediate | No |
+| `offer.accepted` | Internal transition only | No | No | No |
+| `message.created` | Other Conversation participant | Yes | Unread fallback | No |
+| `booking.created` | Customer + selected carrier | Yes | Immediate | Yes |
+| `booking.pickupScheduled` | Customer | Yes | Immediate | Yes |
+| `booking.collected` | Customer | Yes | Immediate | No |
+| `booking.inTransit` | Customer | Yes | Immediate | No |
+| `booking.delivered` | Customer | Yes | Immediate | Yes |
+| `booking.completed` | Customer + carrier | Yes | Immediate | No |
+
+`offer.accepted` remains a valid internal event for the Offer lifecycle transition, Conversation system event, Booking creation trigger and archiving losing Conversations. It must not independently materialize Notification or delivery records. `booking.created` is the sole customer-facing confirmation of successful acceptance because the canonical Booking ID now exists; it notifies the customer and selected carrier and stores `/bookings/[bookingId]` as its destination.
+
+For `message.created`, future email delivery waits approximately 10 minutes, checks that the message/Conversation is still unread, and debounces or batches repeated messages. It does not send one email per message and does not use SMS by default. Chat UI never calls delivery providers.
+
+Domain-event processing and every channel delivery must be idempotent. The same `booking.created` retry uses a stable event + recipient + channel key so it cannot create duplicate in-app Notifications or duplicate email/SMS sends. Offer, Chat and Booking UI emit/establish domain boundaries only; they never invoke providers directly.
+
+In-app history remains authoritative. Future preferences may reduce optional channels, while critical transactional classes (OTP/auth, accepted Booking, pickup schedule and Delivered) remain distinct from normal transactional Offers, Chat fallback and routine progress. Provider selection and preference persistence are deferred to backend work.
 
 The camel-case Booking lifecycle events above establish the future notification boundary for B01. The current frontend does not emit notifications or call email, SMS or push providers.
 
