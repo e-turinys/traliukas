@@ -201,6 +201,11 @@ This file records important product/architecture decisions that should not be ca
 **Decision:** Each vehicle in a 1–10 vehicle Request may have its own structured pickup and delivery location. P05 Step 1 supplies default locations inherited by vehicle cards, and any vehicle, including Vehicle 1, may override them. The Request remains one complete job for one carrier, one Offer and one eventual Booking; partial Offers and split Bookings are unsupported. All vehicles share one requested pickup date/window in V1. Matching evaluates every vehicle's direction, category and non-running capability and uses the complete vehicle count for capacity, without route optimization or segment-capacity reuse. Per-vehicle pickup or delivery edits are material and invalidate Pending Offers. This supersedes D-037's same-route requirement while retaining its 1–10 vehicle, complete-Offer and material-vehicle-change rules.
 **Reason:** Customers can group vehicles that start or finish in different cities while keeping one commercial agreement and a simple V1 scheduling and capacity model.
 
+### D-040 — V1 Conversation architecture
+
+**Decision:** A Conversation begins after a carrier submits an Offer, with exactly one Conversation per Request + Carrier. Offer revisions reuse it. The winning Conversation remains active and gains the Booking link at acceptance; competing Conversations archive as read-only history, and no second Booking chat is created. `/messages/[conversationId]` is canonical before and after Booking. V1 is text-only with explicit user/system messages and read state; attachments are deferred to V1.2. There is no arbitrary user-to-user messaging. `message.created` is the future notification boundary for in-app and transactional email delivery, with no SMS by default and no channel calls from chat UI.
+**Reason:** One durable contextual thread preserves the complete commercial and transport history without duplicate chats, while keeping V1 communication scope and future notification integration explicit.
+
 ## How to add a new decision
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:

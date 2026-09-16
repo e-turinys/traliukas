@@ -18,6 +18,7 @@ import {
   applyMockOfferDecision, customerOfferStatusLabels, formatOfferTimestamp, isOfferActionable,
   offerDetailStatus, offeredPickupDiffers, offerReadOnlyCopy, offerRevisionHistory,
 } from "./logic"
+import { findMockConversationByContext } from "@/lib/mock/conversations"
 
 export function OfferDetailView({ initialRequest, offerId, reviewNow }: {
   initialRequest: RequestDetailPayload; offerId: string; reviewNow: string
@@ -37,6 +38,7 @@ export function OfferDetailView({ initialRequest, offerId, reviewNow }: {
   const requestSummary = publishedRequestSummary(request)
   const revisions = offerRevisionHistory(offer)
   const readOnlyCopy = offerReadOnlyCopy(request, offer, reviewNow)
+  const conversation = findMockConversationByContext(request.id, offer.carrier.id)
 
   const confirm = () => {
     if (!decision) return
@@ -111,6 +113,9 @@ export function OfferDetailView({ initialRequest, offerId, reviewNow }: {
             <CarrierTrust carrier={offer.carrier} />
           </div>
           <Button nativeButton={false} variant="outline" render={<Link href={`/carriers/${encodeURIComponent(offer.carrier.id)}`} />} className="h-auto min-h-11 w-full py-3 whitespace-normal">Peržiūrėti vežėjo profilį</Button>
+          {conversation && <Button nativeButton={false} variant="outline" render={<Link href={`/messages/${encodeURIComponent(conversation.conversation.id)}`} />} className="h-auto min-h-11 w-full py-3 whitespace-normal">
+            {conversation.conversation.status === "active" ? "Rašyti vežėjui" : "Peržiūrėti pokalbį"}
+          </Button>}
         </CardContent></Card>
 
         {offer.offerVersion > 1 && <details className="group/history rounded-xl border">

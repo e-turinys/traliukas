@@ -1,8 +1,18 @@
 # Parvezk.lt — Current Status
 
 **Date:** 2026-09-16
-**Current phase:** Phase 2 — Request / Offer UI with mock data
-**Project status:** P01–P09 are completed, browser-reviewed and LOCKED. The Multi-Vehicle + Multi-Location Request baseline and Carrier Route Capacity V1 are LOCKED. Backend, authentication, Supabase and B01 have not started. The next major work begins only after this approved baseline.
+**Current phase:** Phase 2 — Request / Offer / Conversation UI with mock data
+**Project status:** P01–P09 and the Multi-Vehicle + Multi-Location + Carrier Capacity baseline remain LOCKED. Conversation / Chat V1 and the Messages Inbox are implemented, browser-reviewed and LOCKED. Backend, realtime messaging, email, SMS and notifications are not implemented. B01 Booking Detail is the next major screen and has not started.
+
+## V1 Conversation / Chat locked baseline — 2026-09-16
+
+- Locked D-040: chat begins after Offer, exactly one Conversation exists per Request + Carrier, Offer revisions reuse it, the winning Conversation continues into Booking and losing/terminal conversations archive read-only. There is no arbitrary user messaging or second Booking chat.
+- Added canonical `Conversation` and `Message` types, lifecycle/acceptance/send/order/unread helpers, and a `message.created` domain-event boundary for future in-app and transactional email notifications. V1 chat is text-only; SMS is off by default and attachments are deferred to V1.2.
+- Added and browser-reviewed the Messages Inbox at `/messages` and canonical detail at `/messages/[conversationId]`, with compact multi-location context, explicit customer/carrier/system identity, timestamps, unread presentation, immutable system events, local active-thread send behavior, and read-only historical states. Unknown IDs use Next.js 404 handling.
+- Added P07/P08 conversation entry points without adding chat before an Offer. Winning Booking-linked conversations keep the same ID; future B01 should link to it with “Atidaryti pokalbį”. No B01 lifecycle was implemented.
+- Review fixtures cover active pre-Booking, updated Offer, Booking-linked winner, archived loser, completed/read-only and multi-vehicle/multi-location states.
+- Human browser review passed. Conversation / Chat V1 and the Messages Inbox are now LOCKED. Backend persistence, realtime transport, email, SMS and notification delivery remain unimplemented; `message.created` is only the documented future notification event boundary.
+- Final lock validation: all 90 unit tests passed, including 11 focused Conversation cases; `npm.cmd run build` passed compilation, lint/type validation and static generation; Conversation and P07/P08/P09 production browser regressions passed at 390/768/1280/1536px without horizontal overflow or runtime exceptions.
 
 ## Multi-Vehicle Core Revision — 2026-09-15
 
@@ -178,11 +188,11 @@
 
 ## Immediate next task
 
-Next task: **Select and define the next major work after the locked P01–P09 baseline.** Do not start it from this status update. Backend, authentication, Supabase and B01 have not started.
+Next major screen: **B01 Booking Detail.** Define its implementation task separately before coding. Do not start B01, backend, realtime messaging, email, SMS or notifications from this status update.
 
 ## Locked baseline handoff
 
-P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport and Carrier Route Capacity V1 are approved and locked. Start no new feature until it is separately selected and scoped. B01, backend, authentication and Supabase remain unstarted. Do not commit or push without a separate instruction.
+P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Carrier Route Capacity V1, Conversation / Chat V1 and the Messages Inbox are approved, browser-reviewed and LOCKED. Start no new feature until it is separately selected and scoped. B01, backend, authentication, Supabase, realtime messaging, email, SMS and notifications remain unstarted. Do not commit or push without a separate instruction.
 
 ## Do not reopen without a blocker
 

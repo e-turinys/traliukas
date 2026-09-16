@@ -12,6 +12,7 @@ import { RequestDetails } from "./details"
 import { RequestEditSection } from "./edit-section"
 import { OfferCard } from "./offer-card"
 import { ConfirmRequestDialog } from "./confirm-dialog"
+import { findMockConversationByContext } from "@/lib/mock/conversations"
 
 export function RequestDetailView({ initialRequest, reviewNow }: { initialRequest: RequestDetailPayload; reviewNow: string }) {
   const [request, setRequest] = useState(() => hydrateRequestDetail(initialRequest))
@@ -23,6 +24,10 @@ export function RequestDetailView({ initialRequest, reviewNow }: { initialReques
   const actions = requestActions(request)
   const offerGroups = requestOfferGroups(request)
   const summary = publishedRequestSummary(request)
+  const conversationFor = (carrierId: string) => {
+    const detail = findMockConversationByContext(request.id, carrierId)
+    return detail ? { id: detail.conversation.id, canSend: detail.conversation.status === "active" } : undefined
+  }
   const finishEditing = () => { setEditing(false); requestAnimationFrame(() => heading.current?.focus()) }
   return <div className="mx-auto max-w-6xl space-y-6">
     <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">Demonstracinė užklausa. Pakeitimai galioja tik šiame puslapyje ir atnaujinus puslapį dingsta. Duomenys neišsaugomi ir vežėjams nesiunčiami.</p>
@@ -57,8 +62,8 @@ export function RequestDetailView({ initialRequest, reviewNow }: { initialReques
     }} /> : <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <section aria-labelledby="offers-heading" className="min-w-0 space-y-4">
         <h2 id="offers-heading" className="text-xl font-semibold">{offerGroups.selected ? "Pasirinktas vežėjas" : "Vežėjų pasiūlymai"}</h2>
-        {offerGroups.selected && <OfferCard offer={offerGroups.selected} status={visibleOfferStatus(request, offerGroups.selected, reviewNow)} vehicleCount={request.vehicles.length} emphasis="selected" />}
-        {offerGroups.current.length ? offerGroups.current.map(offer => <OfferCard key={offer.id} offer={offer} status={visibleOfferStatus(request, offer, reviewNow)} vehicleCount={request.vehicles.length} />) : !offerGroups.selected && request.offers.length === 0 ? <div className="space-y-4 rounded-xl border p-5">
+        {offerGroups.selected && <OfferCard offer={offerGroups.selected} status={visibleOfferStatus(request, offerGroups.selected, reviewNow)} vehicleCount={request.vehicles.length} emphasis="selected" conversation={conversationFor(offerGroups.selected.carrier.id)} />}
+        {offerGroups.current.length ? offerGroups.current.map(offer => <OfferCard key={offer.id} offer={offer} status={visibleOfferStatus(request, offer, reviewNow)} vehicleCount={request.vehicles.length} conversation={conversationFor(offer.carrier.id)} />) : !offerGroups.selected && request.offers.length === 0 ? <div className="space-y-4 rounded-xl border p-5">
           <h3 className="font-semibold">Pasiūlymų dar nėra</h3>
           {request.status === "active" && <p className="text-sm text-muted-foreground">Čia galėsite palyginti vežėjų kainas ir pervežimo datas.</p>}
           {request.status === "active" && request.visibility === "targeted" && <Button className="h-auto min-h-11 w-full whitespace-normal py-3" onClick={() => { setRequest(expandRequestVisibility(request)); setNotice("Matomumas pakeistas tik šiame puslapyje. Vežėjams nieko neišsiųsta.") }}>Parodyti ir kitiems tinkamiems vežėjams</Button>}
@@ -68,7 +73,7 @@ export function RequestDetailView({ initialRequest, reviewNow }: { initialReques
             <span>Ankstesni pasiūlymai ({offerGroups.historical.length})</span>
             <ChevronDown aria-hidden="true" className="size-4 shrink-0 transition-transform group-open/history:rotate-180" />
           </summary>
-          <div className="space-y-3 p-3 sm:p-4">{offerGroups.historical.map(offer => <OfferCard key={offer.id} offer={offer} status={visibleOfferStatus(request, offer, reviewNow)} vehicleCount={request.vehicles.length} emphasis="historical" />)}</div>
+          <div className="space-y-3 p-3 sm:p-4">{offerGroups.historical.map(offer => <OfferCard key={offer.id} offer={offer} status={visibleOfferStatus(request, offer, reviewNow)} vehicleCount={request.vehicles.length} emphasis="historical" conversation={conversationFor(offer.carrier.id)} />)}</div>
         </details>}
       </section>
       <RequestDetails request={request} />

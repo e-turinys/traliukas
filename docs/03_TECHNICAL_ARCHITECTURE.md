@@ -149,12 +149,15 @@ USER
 TRANSPORT REQUEST
  ├─ 1–10 REQUEST VEHICLES
  ├─ REQUEST VERSIONS
- └─ OFFERS
-      ├─ OFFER REVISIONS
-      └─ accepted → BOOKING
+ ├─ OFFERS
+ │    ├─ OFFER REVISIONS
+ │    └─ accepted → BOOKING
+ └─ REQUEST + CARRIER → one CONVERSATION
+      ├─ MESSAGES
+      └─ optional BOOKING link after acceptance
 
 BOOKING
- ├─ linked CONVERSATION
+├─ linked winning CONVERSATION (not a new thread)
  ├─ BOOKING ACTIVITY
  ├─ REPORTS
  └─ REVIEWS
@@ -251,7 +254,39 @@ The server must confirm the versions expected by the customer still match curren
 
 If not, return a stale-data response and make the user review updated terms.
 
-## 10. Booking snapshot architecture
+## 10. Conversation architecture
+
+The Conversation aggregate is created by Offer submission, never before an Offer. Enforce a unique Request + Carrier identity. `current_offer_id` points to the carrier's current Offer, so Offer revisions reuse the existing Conversation rather than creating another thread.
+
+Canonical Conversation fields:
+
+- `id`
+- `request_id`
+- `carrier_id`
+- `current_offer_id`
+- optional `booking_id`
+- `status`: `active`, `archived`, or completed/read-only equivalent
+- `created_at`
+- `last_message_at`
+
+Canonical Message fields:
+
+- `id`
+- `conversation_id`
+- `type`: `user` or `system`
+- `sender_type`: customer, carrier or system
+- optional `sender_id`
+- `body`
+- `created_at`
+- optional `read_at`
+
+Pending and revised Offers keep their Conversation active. Accepting an Offer atomically links the winning Conversation to the Booking and keeps it active while archiving the Request's competing Conversations. Terminal non-winning Offers archive their Conversations. Completed Booking history remains accessible and may be read-only in V1.
+
+`/messages/[conversationId]` is the only canonical detail route before and after Booking. Authorization must verify that the viewer participates in the Request/Carrier/Booking context. V1 UI is text-only and local/mock; it does not claim persistence or realtime transport.
+
+Creating a user Message establishes the `message.created` domain-event boundary. The future notification layer consumes it for in-app notification and transactional email; SMS is off by default. Conversation UI must not invoke email or SMS providers directly.
+
+## 11. Booking snapshot architecture
 
 Do not render the contractual/commercial agreement by joining only to current mutable Request/Route/Offer/Profile values.
 
@@ -261,7 +296,7 @@ Important searchable Booking fields may also be duplicated in structured columns
 
 Operational details remain mutable and logged separately.
 
-## 11. Server-side business layer
+## 12. Server-side business layer
 
 Important actions must run through explicit server-side business functions/server actions/API handlers rather than a sequence of independent client mutations.
 
@@ -304,7 +339,7 @@ At minimum:
 
 Double-submit must be idempotent/safely handled.
 
-## 12. Authorization model
+## 13. Authorization model
 
 Authorization must be enforced server-side.
 
@@ -321,7 +356,7 @@ Typical policy examples:
 
 Supabase Row Level Security may be used as an additional defense, not as a substitute for well-defined application business rules.
 
-## 13. Authentication architecture
+## 14. Authentication architecture
 
 V1 target: passwordless phone OTP.
 
@@ -337,7 +372,7 @@ Email verification remains separate.
 
 SMS provider selection is an implementation task and is not required before mock UI work begins.
 
-## 14. Storage / files
+## 15. Storage / files
 
 Planned Supabase Storage use cases:
 
@@ -352,7 +387,7 @@ Requirements:
 - uploads validate file type/size;
 - user-facing delete should not silently destroy evidence needed for active disputes/audit/legal retention.
 
-## 15. Notifications architecture
+## 16. Notifications architecture
 
 Use domain-event-driven notification creation rather than scattering ad hoc notification logic across UI components.
 
@@ -362,6 +397,7 @@ Example domain events:
 - `offer.updated`
 - `offer.accepted`
 - `offer.declined`
+- `message.created`
 - `booking.created`
 - `booking.pickup_scheduled`
 - `booking.pickup_changed`
@@ -375,7 +411,9 @@ Example domain events:
 
 V1 does not need Kafka or a complex external event bus; a simple application/domain event pattern is sufficient.
 
-## 16. Analytics architecture
+`message.created` should produce an in-app notification and may produce transactional email through this layer. It does not produce SMS by default. The chat UI never calls email/SMS providers directly.
+
+## 17. Analytics architecture
 
 Track a small set of product funnel events from authoritative business actions when possible:
 
@@ -409,7 +447,7 @@ Carrier:
 
 Avoid counting the same business action solely from fragile client clicks when the authoritative server action can emit the event.
 
-## 17. Admin data architecture
+## 18. Admin data architecture
 
 - Lifecycle status is separate from moderation status.
 - Admin overrides record actor, time, old/new value and reason.
@@ -417,7 +455,7 @@ Avoid counting the same business action solely from fragile client clicks when t
 - Admin data tables must support server-side filtering/sorting/pagination at scale.
 - User suspension does not cascade into silent Booking cancellations.
 
-## 18. Development UI catalog
+## 19. Development UI catalog
 
 Create a development-only route such as `/dev/components` containing production reusable components with mock states:
 
@@ -432,7 +470,7 @@ Create a development-only route such as `/dev/components` containing production 
 
 This acts as a lightweight component catalog without requiring Storybook in V1.
 
-## 19. Testing priorities
+## 20. Testing priorities
 
 Highest-risk flows should receive tests early:
 

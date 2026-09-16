@@ -224,15 +224,15 @@ Carrier marks Delivered. Customer confirms receipt to produce Completed. V1 does
 
 ### Conversation
 
-An Offer may create/use a contextual conversation. If the Offer is accepted, the same conversation becomes the Booking conversation.
+A conversation begins only after a carrier submits an Offer. Exactly one Conversation exists for one Request + one Carrier. Offer revisions from that carrier reuse the same Conversation and update its current Offer reference.
 
-Do not create a second chat thread after Booking.
+Pending and updated Offers keep the Conversation active. Declined, expired, withdrawn or unavailable Offers archive it as read-only. When the customer accepts an Offer, the winning Conversation remains active and is linked to the new Booking; competing carriers' Conversations archive as read-only historical threads. Do not create a second chat thread after Booking. A Completed Booking keeps the Conversation available as history and V1 may make it read-only.
 
-No open “message any user” functionality exists in V1.
+The canonical detail URL is `/messages/[conversationId]`; Request, Offer and Booking screens link there. `/bookings/[id]/chat` is not a second or canonical thread.
 
-Conversations are always tied to a marketplace context such as an Offer/Booking.
+V1 supports text user messages, sender identity, timestamps, read/unread state and immutable system messages. Attachments are deferred to V1.2. No open “message any user” functionality exists; every Conversation is tied to its Request/Carrier and optional Booking context.
 
-System events displayed in chat should come from structured activity records where appropriate, not exist only as plain text messages.
+System events displayed in chat should come from structured activity records where appropriate, not exist only as mutable plain text messages. A future `message.created` domain event feeds in-app and transactional email notification handling; SMS is not sent by default and the chat UI does not call notification channels directly.
 
 ### Booking Activity
 

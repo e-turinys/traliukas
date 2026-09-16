@@ -8,8 +8,9 @@ import { formatOfferExpiry } from "./logic"
 import { offerStatusLabels, type RequestOffer } from "./model"
 import { vehiclePriceScope } from "../vehicle-summary"
 
-export function OfferCard({ offer, status, vehicleCount, emphasis = "standard" }: {
+export function OfferCard({ offer, status, vehicleCount, emphasis = "standard", conversation }: {
   offer: RequestOffer; status: RequestOffer["status"]; vehicleCount: number; emphasis?: "standard" | "selected" | "historical"
+  conversation?: { id: string; canSend: boolean }
 }) {
   const actionable = status === "pending"
   const selected = emphasis === "selected"
@@ -36,6 +37,9 @@ export function OfferCard({ offer, status, vehicleCount, emphasis = "standard" }
         <div className="min-w-0 sm:col-span-2"><dt className="text-muted-foreground">Pasiūlymas galioja iki</dt><dd>{formatOfferExpiry(offer.expiresAt)} <span className="text-muted-foreground">(Lietuvos laiku)</span></dd></div>
       </dl>
       {actionable && <Button nativeButton={false} render={<Link href={`/offers/${encodeURIComponent(offer.id)}`} />} className="h-auto min-h-11 w-full py-3 whitespace-normal">Peržiūrėti pasiūlymą</Button>}
+      {conversation && <Button nativeButton={false} variant="outline" render={<Link href={`/messages/${encodeURIComponent(conversation.id)}`} />} className="h-auto min-h-11 w-full py-3 whitespace-normal">
+        {conversation.canSend ? "Rašyti vežėjui" : "Peržiūrėti pokalbį"}
+      </Button>}
     </CardContent>
   </Card>
 }

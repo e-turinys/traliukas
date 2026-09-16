@@ -102,7 +102,7 @@ Closing a Request does not later re-open the same object; repeating creates a ne
 - For multiple vehicles, price copy explicitly says it covers the complete vehicle set. One Offer remains Request-level; there is no per-vehicle price, selection or partial acceptance.
 - “Jūsų užklausa” lists every vehicle with its pickup → delivery route, and acceptance confirmation states that the Offer covers all vehicles and routes in the complete Request.
 - Payment terms shown separately.
-- Contextual conversation is the same thread that later becomes Booking chat.
+- An Offer creates/reuses the Request + Carrier conversation. “Rašyti vežėjui” links to `/messages/[conversationId]`; an Offer revision keeps the same thread.
 - Accept uses confirmation screen/dialog and atomic server transaction.
 - Stale Offer/Request/Route version prevents acceptance and forces re-review.
 
@@ -174,7 +174,7 @@ Closing a Request does not later re-open the same object; repeating creates a ne
 | ID | Screen | Primary purpose | Planned URL |
 |---|---|---|---|
 | B01 | Booking Detail | Source of truth for agreement, operations and status | `/bookings/[id]` |
-| B02 | Booking Conversation | Existing Offer conversation continued after Booking | `/bookings/[id]/chat` |
+| B02 | Booking Conversation | Existing Offer conversation continued after Booking | `/messages/[conversationId]` |
 | B03 | Status Update | Carrier next valid transport action | Primarily action UI inside B01 |
 | B04 | Delivery Confirmation | Customer confirms delivery or reports a problem | Primarily action UI inside B01 |
 | B05 | Review | Completed Booking review | Booking-context route/modal/page as implemented |
@@ -189,6 +189,7 @@ Closing a Request does not later re-open the same object; repeating creates a ne
 - Normal cancellation ends after Vehicle Collected.
 - Delivered waits for customer confirmation; no automatic V1 completion timer.
 - Report state is independent from Booking transport status.
+- B01 opens the linked winning Conversation through “Atidaryti pokalbį” to `/messages/[conversationId]`; it never creates a Booking-specific duplicate thread.
 
 ---
 
@@ -207,7 +208,12 @@ Closing a Request does not later re-open the same object; repeating creates a ne
 ### Shared rules
 
 - No global “New Message” action.
-- Conversation exists only in marketplace context.
+- Conversation begins after an Offer and exists only in marketplace context. Exactly one Conversation exists per Request + Carrier, and Offer revisions reuse it.
+- Conversation detail is canonical at `/messages/[conversationId]`. Its compact header shows carrier, Request route, vehicle count and useful Request/Booking status, with navigation to the Request before Booking and Booking after acceptance.
+- Pending/updated Offer conversations are active. The accepted carrier's Conversation remains active and links to Booking; competing, declined, expired, withdrawn or unavailable Offer conversations are archived/read-only. Completed Booking conversations remain historical and may be read-only.
+- M01 lists carrier, compact route, last-message preview, timestamp, real fixture/account unread count and useful state. Archived threads are visually secondary. There is no marketplace-wide fabricated unread statistic.
+- Active threads support text-only local/mock send behavior. User and immutable system messages have explicit non-color-only identity and timestamps. Read-only threads omit the composer and explain that the conversation is finished.
+- Attachments, photos, audio, reactions, typing state, editing/deleting, realtime transport and backend persistence are outside this V1 screen; attachments are deferred to V1.2.
 - Unread counts are server-side.
 - Deep links return the user to the exact requested object after authentication.
 - Authorization is server-side, not based on hidden UI.
