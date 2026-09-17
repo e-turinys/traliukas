@@ -72,6 +72,33 @@ Examples:
 
 Components should receive semantic state (`status="completed"`) rather than repeatedly embedding raw utility color choices.
 
+### V1 visual baseline — LOCKED (D-051, 2026-09-17)
+
+P01 High-Fidelity passed human desktop and mobile browser review. Its current responsive browser implementation is the visual source of truth and the reference for future P02/P03 high-fidelity work. This approval does not authorize redesigning P01 or changing any locked product behavior.
+
+- **Direction:** Clean Marketplace + Friendly European Marketplace. Practical, calm, trustworthy and consumer-facing; transport-focused without corporate logistics or luxury automotive styling.
+- **Palette:** deep teal/petrol primary (Tailwind teal-700 family), darker teal hover, very light teal soft surfaces, light slate/neutral backgrounds, white cards, near-black slate text, muted slate secondary text and subtle slate borders. No gradients, unrelated brand colors or dark theme.
+- **Typography/icons:** Geist remains the typography baseline; use standard Tailwind type/leading scales and Lucide application icons.
+- **Sizing:** Tailwind v4 spacing, height, width, type and radius scales plus existing shadcn/Base UI sizing conventions are mandatory. Avoid arbitrary custom pixel dimensions; any unavoidable technical exception must be explained. Use responsive max-width containers and practical touch targets.
+- **Layout:** normal page sections use grid, flex and content-driven auto-layout behavior. Do not use fragile absolute positioning for normal layouts, tightly fitted text containers or fixed card heights. Text and translated labels must wrap naturally; buttons must grow without clipping.
+- **Rhythm:** controlled whitespace, clear hierarchy, restrained rounding, subtle borders and minimal shadows. Preserve visible keyboard focus, semantic headings/labels, adequate contrast and non-color-only status meaning.
+- **Responsive reference:** P01 at 390, 768, 1280 and 1440px. Future P02/P03 work must retain intentional mobile layouts and avoid horizontal overflow, overlapping text, clipped actions or hidden sections.
+
+#### Reusable patterns established by P01
+
+| Pattern | Reference | Approved treatment |
+|---|---|---|
+| Public header | `src/components/layout/public-header.tsx` | Lightweight white header, teal wordmark, desktop navigation and compact mobile Sheet menu; existing destinations retained. |
+| PageContainer | `src/components/layout/page-container.tsx` | Centered `max-w-7xl` container with responsive standard horizontal padding. |
+| Marketplace search surface | `src/features/public/home-search.tsx` | White bordered Card, aligned labeled controls, prominent primary action, secondary Request action; horizontal desktop, intermediate tablet grid and stacked mobile fields. Preserve validation and URL handoffs. |
+| Trust strip/item | P01 page benefit list | Quiet Lucide icon/text items in a responsive row/grid/list; no fabricated verification claims or excessive badges. |
+| MarketplaceRouteCard | `src/components/shared/marketplace-route-card.tsx` | Route-first hierarchy, waypoints, carrier, evidence-backed trust, derived capacity, dates and full-width detail action. Cards grow with content; responsive 1/2/3-column grid. |
+| Section heading | P01 page sections | Clear `text-2xl`/`sm:text-3xl` semibold headings, optional muted supporting text and consistent standard spacing. |
+| Three-step explanatory section | P01 “Kaip tai veikia” | Compact numbered items with concise headings/descriptions; stacked mobile and three-column desktop layout. |
+| Carrier CTA surface | P01 closing section | Deep teal surface, readable light text and white content-sized action; stacked mobile and text/action desktop row. |
+
+The page-level reference is `src/app/(public)/page.tsx`; the opt-in palette is `.marketplace-theme` in `src/app/globals.css`. Trust items, section headings, steps and the CTA are reusable composition patterns, not separately extracted components. Reuse or extract them when a concrete screen needs them; do not prematurely abstract or recolor locked screens. The existing search-specific `RouteCard` remains distinct from `MarketplaceRouteCard` until P02/P03 work is explicitly scoped.
+
 ### Mobile/performance
 
 - Customer and Carrier UI: mobile-first.

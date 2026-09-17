@@ -256,6 +256,14 @@ This file records important product/architecture decisions that should not be ca
 **Decision:** Carriers may browse publicly, but must authenticate before creating/publishing a Carrier Route, submitting an Offer, messaging a customer or managing Bookings. Future onboarding is Account → Carrier Profile → email/phone verification → business details → applicable trust verification → publish Routes; eligibility policy is enforced server-side.
 **Reason:** Supply-side actions create commercial and operational obligations and therefore require a stronger identity/eligibility boundary than public browsing.
 
+### D-051 — P01 High-Fidelity and V1 visual baseline
+
+**Date:** 2026-09-17. **Status:** LOCKED after human desktop and mobile browser review.
+
+**Decision:** P01 High-Fidelity is approved and its current responsive browser implementation becomes the V1 visual source of truth and reference for P02/P03. The approved direction is **Clean Marketplace + Friendly European Marketplace**, using deep teal/petrol and slate, white cards and Geist typography. Tailwind v4 standard dimensions and shadcn/Base UI sizing conventions are mandatory. Normal layouts use grid/flex/content-driven auto-layout behavior, not fragile absolute positioning; avoid arbitrary custom pixel dimensions and allow translated content to wrap and grow. No gradients, unrelated brand colors or dark theme. The reusable header, PageContainer, search surface, trust strip/items, MarketplaceRouteCard, section headings, three-step section and carrier CTA are documented in `03_TECHNICAL_ARCHITECTURE.md`.
+
+**Reason:** Human-reviewed production UI provides a consistent, responsive marketplace baseline without maintaining a separate high-fidelity design source. This lock changes documentation only; P01 UI and behavior stay unchanged. P02 Search Results High-Fidelity is the next separately scoped visual task; no P02/P03, backend, Auth, Supabase, i18n rollout or provider work begins under this approval.
+
 ## How to add a new decision
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:

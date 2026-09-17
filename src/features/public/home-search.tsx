@@ -73,11 +73,10 @@ export function HomeSearch() {
   }
 
   return (
-    <Card>
-      <CardContent>
-        <form noValidate onSubmit={handleSubmit} aria-label={copy.search} className="space-y-6">
-          <p id={`${id}-hint`} className="text-sm text-muted-foreground">{copy.hint}</p>
-          <div className="grid gap-5 md:grid-cols-3">
+    <Card className="overflow-visible border border-border py-6 shadow-sm ring-0">
+      <CardContent className="px-4 sm:px-6">
+        <form noValidate onSubmit={handleSubmit} aria-label={copy.search} className="space-y-4">
+          <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-4">
             {(["from", "to"] as const).map((key) => (
               <div key={key} className="min-w-0 space-y-2">
                 <LocationPicker
@@ -94,7 +93,7 @@ export function HomeSearch() {
                 )}
               </div>
             ))}
-            <div className="min-w-0 space-y-2">
+            <div className="min-w-0 space-y-2 [&_button]:flex">
               <DateWindowPicker
                 id={`${id}-date`} label={copy.date} value={date} onValueChange={setDate}
                 invalid={submitted && !!errors.date}
@@ -104,10 +103,14 @@ export function HomeSearch() {
                 <p id={`${id}-date-error`} role="alert" className="text-sm text-destructive">{errors.date}</p>
               )}
             </div>
+            <div className="space-y-2">
+              <span aria-hidden="true" className="hidden text-sm leading-none md:block">&nbsp;</span>
+              <Button type="submit" disabled={!!errors.from || !!errors.to} className="h-auto min-h-11 w-full gap-2 whitespace-normal px-6 py-2 hover:bg-teal-800"><Search aria-hidden="true" />{copy.search}</Button>
+            </div>
           </div>
-          <div className="flex flex-col gap-3 md:flex-row">
-            <Button type="submit" disabled={!!errors.from || !!errors.to} className="min-h-11 w-full px-5 md:w-auto"><Search aria-hidden="true" />{copy.search}</Button>
-            <Button type="button" variant="outline" className="min-h-11 w-full px-5 md:w-auto" onClick={() => navigate("/request/new")}>{copy.offers}</Button>
+          <div className="flex flex-col gap-3 border-t pt-4 md:flex-row md:items-center md:justify-between">
+            <p id={`${id}-hint`} className="text-sm leading-relaxed text-muted-foreground">{copy.hint}</p>
+            <Button type="button" variant="ghost" className="h-auto min-h-11 w-full whitespace-normal px-4 py-3 text-primary hover:text-primary md:w-auto" onClick={() => navigate("/request/new")}>{copy.offers}</Button>
           </div>
         </form>
       </CardContent>

@@ -1,7 +1,17 @@
 # Parvezk.lt — Current Status
 
 **Date:** 2026-09-17
-**Current phase:** Pre-backend architecture locked; implementation not started
+**P01 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. The current responsive P01 browser implementation is the approved V1 visual baseline and the visual reference for P02/P03. P01 search behavior remains locked and unchanged.
+**Next visual task:** P02 Search Results High-Fidelity, in a separately scoped task. Do not start P02/P03 or change P01 as part of this documentation lock.
+
+## P01 visual implementation — 2026-09-17
+
+- Refreshed Home and the shared public header using Geist, standard Tailwind dimensions, Base UI/shadcn primitives and a scoped teal/slate palette. Added a reusable discovery route card using existing fixed fixtures and evidence-backed verification/rating values; P02/P03 layouts and search logic are unchanged.
+- Origin/destination validation, optional single/range/flexible dates, search and secondary Request handoffs are preserved. P01 did not have a vehicle-count control or locale selector; neither was introduced in this visual pass. The carrier CTA retains the existing `/carrier` destination, which is still a planned screen.
+- Human desktop and mobile browser review passed; P01 High-Fidelity is LOCKED. D-051 and the V1 visual baseline in `03_TECHNICAL_ARCHITECTURE.md` record the approved direction, mandatory layout/sizing rules and reusable patterns. No backend, Auth, Supabase, persistence, i18n rollout or provider work started. No commit or push.
+- Validation: production build passed including lint/types; all 111 unit tests passed. Headless Chrome and screenshot review covered 390/768/1280/1440px, no horizontal overflow or clipped controls, desktop control alignment, keyboard location selection, validation focus, both URL handoffs and mobile menu. `git diff --check` passed. Screenshots are in ignored `.next/p01-review/`; production review is served on port 3000. A concurrent development server was stopped after it overwrote build assets; final checks used a fresh production server.
+
+**Current phase:** P01 High-Fidelity locked; P02 Search Results High-Fidelity is the next visual task. Backend implementation has not started.
 **Project status:** P01–P09, Multi-Vehicle, Multi-Location, Carrier Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are implemented, browser-reviewed and LOCKED. The pre-backend Route Distribution, i18n, location privacy, optional budget, carrier trust, light-vehicle scope and progressive Customer/Carrier authentication decisions are also LOCKED. Real authentication, backend, Supabase, persistence, realtime messaging, provider integrations and full translation rollout have not started.
 
 ## Final pre-backend architecture lock — 2026-09-17
@@ -222,7 +232,9 @@
 
 ## Immediate next task
 
-Next phase order is **i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence**. Start only the first separately scoped phase; do not infer authorization to begin auth, Supabase, persistence, providers or UI redesign from this architecture lock.
+**Next visual task = P02 Search Results High-Fidelity.** Use the human-approved responsive P01 implementation and D-051 as the visual reference while preserving locked P02 product behavior. P01 remains LOCKED; P02 and P03 have not started their high-fidelity passes. This documentation task does not authorize implementation of either screen.
+
+The later backend-phase order remains **i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence**, with each phase separately scoped. Do not start any of these phases or provider work from this visual lock.
 
 ## Locked baseline handoff
 

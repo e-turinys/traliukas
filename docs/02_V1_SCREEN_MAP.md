@@ -21,6 +21,8 @@ This document defines the canonical V1 screen IDs and intended URLs. Screen IDs 
 
 ### P01 Home key rules
 
+**High-Fidelity status: LOCKED** after human desktop and mobile browser review (2026-09-17). The current responsive P01 browser UI is the V1 visual baseline and reference for P02/P03; see D-051 and the visual patterns in `03_TECHNICAL_ARCHITECTURE.md`. Do not redesign P01 under subsequent screen work.
+
 - Search works without login.
 - Required: From, To.
 - Date optional; empty means “Bet kada”.

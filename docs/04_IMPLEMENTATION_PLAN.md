@@ -10,6 +10,10 @@ Build in phases with small, reviewable milestones.
 
 The first UI phases use realistic mock data in the real production component stack. This replaces a separate high-fidelity Figma build for V1. The same components should survive into production; only their data source changes.
 
+### Current visual milestone
+
+P01 High-Fidelity is LOCKED after human desktop and mobile browser review. Its responsive implementation is the V1 visual baseline under D-051 and `03_TECHNICAL_ARCHITECTURE.md`. The next visual task is **P02 Search Results High-Fidelity**, separately scoped and preserving locked functionality; P03 must also use P01 as its visual reference when selected. Neither screen starts as part of the P01 documentation lock. Backend-phase ordering below remains unchanged and does not authorize backend, Auth, Supabase, i18n rollout or provider work now.
+
 ## Phase 0 — Foundation
 
 ### Goal

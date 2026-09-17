@@ -25,11 +25,11 @@ const navigation = [
 
 export function PublicHeader() {
   return (
-    <header className="border-b bg-background">
-      <PageContainer className="flex h-16 items-center justify-between">
+    <header className="border-b bg-white">
+      <PageContainer className="flex min-h-16 items-center justify-between gap-6 py-2">
         <Link
           href="/"
-          className="text-xl font-semibold tracking-tight"
+          className="rounded-md text-2xl font-semibold tracking-tight text-teal-700 outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
           aria-label="Parvezk.lt pradinis puslapis"
         >
           parvezk.lt
@@ -43,7 +43,7 @@ export function PublicHeader() {
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="flex min-h-11 items-center rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-teal-700 focus-visible:outline-2 focus-visible:outline-teal-600"
             >
               {item.label}
             </Link>
@@ -51,7 +51,7 @@ export function PublicHeader() {
 
           <Link
             href="/login"
-            className={buttonVariants({ variant: "outline" })}
+            className={cn(buttonVariants({ variant: "outline" }), "h-auto min-h-11 whitespace-normal px-4 py-2")}
           >
             Prisijungti
           </Link>
@@ -64,6 +64,7 @@ export function PublicHeader() {
                 <Button
                   variant="ghost"
                   size="icon"
+                  className="size-11"
                   aria-label="Atidaryti navigaciją"
                 />
               }
@@ -77,7 +78,7 @@ export function PublicHeader() {
               </SheetHeader>
 
               <nav
-                className="mt-8 flex flex-col gap-2"
+                className="mt-6 flex flex-col gap-2 px-4 pb-6"
                 aria-label="Mobilioji navigacija"
               >
                 {navigation.map((item) => (
@@ -86,7 +87,7 @@ export function PublicHeader() {
                     href={item.href}
                     className={cn(
                       buttonVariants({ variant: "ghost" }),
-                      "justify-start"
+                      "h-auto min-h-11 justify-start whitespace-normal px-4 py-3"
                     )}
                   >
                     {item.label}
@@ -97,7 +98,7 @@ export function PublicHeader() {
                   href="/login"
                   className={cn(
                     buttonVariants({ variant: "outline" }),
-                    "mt-4"
+                    "mt-4 h-auto min-h-11 whitespace-normal py-3"
                   )}
                 >
                   Prisijungti
