@@ -216,6 +216,46 @@ This file records important product/architecture decisions that should not be ca
 **Decision:** Notifications are derived from Offer, Message and Booking domain events through recipient resolution and policy, never direct email/SMS calls from UI. Self-notifications are suppressed. `offer.accepted` remains an internal Offer/Conversation/Booking transition event but produces no external delivery; `booking.created` is the sole accepted-Booking notification, reaches customer + selected carrier through in-app + email + SMS, and links to `/bookings/[bookingId]`. In-app history is authoritative; email carries transactional updates, while SMS is otherwise limited to selected critical pickup-scheduled and Delivered events. `message.created` uses in-app immediately and a future delayed unread/debounced email fallback, with no SMS. Every Notification stores its canonical `href`. Future event processing and channel delivery require stable event + recipient + channel idempotency keys; channel delivery state is separate from the base Notification. Provider choice, real delivery, preferences and auth-aware global unread counts remain deferred.
 **Reason:** Central policy keeps customer communication consistent, retry-safe and provider-independent without coupling locked Offer, Chat or Booking interfaces to delivery infrastructure.
 
+### D-043 — Route Distribution Architecture
+
+**Decision:** Carrier Route gains the future-ready `routeFlexible: boolean` concept; it does not add `maxDetourKm` or distance-based detour matching. An eligible Route transition to canonical `published` with available capacity > 0 emits `carrierRoute.published`. A separate Route Distribution Service creates immutable, localized `RouteDistributionJob` snapshots per channel/target rather than making CarrierRoute call providers. Draft/ineligible/full Routes never distribute. Telegram is the first intended automated adapter; Facebook Groups use a generated/manual post package baseline; WhatsApp is future opt-in Business messaging. Every external CTA returns to `/routes/[routeId]`, and snapshots exclude exact addresses, phone numbers and private contacts.
+**Reason:** Provider-independent, snapshot-based distribution can acquire customers without mutating historical posts, leaking private data or encouraging marketplace bypass.
+
+### D-044 — Internationalization V1
+
+**Decision:** English (`en`) is the canonical source and fallback. Initial locales are `en`, `lt`, `de`, `nl`, `fr`, `pl`, `ro`, `uk` and `ru`; resolution order is saved `preferredLocale`, supported browser locale, then English. Product/system/notification/delivery/distribution copy uses translation keys and locale-aware formatting. Normal entity and user-generated data is stored once; Chat, comments and Request notes are not auto-translated in V1. Optional `spokenLanguages[]` is future profile metadata, not an account requirement.
+**Reason:** One deterministic locale policy supports international operations without duplicating domain data or coupling backend values to Lithuanian display strings.
+
+### D-045 — Public vs Private Location
+
+**Decision:** Marketplace/public location is city/area + country with future coordinates/place reference. Private transport address is street, postal code, city, country and optional instructions. Vehicle pickup/delivery must eventually support `publicLocation` plus optional `privateAddress`; exact addresses and phone/contact data are available only to selected, authorized parties after Booking and are excluded from public/distribution projections.
+**Reason:** Matching and acquisition need useful geography, while operations require backend-enforced protection of exact locations and contacts.
+
+### D-046 — Optional Request Budget
+
+**Decision:** A Request may have optional `budgetAmount` + `budgetCurrency` representing the customer's overall desired transport budget. It is not required, fixed, per-vehicle, an auto-accept rule or a replacement for the carrier's independent Offer.
+**Reason:** Budget guidance can improve commercial fit without changing the Offer/acceptance model or misleading users about a guaranteed price.
+
+### D-047 — Carrier Trust Metadata
+
+**Decision:** Carrier schema readiness distinguishes `verifiedCarrier`, `cmrInsuranceAvailable`, `cmrInsuranceVerified`, `invoiceAvailable` and `liveTrackingAvailable`. Optional later metadata includes CMR coverage amount/currency, company identity and verification timestamps. Trust claims must be evidence-backed and never fabricated.
+**Reason:** Separate availability and verification facts let public trust UI evolve safely without overloading one generic verification badge.
+
+### D-048 — V1 Vehicle Scope
+
+**Decision:** V1 supports passenger cars, SUV/crossovers, vans/minivans and motorcycles. Excavators, heavy/agricultural machinery, loose freight, engines/standalone cargo and heavy commercial equipment are excluded. The one-vehicle-equals-one-capacity-slot rule is not extended to those categories.
+**Reason:** Heavy/cargo transport needs dimensions, weight, trailer, payload and regulatory models that would invalidate the intentionally simple V1 capacity architecture.
+
+### D-049 — Progressive Customer Authentication
+
+**Decision:** Customers may browse, view public Route/Carrier pages, and complete a Request locally without an account. Authentication/contact confirmation occurs at Publish Request; successful verification creates or reuses the Customer account and returns to the pending action. V1 retains verified phone for publication anti-spam/trust. Authentication is passwordless-first; email OTP, magic link, phone OTP, Google or Apple may be used later without password/reset UX. Auth is required after publication for Dashboard, Offers, Chat, acceptance, Booking and Notifications.
+**Reason:** Delaying registration until the value-bearing publish action reduces acquisition friction while retaining marketplace accountability.
+
+### D-050 — Carrier Authentication Gate
+
+**Decision:** Carriers may browse publicly, but must authenticate before creating/publishing a Carrier Route, submitting an Offer, messaging a customer or managing Bookings. Future onboarding is Account → Carrier Profile → email/phone verification → business details → applicable trust verification → publish Routes; eligibility policy is enforced server-side.
+**Reason:** Supply-side actions create commercial and operational obligations and therefore require a stronger identity/eligibility boundary than public browsing.
+
 ## How to add a new decision
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:

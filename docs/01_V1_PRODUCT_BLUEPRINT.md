@@ -1,7 +1,7 @@
 # Parvezk.lt V1 — Product Blueprint
 
 **Canonical status:** LOCKED unless a real user test, legal requirement, or technical blocker requires a change.  
-**Last consolidated:** 2026-09-11.
+**Last consolidated:** 2026-09-17.
 
 ## 1. Core domain model
 
@@ -29,6 +29,7 @@ A Request contains:
 - 1–10 vehicles, each with a stable identity, structured pickup and delivery locations, category, make/model, optional year, running/non-running state and rolling ability when non-running;
 - optional photos belonging to their individual vehicle;
 - optional notes;
+- optional overall desired budget (`budget_amount`, `budget_currency`); this is guidance, not a fixed price or acceptance rule;
 - visibility: `targeted` or `marketplace`;
 - if targeted, target carrier and target route references;
 - current request version.
@@ -61,6 +62,7 @@ Route fields include:
 - route end date;
 - supported vehicle categories;
 - non-running vehicle capability;
+- `route_flexible`: whether the carrier may deviate from the published corridor by agreement;
 - `capacity_total`;
 - `capacity_reserved`;
 - `accepting_new_requests`;
@@ -79,7 +81,7 @@ Submitting an Offer does not change capacity. Successful Booking creation increm
 Route lifecycle:
 
 - `draft`
-- `active`
+- `published`
 - `expired`
 - `cancelled`
 
@@ -111,6 +113,24 @@ V1 UI uses qualitative labels:
 Do not show fake precision such as “92% match”.
 
 Exact total route detour is optional for later integration with a routing provider; V1 core matching must not depend on a perfect detour engine.
+
+`route_flexible = true` may be presented as “Maršrutas lankstus” or “Galimas nukrypimas nuo maršruto”. It does not change deterministic matching in V1. Distance-based detour matching and `max_detour_km` are deferred until Maps/geocoding work.
+
+### Route distribution
+
+An eligible transition to a published Route with available capacity emits `carrierRoute.published`. A separate Route Distribution layer creates channel-specific jobs; Carrier Route code does not publish directly to social providers.
+
+Distribution requires all of the following: lifecycle status `published`, carrier eligibility to publish, and available capacity greater than zero. Draft Routes are never distributed. Current frontend fixtures that call a publicly available route “active” map to the canonical future `published` state; this does not create a second lifecycle state.
+
+Every distribution job stores a localized payload snapshot containing public route origin, destination, waypoints, departure/date, available spaces, supported light-vehicle categories, non-running compatibility, route flexibility, public carrier trust indicators, CTA copy and canonical `/routes/[routeId]` URL. Later Route edits never silently rewrite an already-published external post. Exact addresses, private contacts and phone numbers are excluded.
+
+Initial channel strategy:
+
+- Telegram: first intended fully automated adapter;
+- Facebook Groups: generated post package with manual publishing as the baseline; V1 does not depend on unsupported Groups API automation;
+- WhatsApp: future opt-in Business messaging/distribution only; do not assume arbitrary group/channel posting.
+
+External content leads back to Parvezk.lt instead of encouraging marketplace bypass.
 
 ### Offer
 
@@ -300,6 +320,8 @@ A user should not be able to spam multiple identical simultaneous open reports f
 - rating/completed transports;
 - public reviews.
 
+The public Location level is city/area + country, with coordinates or a structured place reference when available. It is suitable for discovery, matching and external Route distribution.
+
 ### Private/operational data includes
 
 - exact addresses;
@@ -310,18 +332,22 @@ A user should not be able to spam multiple identical simultaneous open reports f
 - internal admin notes;
 - sensitive operational attachments.
 
+The private transport-address level contains street, postal code, city, country and optional access instructions. Vehicle pickup/delivery data must be able to reference `publicLocation` and an optional `privateAddress`; existing structured Location values remain the public-level foundation. Exact addresses become available only to selected, authorized parties after Booking, subject to backend access control.
+
 Private data must not be exposed through permanent public URLs or client-only authorization.
 
 ## 3. Authentication and account rules
 
-V1 uses passwordless phone OTP as the main user authentication flow.
+V1 uses progressive, passwordless authentication. Public users may browse Routes, search, view public Route/Carrier details, start a Transport Request and complete its form locally. The authentication/contact-verification gate occurs only at **Publish Request**, using the product concept “Patvirtinkite kontaktus ir paskelbkite užklausą”.
 
-- Existing phone → OTP logs the User in.
-- New phone → OTP verifies and creates the User.
-- Auth flow returns the User to the interrupted task (e.g., Request publish), not always to Dashboard.
+The minimum future Customer identity is `id`, `name`, `email`, `phone`, `preferred_locale`, optional `email_verified_at` and optional `phone_verified_at`. A Customer account is created automatically after successful identity/contact verification if none exists. V1 Request publication retains a verified-phone anti-spam/trust gate; the OTP provider is not selected. Email OTP, magic link, phone OTP, Google and Apple are possible passwordless sign-in methods, but the product must not be designed around password, confirm-password or password-reset friction.
+
+- Auth returns the User to the interrupted task, not always to Dashboard.
 - OTP attempts and resend are rate-limited server-side.
-- Email verification exists, but does not block customer Request publication.
+- After publication, Dashboard, Offers, Chat, Offer acceptance, Booking and Notifications require an account.
+- Public browsing remains account-free.
 - Carrier Offer capability depends on required verified contact/verification conditions.
+- When an account exists, its `preferred_locale` drives transactional content through the canonical locale policy.
 
 ## 4. Carrier verification
 
@@ -342,9 +368,13 @@ Verification state per category/document:
 
 A public “Patvirtintas vežėjas / Verified Carrier” badge appears only when all current platform-required verification checks are approved.
 
+Carrier schema readiness also includes distinct, evidence-backed trust attributes: `verified_carrier`, `cmr_insurance_available`, `cmr_insurance_verified`, `invoice_available` and `live_tracking_available`. Future metadata may include CMR coverage amount/currency, company identity and verification timestamps. Availability and verification are not interchangeable, and no value may be fabricated.
+
 An expired required verification can block new Offers without automatically cancelling existing Bookings.
 
 Carrier may create a profile, create routes, browse Requests, and see Matches before full approval. Sending Offers requires the required verification state.
+
+Public carrier browsing is account-free. Creating or publishing a Carrier Route, submitting an Offer, messaging a customer and managing Bookings require authentication. Future onboarding is Account → Carrier Profile → email/phone verification → business details → applicable trust verification → publish Routes. The exact verification workflow remains backend scope.
 
 ## 5. Request visibility
 
@@ -427,6 +457,26 @@ The Offer price shown to the customer is the final transport price for every veh
 V1 does not process or guarantee payment.
 
 Payment terms are stored in the Offer and Booking snapshot so the customer can compare offers meaningfully.
+
+An optional Request budget represents the customer's overall desired transport budget, never a per-vehicle canonical price. It is not required, does not fix the final price, does not auto-accept an Offer and does not prevent carriers from submitting independent Offers.
+
+## 9A. Internationalization V1
+
+English (`en`) is the canonical source locale and fallback. Initial supported locales are `en`, `lt`, `de`, `nl`, `fr`, `pl`, `ro`, `uk` and `ru`.
+
+Locale resolution order is saved `preferred_locale`, then supported browser locale, then English. Future optional `spoken_languages[]` describes communication capability and is not required at account creation.
+
+Navigation, buttons, forms, validation, empty states, lifecycle/status labels, system messages, Notifications, transactional email/SMS and Route distribution templates must resolve translation keys. Normal entity data is not stored as parallel translated copies, and user-generated Chat messages, carrier comments and Request notes are not automatically translated in V1. A future explicit Translate feature may be added separately.
+
+Dates, numbers and currencies use locale-aware formatting at presentation/template boundaries. Backend/domain logic stores canonical values and must not embed Lithuanian date strings. The existing locked Lithuanian frontend remains unchanged until the separately scoped i18n rollout.
+
+## 9B. V1 vehicle scope
+
+V1 transport supply, demand, capacity and matching cover light vehicles only: passenger car, SUV/crossover, van/minivan and motorcycle. Excavators, heavy or agricultural machinery, loose freight, engines/standalone cargo and heavy commercial equipment are explicitly outside V1 because they need dimensions, weight, trailer type, payload and regulatory rules. The one-vehicle-equals-one-capacity-slot model must not be stretched to cover them.
+
+## 9C. Social acquisition flow
+
+The intended funnel is: external Telegram/Facebook/WhatsApp Route post → public `/routes/[routeId]` → account-free browsing → CTA to create a Transport Request → optional prefill from Route context → authentication/contact verification only at Publish → active Request → Carrier Offer → Conversation → Booking.
 
 ## 10. Notifications and messages
 

@@ -1,8 +1,21 @@
 # Parvezk.lt — Current Status
 
-**Date:** 2026-09-16
-**Current phase:** Phase 2 — Request / Offer / Conversation / Booking / Notification UI with mock data
-**Project status:** P01–P09, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and N01 Notifications V1 are implemented, browser-reviewed and LOCKED. Multi-Vehicle + Multi-Location Booking behavior and Carrier Capacity V1 are also LOCKED. Real authentication, backend, Supabase, realtime messaging and email/SMS notification delivery have not started.
+**Date:** 2026-09-17
+**Current phase:** Pre-backend architecture locked; implementation not started
+**Project status:** P01–P09, Multi-Vehicle, Multi-Location, Carrier Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are implemented, browser-reviewed and LOCKED. The pre-backend Route Distribution, i18n, location privacy, optional budget, carrier trust, light-vehicle scope and progressive Customer/Carrier authentication decisions are also LOCKED. Real authentication, backend, Supabase, persistence, realtime messaging, provider integrations and full translation rollout have not started.
+
+## Final pre-backend architecture lock — 2026-09-17
+
+- D-043 locks `routeFlexible`, canonical persisted Route publication, `carrierRoute.published`, eligibility/capacity checks, provider-independent channel jobs, immutable public payload snapshots and canonical `/routes/[routeId]` acquisition CTAs. Telegram is the first intended automated adapter; Facebook starts as generated/manual publishing; WhatsApp is future opt-in Business messaging. No adapter/provider was implemented.
+- D-044 locks English as source/fallback; locales `en`, `lt`, `de`, `nl`, `fr`, `pl`, `ro`, `uk`, `ru`; saved preference → browser → English resolution; translation-key scope; locale-aware formatting; and no automatic translation of user-generated content. The current locked Lithuanian UI was not migrated or changed.
+- D-045 locks public city/area + country separately from private exact addresses/instructions. Future vehicle locations support `publicLocation` plus optional `privateAddress`, enforced by backend authorization after Booking. Phone/private contact data never belongs in public or distribution payloads.
+- D-046/D-047 lock optional overall Request budget fields and evidence-backed Carrier trust metadata without changing P05 or current Carrier UI.
+- D-048 limits V1 capacity/matching to passenger cars, SUV/crossovers, vans/minivans and motorcycles. Heavy machinery, agricultural machinery, loose freight, engines and heavy commercial equipment remain out of scope. The current mock `other` form option is not a persisted heavy-transport category and remains untouched until the data-backed migration is scoped.
+- D-049/D-050 lock progressive passwordless Customer auth at Publish Request and stricter Carrier auth before supply/commercial actions. Verified phone remains the V1 Request-publication trust gate; no OTP/OAuth/provider flow was implemented.
+- The intended growth funnel is external Route post → public Route Detail → account-free browse/local Request form → verification at Publish → Request → Offer → Conversation → Booking.
+- Locked next-phase order: i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence.
+- Not started: Supabase, real auth, real persistence, realtime backend, email/SMS providers, Telegram/Facebook/WhatsApp adapters, Maps/geocoding, address reveal logic and full i18n translation rollout.
+- Final validation: `npm.cmd run build` passed compilation, lint/type checks, static generation and build tracing; all 111 unit tests passed; `git diff --check` passed. This lock changed documentation only and did not alter application behavior.
 
 ## N01 Notifications V1 locked baseline — 2026-09-16
 
@@ -209,11 +222,11 @@
 
 ## Immediate next task
 
-No next feature is selected. Do not start another feature, backend, authentication, Supabase, realtime messaging, email or SMS delivery without a separately scoped instruction.
+Next phase order is **i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence**. Start only the first separately scoped phase; do not infer authorization to begin auth, Supabase, persistence, providers or UI redesign from this architecture lock.
 
 ## Locked baseline handoff
 
-P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior, Carrier Route Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and N01 Notifications V1 are approved, browser-reviewed and LOCKED. Start no new feature until it is separately selected and scoped. Real authentication, backend, Supabase, realtime messaging and email/SMS notification delivery remain unstarted. Do not commit or push without a separate instruction.
+P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior, Carrier Route Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are approved, browser-reviewed and LOCKED. D-043–D-050 lock the final pre-backend architecture. Start no new phase until it is separately selected and scoped. Real authentication, backend, Supabase, persistence, realtime messaging, provider delivery, Route-distribution adapters and full i18n translation rollout remain unstarted. Do not commit or push without a separate instruction.
 
 ## Do not reopen without a blocker
 
@@ -222,6 +235,13 @@ The following are already locked and should not be casually redesigned during im
 - one User can be customer + carrier;
 - search works without registration;
 - phone OTP required to publish customer Request;
+- progressive passwordless Customer auth gates Publish rather than browsing/form completion;
+- Carrier auth gates Route publication, Offers, customer messaging and Booking management;
+- English source/fallback and saved preference → browser → English locale resolution;
+- public city/area Location is separate from private exact transport address;
+- optional Request budget is overall guidance, not an Offer or auto-accept rule;
+- V1 vehicle scope is passenger car, SUV/crossover, van/minivan and motorcycle only;
+- `carrierRoute.published` feeds snapshot-based provider-independent distribution jobs;
 - Carrier Offer requires required verification;
 - Route has no price;
 - Offer requires a Route;

@@ -1,6 +1,6 @@
 # Parvezk.lt V1 — Canonical Screen Map
 
-**Last consolidated:** 2026-09-11.
+**Last consolidated:** 2026-09-17.
 
 This document defines the canonical V1 screen IDs and intended URLs. Screen IDs are product references; URLs are implementation targets and may be adjusted only deliberately.
 
@@ -48,6 +48,8 @@ This document defines the canonical V1 screen IDs and intended URLs. Screen IDs 
 - One primary CTA: “Gauti pasiūlymą iš šio vežėjo” when capacity is available.
 - Capacity uses “1 laisva vieta”, “2 laisvos vietos” and “Maršrutas pilnas”. A full Route remains directly viewable in a read-only state and does not show a misleading active Request CTA.
 - Other unavailable states may retain the marketplace Request fallback where appropriate.
+- Future persisted Routes may show “Maršrutas lankstus” when `routeFlexible` is true. This is informational in V1; it does not add detour-distance matching or expose a private address/contact.
+- `/routes/[id]` is the canonical public destination for localized external Route-distribution CTAs.
 
 ### P04 Carrier profile key rules
 
@@ -68,7 +70,9 @@ Each vehicle initially inherits the Step 1 default route. Its card shows “Naud
 
 Targeted flow must tell the customer before publish whether only the selected carrier or also other matching carriers will see the Request.
 
-Phone OTP is required to publish. Email verification does not block customer publication.
+An optional overall transport budget may be added in a future data-backed P05 iteration without becoming a fixed price or per-vehicle price. It is not required to publish, and carriers still submit independent Offers.
+
+The form remains usable locally without an account. Authentication/contact confirmation is gated at the final Publish action with the concept “Patvirtinkite kontaktus ir paskelbkite užklausą”; V1 retains verified phone as the publication anti-spam/trust requirement. Do not redesign P05 until this backend/auth phase is explicitly scoped.
 
 ### P06 Published key rules
 
@@ -201,7 +205,7 @@ Closing a Request does not later re-open the same object; repeating creates a ne
 
 | ID | Screen | Primary purpose | Planned URL |
 |---|---|---|---|
-| U01 | Login / Register | Passwordless phone entry | Auth flow / modal / route as implemented |
+| U01 | Login / Register | Progressive passwordless contact confirmation | Auth flow / modal / route as implemented |
 | U02 | Phone OTP | Verify phone and create/login User | Auth flow |
 | U03 | Email Verification | Optional customer / required carrier contact verification path | Auth/account flow |
 | U04 | Profile & Privacy | Basic user profile, security, privacy/account request | `/account` |
@@ -221,6 +225,10 @@ Closing a Request does not later re-open the same object; repeating creates a ne
 - Unread counts are server-side.
 - Deep links return the user to the exact requested object after authentication.
 - Authorization is server-side, not based on hidden UI.
+- Public users may browse/search, view public Routes and Carrier profiles, and complete P05 locally. Dashboard, Offers, Chat, Offer acceptance, Booking and Notifications require an account; the interrupted deep link/action is retained through authentication.
+- Customer auth is passwordless and progressive. Phone OTP remains the V1 Request-publication verification gate; email OTP/magic link and Google/Apple may later establish identity without creating password-first UX.
+- Public discovery shows city/area + country only. Exact street/postal address, location instructions and phone/contact data are limited to selected, authorized parties after Booking.
+- UI strings and localized templates will move to translation keys. Locale resolution is saved preference → supported browser locale → English; English is the canonical source/fallback. User-generated content is not auto-translated in V1.
 
 ### N01 Notifications key rules
 
@@ -230,6 +238,13 @@ Closing a Request does not later re-open the same object; repeating creates a ne
 - Lifecycle titles are count-aware: one vehicle uses “Automobilis paimtas / pristatytas”; two or more use “Automobiliai paimti / pristatyti”. Multi-location context stays compact.
 - The current shared header is public and unauthenticated, so N01 does not add a misleading global account unread count. An auth-aware customer navigation entry and server-derived count belong to the account/backend integration phase.
 - N01 does not send email, SMS or push, expose provider state, or implement notification preferences. It renders local review data for the future event-driven notification layer.
+
+### Pre-backend screen-map boundary
+
+- This architecture lock adds no new V1 screen or route and does not redesign P01–P09, M01, B01 or N01.
+- Carrier Route publishing will emit `carrierRoute.published` only after authenticated/eligible publication with capacity. A separate service creates Telegram, Facebook or WhatsApp distribution jobs; no screen calls a provider directly.
+- Telegram is the first intended automated adapter. Facebook Groups starts with a generated manual post package, and WhatsApp is future opt-in Business messaging—not arbitrary group posting.
+- External posts always deep-link to the public Route Detail and may prefill P05; authentication/contact verification remains deferred until Publish.
 
 ---
 

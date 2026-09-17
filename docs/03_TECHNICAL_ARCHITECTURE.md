@@ -1,7 +1,7 @@
 # Parvezk.lt V1 — Technical Architecture
 
 **Status:** Implementation blueprint locked; backend not yet implemented.  
-**Last consolidated:** 2026-09-11.
+**Last consolidated:** 2026-09-17.
 
 ## 1. Current stack
 
@@ -97,6 +97,8 @@ The final SQL schema may split or merge implementation details, but the followin
 - organization/membership support should not be blocked by the V1 schema even if V1 UI starts with one main carrier user
 - contact verification state
 
+Minimum Customer identity fields are `id`, `name`, `email`, `phone`, `preferred_locale`, optional `email_verified_at` and optional `phone_verified_at`. Future `spoken_languages` is optional and is not required at registration. Carrier Profile readiness includes separate `verified_carrier`, `cmr_insurance_available`, `cmr_insurance_verified`, `invoice_available` and `live_tracking_available` facts, with optional evidence/coverage/company metadata rather than fabricated UI claims.
+
 ### Carrier verification
 
 - `carrier_verifications`
@@ -108,6 +110,8 @@ The final SQL schema may split or merge implementation details, but the followin
 - `request_vehicles`
 - `request_versions`
 
+`transport_requests` may store optional `budget_amount` + `budget_currency` for the customer's overall desired transport budget. It is neither an Offer, a fixed price nor an acceptance condition.
+
 `transport_requests` owns default pickup/delivery locations and the shared pickup window. Each Request owns 1–10 ordered `request_vehicles` with a stable vehicle ID and vehicle-specific structured pickup/delivery locations, category, make/model, optional year, condition, rolling ability and photos. Vehicle locations become canonical after an override; Request defaults exist for inheritance and convenience.
 
 ### Carrier supply
@@ -115,6 +119,9 @@ The final SQL schema may split or merge implementation details, but the followin
 - `carrier_routes`
 - `route_stops`
 - `route_versions`
+- `route_distribution_jobs`
+
+Persisted Carrier Route readiness includes `route_flexible boolean`. It expresses willingness to deviate by agreement only; there is no V1 `max_detour_km` or distance-based detour matcher. Canonical future public lifecycle is `draft` → `published` → `expired`/`cancelled`; current mock “active” Routes map to `published` during persistence migration.
 
 ### Commercial flow
 
@@ -192,6 +199,13 @@ Example private operational pickup data:
 - private contact;
 - instructions.
 
+The backend schema must enforce two levels rather than relying on hidden UI:
+
+- `public_location`: city/area, country and future coordinates/structured place reference, safe for marketplace discovery and distribution;
+- optional `private_address`: street, postal code, city, country and access instructions, visible only to selected/authorized parties after Booking.
+
+Each Request/Booking vehicle pickup and delivery must be able to retain both references. The current structured `Location` model remains the public-level base and does not need a frontend migration during this architecture lock. Phone numbers and exact addresses are never included in public projections or Route distribution payloads.
+
 ## 7. Date and time model
 
 Calendar/business dates such as “pickup date Sep 16” should be represented as date-only values where appropriate, not accidentally shifted by UTC conversion.
@@ -226,7 +240,7 @@ Rules:
 - Booking acceptance atomically increases `capacity_reserved` by the Request vehicle count; eligible Booking cancellation releases the same count.
 - Available capacity never becomes negative, reservation cannot exceed available capacity, and carrier capacity cannot be reduced below `capacity_reserved`.
 - Zero available capacity derives the Full state and excludes the Route from new recommendations without deleting the Route.
-- Route may remain Active while `accepting_new_requests = false`.
+- Route may remain Published while `accepting_new_requests = false`.
 
 ## 9. Versioning model
 
@@ -366,19 +380,19 @@ Supabase Row Level Security may be used as an additional defense, not as a subst
 
 ## 14. Authentication architecture
 
-V1 target: passwordless phone OTP.
+V1 target is progressive, passwordless authentication rather than registration-first UX.
 
-Flow:
+Customer flow:
 
-- user enters phone;
-- OTP verifies;
-- existing phone logs into existing User;
-- new phone creates User;
-- redirect returns to the intended task.
+1. Browse/search/view public Route and Carrier pages without an account.
+2. Start and complete a Transport Request locally.
+3. At Publish, show “Patvirtinkite kontaktus ir paskelbkite užklausą”.
+4. Verify identity/contact and automatically create or reuse the Customer account.
+5. Preserve the pending action/deep link and publish only after authorization checks.
 
-Email verification remains separate.
+Phone verification remains required for V1 Request publication as an anti-spam/trust gate. Possible passwordless identity methods include email OTP, magic link, phone OTP, Google and Apple; no provider is selected and no traditional password/reset architecture is required. Dashboard, Offers, Chat, Offer acceptance, Booking and Notifications are authenticated surfaces.
 
-SMS provider selection is an implementation task and is not required before mock UI work begins.
+Carrier browsing is public, but authentication is required before creating/publishing a Route, submitting an Offer, messaging or managing Bookings. Carrier publication/Offer eligibility additionally uses contact, business and trust-verification policy. Provider and onboarding UI implementation remain future scope.
 
 ## 15. Storage / files
 
@@ -394,6 +408,32 @@ Requirements:
 - authorization controls access;
 - uploads validate file type/size;
 - user-facing delete should not silently destroy evidence needed for active disputes/audit/legal retention.
+
+## 15A. Internationalization architecture
+
+Canonical source/fallback locale is English (`en`). Initial locale identifiers are `en`, `lt`, `de`, `nl`, `fr`, `pl`, `ro`, `uk` and `ru`. Resolve locale in this order: saved supported `preferred_locale`, supported browser locale, English.
+
+Translation keys cover navigation, controls, forms, validation, empty states, lifecycle/status labels, system messages, Notifications, transactional email/SMS and Route-distribution templates. Normal domain entities store canonical/user-entered content once; Chat messages, carrier comments and Request notes are not machine-translated in V1. A future `spoken_languages[]` profile field is optional and separate from UI locale.
+
+Formatting adapters accept locale and use locale-aware date, number and currency formatting. Persist date-only business dates, normalized timestamps, numeric monetary amounts and ISO currency codes; do not store preformatted Lithuanian strings in domain/backend records. Existing Lithuanian frontend formatters remain unchanged until the separately scoped rollout.
+
+## 15B. Route distribution architecture
+
+`carrierRoute.published` is the domain boundary emitted after an authorized, eligible transition to `published`. Distribution processing additionally verifies available capacity > 0. Draft, ineligible or full Routes create no distribution jobs.
+
+Flow:
+
+`Carrier Route → carrierRoute.published → Route Distribution Service → channel-specific RouteDistributionJob`
+
+Canonical `RouteDistributionJob` fields are `id`, `route_id`, channel (`telegram`, `facebook`, `whatsapp`), `target_id`, `locale`, mode (`automatic`, `manual`), status (`pending`, `published`, `manual_required`, `failed`), immutable `payload_snapshot`, optional `external_post_id`, `created_at`, optional `published_at` and optional `error`. Carrier Route remains provider-agnostic.
+
+`payload_snapshot` can contain public origin/destination/waypoints, departure/date, available spaces, supported light-vehicle categories, non-running compatibility, `route_flexible`, public carrier trust indicators, localized CTA and canonical `/routes/[routeId]`. It excludes exact/private addresses and contact data. Route edits/version changes do not silently mutate historical external posts.
+
+Create one job per channel/target/locale according to distribution policy. Future processing must be idempotent, using a stable publication-event/version + channel + target + locale key. Telegram is intended as the first automated adapter; Facebook Groups use generated manual post packages unless supported capability is established; WhatsApp is future opt-in Business messaging and never assumes arbitrary group posting. No provider/API is selected or integrated by this architecture lock.
+
+## 15C. V1 vehicle-domain boundary
+
+Supported V1 categories are passenger car, SUV/crossover, van/minivan and motorcycle. Excavators, heavy/agricultural machinery, loose freight, engines/standalone cargo and heavy commercial equipment require different dimensions, weight, payload, trailer and regulatory models and remain outside V1. The existing integer capacity rule stays limited to supported light vehicles.
 
 ## 16. Notifications architecture
 

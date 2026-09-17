@@ -1,6 +1,6 @@
 # Parvezk.lt V1 — Implementation Plan
 
-**Last consolidated:** 2026-09-11.
+**Last consolidated:** 2026-09-17.
 
 ## Working strategy
 
@@ -99,12 +99,19 @@ Create the public marketplace shell in the browser before backend complexity.
 
 Connect real persistence/auth/storage without changing locked UX rules.
 
+### Locked entry order
+
+1. Establish the i18n foundation: English source/fallback, supported locale registry, translation-key boundaries and locale-aware formatting adapters. Do not attempt a full translation rollout in this step.
+2. Implement progressive passwordless Auth/User roles and publish-time Customer verification; retain public browsing and local Request drafting.
+3. Define and migrate the Supabase schema/RLS from the locked domain decisions.
+4. Move mock entities to persistence incrementally, preserving locked screen behavior.
+
 ### Tasks
 
 - provision/configure Supabase project;
 - database schema/migrations;
-- auth model;
-- phone OTP provider decision/integration;
+- progressive passwordless auth and Customer/Carrier role model;
+- publish-time phone verification and provider decision/integration;
 - email verification;
 - Storage buckets/policies;
 - server-side authorization conventions;
@@ -119,6 +126,7 @@ Connect real persistence/auth/storage without changing locked UX rules.
 - Carrier Verification / Documents
 - Transport Request / Request Versions
 - Carrier Route / Stops / Route Versions
+- Route Distribution Jobs
 - Offer / Offer Revisions
 - Booking
 - Conversation / Messages
@@ -189,6 +197,12 @@ Replace customer mock flows with live data.
 - B06 reports;
 - internal Booking activity timeline;
 - deep-link return after auth.
+- `carrierRoute.published` handling and provider-independent Route distribution job creation;
+- Telegram automated adapter only after provider selection;
+- Facebook generated/manual post package baseline;
+- future opt-in WhatsApp Business adapter.
+
+Route-distribution adapters must consume public localized payload snapshots, point to `/routes/[routeId]`, exclude exact addresses/phone numbers, and remain separate from Carrier Route persistence. Provider integration is not part of the pre-backend architecture lock.
 
 ## Phase 8 — Admin
 
