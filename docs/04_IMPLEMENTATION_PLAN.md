@@ -12,7 +12,7 @@ The first UI phases use realistic mock data in the real production component sta
 
 ### Current visual milestone
 
-P01 High-Fidelity is LOCKED after human desktop and mobile browser review. Its responsive implementation is the V1 visual baseline under D-051 and `03_TECHNICAL_ARCHITECTURE.md`. The next visual task is **P02 Search Results High-Fidelity**, separately scoped and preserving locked functionality; P03 must also use P01 as its visual reference when selected. Neither screen starts as part of the P01 documentation lock. Backend-phase ordering below remains unchanged and does not authorize backend, Auth, Supabase, i18n rollout or provider work now.
+P01 and P02 High-Fidelity are LOCKED after human desktop and mobile browser review. P01 remains the V1 visual foundation under D-051; P02 adds the results/discovery baseline under D-052, including the shared card's result variant, match/alternative treatments, compact search editor and empty-state flow. See `03_TECHNICAL_ARCHITECTURE.md` for mandatory sizing/layout rules and responsive references. The next visual task is **P03 Route Detail High-Fidelity**, separately scoped and preserving locked functionality. P03 does not start as part of this documentation lock. Backend-phase ordering below remains unchanged and does not authorize backend, Auth, Supabase, i18n rollout or provider work now.
 
 ## Phase 0 — Foundation
 

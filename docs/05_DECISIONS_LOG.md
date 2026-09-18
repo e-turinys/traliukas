@@ -264,6 +264,14 @@ This file records important product/architecture decisions that should not be ca
 
 **Reason:** Human-reviewed production UI provides a consistent, responsive marketplace baseline without maintaining a separate high-fidelity design source. This lock changes documentation only; P01 UI and behavior stay unchanged. P02 Search Results High-Fidelity is the next separately scoped visual task; no P02/P03, backend, Auth, Supabase, i18n rollout or provider work begins under this approval.
 
+### D-052 — P02 High-Fidelity and results/discovery visual baseline
+
+**Date:** 2026-09-18. **Status:** LOCKED after human desktop and mobile browser review.
+
+**Decision:** P02 High-Fidelity is approved as the V1 responsive visual reference for future search/discovery screens. Lock `MarketplaceRouteCard`'s result variant, the soft-teal qualitative match/served-segment explanation, separate neutral alternative-route treatment, compact search summary/modify-search surface, existing filters/sort presentation and the account-free empty-state Request flow. P01 remains LOCKED and unchanged. Tailwind v4 + shadcn/Base UI standard sizing is mandatory; normal responsive layouts use grid/flex/content-driven sizing without arbitrary custom pixel dimensions or fragile absolute positioning. Detailed patterns and 390/768/1280/1440px references are recorded in `03_TECHNICAL_ARCHITECTURE.md`.
+
+**Reason:** Human-reviewed production results UI establishes a consistent discovery baseline while preserving matching, capacity, multi-vehicle/multi-location rules and existing URL handoffs. This lock changes documentation only. P03 Route Detail High-Fidelity is the next separately scoped visual task; no P03, backend, Auth, Supabase, i18n rollout or provider work begins here.
+
 ## How to add a new decision
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:

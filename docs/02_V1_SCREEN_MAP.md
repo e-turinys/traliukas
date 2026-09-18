@@ -32,6 +32,8 @@ This document defines the canonical V1 screen IDs and intended URLs. Screen IDs 
 
 ### P02 Search key rules
 
+**High-Fidelity status: LOCKED** after human desktop and mobile browser review (2026-09-18). The current responsive P02 browser implementation is the V1 results/discovery visual baseline under D-052. Its compact search summary/editor, `MarketplaceRouteCard` result variant, match explanations, separate alternatives and account-free empty-state Request flow are locked; see `03_TECHNICAL_ARCHITECTURE.md`. P01 remains LOCKED and unchanged.
+
 - Search state and filters persist in URL.
 - Desktop List + Map; mobile defaults to List with Map toggle.
 - Map is lazy-loaded and supplemental.

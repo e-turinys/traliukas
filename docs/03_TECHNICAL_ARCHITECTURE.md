@@ -97,7 +97,25 @@ P01 High-Fidelity passed human desktop and mobile browser review. Its current re
 | Three-step explanatory section | P01 “Kaip tai veikia” | Compact numbered items with concise headings/descriptions; stacked mobile and three-column desktop layout. |
 | Carrier CTA surface | P01 closing section | Deep teal surface, readable light text and white content-sized action; stacked mobile and text/action desktop row. |
 
-The page-level reference is `src/app/(public)/page.tsx`; the opt-in palette is `.marketplace-theme` in `src/app/globals.css`. Trust items, section headings, steps and the CTA are reusable composition patterns, not separately extracted components. Reuse or extract them when a concrete screen needs them; do not prematurely abstract or recolor locked screens. The existing search-specific `RouteCard` remains distinct from `MarketplaceRouteCard` until P02/P03 work is explicitly scoped.
+The page-level reference is `src/app/(public)/page.tsx`; the opt-in palette is `.marketplace-theme` in `src/app/globals.css`. Trust items, section headings, steps and the CTA are reusable composition patterns, not separately extracted components. Reuse or extract them when a concrete screen needs them; do not prematurely abstract or recolor locked screens. P02 now uses the locked `MarketplaceRouteCard` result variant below; the older `RouteCard` remains unchanged for its other consumers.
+
+#### Results/discovery visual baseline — LOCKED (D-052, 2026-09-18)
+
+P02 Search Results High-Fidelity passed human desktop and mobile browser review. Its current responsive implementation is the V1 visual reference for future search/discovery screens, alongside the unchanged locked P01 foundation. It continues the Clean Marketplace + Friendly European Marketplace direction, deep teal/slate palette, Geist typography, white surfaces, subtle borders and restrained radii/shadows.
+
+| Locked pattern | Reference | Approved treatment |
+|---|---|---|
+| Compact search summary / modify search | `src/features/public/search-results.tsx`, `search-edit-form.tsx` | Compact white surface showing origin → destination, count-aware vehicle wording and date. Existing modify action reveals responsive labeled controls without an oversized hero; validation and URL handoffs are preserved. |
+| MarketplaceRouteCard result variant | `src/components/shared/marketplace-route-card.tsx` | `variant="result"` extends the shared card with route-first hierarchy, waypoints, match explanation, carrier/trust, derived availability, date window and vehicle/non-running compatibility. Detail action remains easy to tap. P01's default compact variant stays unchanged. |
+| Match explanation | Result variant | Qualitative match label and matching pickup → delivery segment in a compact soft-teal treatment, with readable wrapping. No invented scores, proximity, trust or detour logic. |
+| Alternative routes | Search results and result variant | Separate section after exact results, explanatory copy about the different delivery city, and a neutral “Galimas variantas” treatment. Alternatives must not imply an exact delivery match. |
+| Filters and sorting | `src/features/public/search-filters.tsx` | Existing compact controls with standard sizing; desktop disclosure and mobile Sheet, preserving URL state, history and filter/sort behavior. |
+| Empty-state flow | `src/components/shared/search-result-states.tsx` | “Neradome tinkamo maršruto” plus explanation and “Sukurti pervežimo užklausą” action, retaining the account-free Request handoff with existing location/date prefill. No new vehicle-count handoff is implied. |
+| Responsive results layout | Search results | Single-column cards on mobile/tablet; desktop two-thirds results and one-third supplemental, content-sized map placeholder. Mobile List/Map behavior remains. No Maps/provider integration is implied. |
+
+Tailwind v4 standard spacing/type/height/width/radius scales and shadcn/Base UI sizing remain mandatory. Normal layouts must use grid/flex and content-driven sizing, not fragile absolute positioning. Do not introduce arbitrary custom pixel dimensions. Allow longer translated labels and metadata to wrap, maintain practical touch targets and visible focus, and prevent clipping, overlap and horizontal scrolling. P02 at 390/768/1280/1440px is the responsive reference. Loading and error states follow the same palette/surface treatment.
+
+This visual lock does not change search/matching, capacity, multi-vehicle or multi-location rules. Full routes remain excluded from new matching; no false trust data or additional actions are introduced. P03 Route Detail High-Fidelity is the next separately scoped visual task, not part of this lock.
 
 ### Mobile/performance
 

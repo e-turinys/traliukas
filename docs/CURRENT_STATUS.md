@@ -1,8 +1,17 @@
 # Parvezk.lt — Current Status
 
-**Date:** 2026-09-17
+**Date:** 2026-09-18
 **P01 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. The current responsive P01 browser implementation is the approved V1 visual baseline and the visual reference for P02/P03. P01 search behavior remains locked and unchanged.
-**Next visual task:** P02 Search Results High-Fidelity, in a separately scoped task. Do not start P02/P03 or change P01 as part of this documentation lock.
+**P02 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its responsive search-results implementation is the V1 visual reference for future results/discovery screens under D-052. P01 remains LOCKED and unchanged.
+**Next visual task:** P03 Route Detail High-Fidelity, separately scoped. This documentation lock does not start P03 or any backend phase.
+
+## P02 High-Fidelity implementation — 2026-09-18
+
+- Applied the locked P01 teal/slate palette to P02, including loading/error states. Reused the unchanged public header/container and extended `MarketplaceRouteCard` with a `result` variant; the default P01 presentation is preserved. Result cards prioritize routes, waypoints, qualitative match explanations, carrier trust, availability/dates and vehicle/non-running compatibility.
+- Added count-aware search-summary wording from the existing `vehicleCount` URL value. Preserved search editing, filters, sorting, history, exact/alternative groups, route destinations and request fallback. Matching, capacity, multi-vehicle and multi-location domain logic and fixtures are unchanged. Vehicle count still has no editor control; the existing Request fallback carries locations/dates, not `vehicleCount`.
+- Desktop uses a two-thirds results list and one-third supplemental map placeholder with content-driven height. Mobile retains List/Map and filter Sheet behavior. No map provider or invented CMR/invoice/flexibility claims. Existing demonstration-data notice remains; fixed September fixtures naturally expire under existing matching rules.
+- Empty results provide “Sukurti pervežimo užklausą” with the existing account-free prefilled Request handoff. No P01 redesign, P03 implementation, backend, Auth, Supabase, persistence, full i18n or provider work. No commit or push.
+- Validation: `npm.cmd run build` passed compilation, lint and types; all 111 unit tests passed; `git diff --check` passed. `tests/search.browser.mjs` passed at 390/768/1280/1440px for results, matching segments, count labels, filter/history and sort URLs, search editing, empty/invalid states, mobile List/Map and route navigation, with no overflow/clipping or runtime exceptions. Screenshots reviewed under ignored `.next/p02-review/`. Existing P01 browser checks also passed at all four widths; P01 screenshots were visually rechecked. Review URL: `/search?from=hamburg-de&to=kaunas-lt` on the local production server at port 3000. Human desktop and mobile browser review passed; P02 High-Fidelity is LOCKED under D-052. This documentation lock does not change P01/P02 UI or behavior.
 
 ## P01 visual implementation — 2026-09-17
 
@@ -11,7 +20,7 @@
 - Human desktop and mobile browser review passed; P01 High-Fidelity is LOCKED. D-051 and the V1 visual baseline in `03_TECHNICAL_ARCHITECTURE.md` record the approved direction, mandatory layout/sizing rules and reusable patterns. No backend, Auth, Supabase, persistence, i18n rollout or provider work started. No commit or push.
 - Validation: production build passed including lint/types; all 111 unit tests passed. Headless Chrome and screenshot review covered 390/768/1280/1440px, no horizontal overflow or clipped controls, desktop control alignment, keyboard location selection, validation focus, both URL handoffs and mobile menu. `git diff --check` passed. Screenshots are in ignored `.next/p01-review/`; production review is served on port 3000. A concurrent development server was stopped after it overwrote build assets; final checks used a fresh production server.
 
-**Current phase:** P01 High-Fidelity locked; P02 Search Results High-Fidelity is the next visual task. Backend implementation has not started.
+**Current phase:** P01 and P02 High-Fidelity LOCKED; P03 Route Detail High-Fidelity is the next visual task. Backend implementation has not started.
 **Project status:** P01–P09, Multi-Vehicle, Multi-Location, Carrier Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are implemented, browser-reviewed and LOCKED. The pre-backend Route Distribution, i18n, location privacy, optional budget, carrier trust, light-vehicle scope and progressive Customer/Carrier authentication decisions are also LOCKED. Real authentication, backend, Supabase, persistence, realtime messaging, provider integrations and full translation rollout have not started.
 
 ## Final pre-backend architecture lock — 2026-09-17
@@ -232,7 +241,7 @@
 
 ## Immediate next task
 
-**Next visual task = P02 Search Results High-Fidelity.** Use the human-approved responsive P01 implementation and D-051 as the visual reference while preserving locked P02 product behavior. P01 remains LOCKED; P02 and P03 have not started their high-fidelity passes. This documentation task does not authorize implementation of either screen.
+**Next visual task = P03 Route Detail High-Fidelity.** Use the locked P01 visual language and P02 results/discovery patterns while preserving P03 product behavior. P01 and P02 remain LOCKED and unchanged. P03 implementation is not started or authorized by this documentation-only lock; begin only in a separately scoped task.
 
 The later backend-phase order remains **i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence**, with each phase separately scoped. Do not start any of these phases or provider work from this visual lock.
 

@@ -15,8 +15,8 @@ export function SearchSelect({ label, value, options, onChange }: {
   return <div className="min-w-0 space-y-2">
     <Label htmlFor={id}>{label}</Label>
     <Select value={value} onValueChange={(next) => { if (next !== null) onChange(next) }} items={options}>
-      <SelectTrigger id={id} className="min-h-11 w-full"><SelectValue /></SelectTrigger>
-      <SelectContent>{options.map((option) => <SelectItem key={option.value} value={option.value} className="min-h-11">{option.label}</SelectItem>)}</SelectContent>
+      <SelectTrigger id={id} className="min-h-11 w-full whitespace-normal bg-card data-[size=default]:h-auto"><SelectValue className="line-clamp-none" /></SelectTrigger>
+      <SelectContent className="marketplace-theme">{options.map((option) => <SelectItem key={option.value} value={option.value} className="min-h-11 [&>span]:shrink [&>span]:whitespace-normal">{option.label}</SelectItem>)}</SelectContent>
     </Select>
   </div>
 }
@@ -56,8 +56,8 @@ export function SearchFilters({ query, apply }: { query: string; apply: (params:
       <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm"><input type="checkbox" checked={nonRunning} onChange={(event) => setNonRunning(event.target.checked)} className="size-5 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" />Gali vežti nevažiuojantį automobilį</label>
     </div>
     <div className="flex flex-col gap-2 sm:flex-row">
-      <Button type="submit" className="min-h-11">Taikyti filtrus</Button>
-      <Button type="button" variant="ghost" className="min-h-11" onClick={() => {
+      <Button type="submit" className="h-auto min-h-11 whitespace-normal px-6 py-2 hover:bg-teal-800">Taikyti filtrus</Button>
+      <Button type="button" variant="ghost" className="h-auto min-h-11 whitespace-normal px-4 py-2" onClick={() => {
         ["verified", "rating", "vehicle", "nonRunning"].forEach((key) => params.delete(key))
         writeDate(params, { type: "anytime" })
         apply(params)

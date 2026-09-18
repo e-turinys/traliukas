@@ -32,16 +32,19 @@ export function SearchEditForm({ query, onSubmit }: { query: string; onSubmit: (
   }
   return <form onSubmit={submit} noValidate className="space-y-4">
     <p className="text-sm text-muted-foreground">Pasirinkite paėmimo ir pristatymo vietas. Datos nurodyti nebūtina.</p>
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-4">
       {(["from", "to"] as const).map((key) => <div key={key} className="min-w-0 space-y-2">
         <LocationPicker id={`${id}-${key}`} label={key === "from" ? "Iš kur?" : "Į kur?"} value={key === "from" ? from : to} onValueChange={key === "from" ? setFrom : setTo} required invalid={submitted && !!errors[key]} describedBy={submitted && errors[key] ? `${id}-${key}-error` : undefined} />
         {submitted && errors[key] && <p id={`${id}-${key}-error`} role="alert" className="text-sm text-destructive">{errors[key]}</p>}
       </div>)}
-      <div className="space-y-2">
+      <div className="min-w-0 space-y-2 [&_button]:flex">
         <DateWindowPicker id={`${id}-date`} label="Kada?" value={date} onValueChange={setDate} invalid={submitted && !!errors.date} describedBy={submitted && errors.date ? `${id}-date-error` : undefined} />
         {submitted && errors.date && <p id={`${id}-date-error`} role="alert" className="text-sm text-destructive">{errors.date}</p>}
       </div>
+      <div className="space-y-2">
+        <span aria-hidden="true" className="hidden text-sm leading-none md:block">&nbsp;</span>
+        <Button type="submit" disabled={!!errors.from || !!errors.to} className="h-auto min-h-11 w-full whitespace-normal px-6 py-2 hover:bg-teal-800">Rasti vežėją</Button>
+      </div>
     </div>
-    <Button type="submit" disabled={!!errors.from || !!errors.to} className="min-h-11 w-full md:w-auto">Rasti vežėją</Button>
   </form>
 }
