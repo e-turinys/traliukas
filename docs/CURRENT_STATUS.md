@@ -3,7 +3,21 @@
 **Date:** 2026-09-18
 **P01 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. The current responsive P01 browser implementation is the approved V1 visual baseline and the visual reference for P02/P03. P01 search behavior remains locked and unchanged.
 **P02 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its responsive search-results implementation is the V1 visual reference for future results/discovery screens under D-052. P01 remains LOCKED and unchanged.
-**Next visual task:** P03 Route Detail High-Fidelity, separately scoped. This documentation lock does not start P03 or any backend phase.
+**P03 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its route-detail patterns are part of the V1 visual baseline under D-053. P01/P02 remain LOCKED and unchanged.
+**Next visual task:** P04 Carrier Profile High-Fidelity, separately scoped. This documentation lock does not start P04 or any backend phase.
+
+## P03 High-Fidelity implementation — 2026-09-18
+
+- Applied the locked P01/P02 teal/slate, Geist and white bordered-surface treatment to Route Detail and its existing not-found state. Reused the unchanged PublicHeader, PageContainer, Button, Card/CardContent and CarrierTrust. Refined RouteDetail and the existing RouteStopList; no new UI component abstraction was needed.
+- Route-first summary shows the existing ordered waypoints, dates and availability. RouteStopList now uses a semantic ordered list with flex columns and content-driven connector lines, with stronger endpoints; no absolute positioning, fixed card heights, map or arbitrary pixel dimensions.
+- Standard responsive grid gives desktop main content plus a sticky action sidebar. On mobile, the action card stays in normal document flow. Capabilities, carrier verification/rating/completed transports and completed-transport review previews use only existing data. Carrier profile and back-to-search links are unchanged.
+- Canonical capacity and availability helpers, fixtures, date semantics and request URL construction are unchanged. Available routes retain the targeted CTA and complete location/date/carrier/route handoff; expired or closed non-full routes retain the existing marketplace fallback. Full routes remain directly viewable without a new Request CTA. Browsing and starting a Request remain account-free.
+- The current runtime model does not expose routeFlexible, search-match context or extra CMR/invoice/tracking attributes, so no values or indicators were fabricated. Only public city/country location data is shown. Fixed September fixtures still expire naturally under existing rules.
+- Validation: production build passed compilation, lint and types; all 111 unit tests passed. `tests/route-detail.browser.mjs` passed at 390/768/1280/1440px for available/full/expired/new-carrier/unknown states, ordered stops, capacity, unclipped content, desktop/mobile sidebar behavior, keyboard Request handoff, carrier/back navigation, HTTP 404 and no runtime exceptions. Screenshots were visually inspected under ignored `.next/p03-review/`. A tablet heading line-height issue found during review was corrected using standard Tailwind leading.
+- Existing P01 and P02 browser suites also passed at all four widths. `git diff --check` passed; changes are limited to P03 presentation, its timeline, focused browser checks and this status document.
+- Human review: `/routes/vakaru-kryptis-0918` (available), `/routes/manto-transportas-0917` (new carrier), `/routes/baltijos-kelias-0920-full` (full), `/routes/baltijos-kelias-0915` (expired) and `/routes/unknown` (not found), on the local production server at port 3000. Human desktop and mobile browser review passed; P03 High-Fidelity is LOCKED under D-053. This documentation-only lock changes no P01/P02/P03 UI or behavior.
+- Locked patterns: route-first hierarchy, route timeline, compact capabilities, evidence-backed carrier trust, sticky desktop action card, normal-flow mobile action card and capacity/full-route UI. Tailwind v4 + shadcn/Base UI standard sizing and grid/flex/content-driven responsive layouts remain mandatory; arbitrary custom pixel dimensions are prohibited. See `03_TECHNICAL_ARCHITECTURE.md` for the approved baseline.
+- No P01/P02 redesign, P04 high-fidelity, domain changes, backend, Auth, Supabase, persistence, i18n rollout, Maps or provider work. No commit or push.
 
 ## P02 High-Fidelity implementation — 2026-09-18
 
@@ -20,7 +34,7 @@
 - Human desktop and mobile browser review passed; P01 High-Fidelity is LOCKED. D-051 and the V1 visual baseline in `03_TECHNICAL_ARCHITECTURE.md` record the approved direction, mandatory layout/sizing rules and reusable patterns. No backend, Auth, Supabase, persistence, i18n rollout or provider work started. No commit or push.
 - Validation: production build passed including lint/types; all 111 unit tests passed. Headless Chrome and screenshot review covered 390/768/1280/1440px, no horizontal overflow or clipped controls, desktop control alignment, keyboard location selection, validation focus, both URL handoffs and mobile menu. `git diff --check` passed. Screenshots are in ignored `.next/p01-review/`; production review is served on port 3000. A concurrent development server was stopped after it overwrote build assets; final checks used a fresh production server.
 
-**Current phase:** P01 and P02 High-Fidelity LOCKED; P03 Route Detail High-Fidelity is the next visual task. Backend implementation has not started.
+**Current phase:** P01, P02 and P03 High-Fidelity LOCKED; next visual task is P04 Carrier Profile High-Fidelity. Backend implementation has not started.
 **Project status:** P01–P09, Multi-Vehicle, Multi-Location, Carrier Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are implemented, browser-reviewed and LOCKED. The pre-backend Route Distribution, i18n, location privacy, optional budget, carrier trust, light-vehicle scope and progressive Customer/Carrier authentication decisions are also LOCKED. Real authentication, backend, Supabase, persistence, realtime messaging, provider integrations and full translation rollout have not started.
 
 ## Final pre-backend architecture lock — 2026-09-17
@@ -241,7 +255,7 @@
 
 ## Immediate next task
 
-**Next visual task = P03 Route Detail High-Fidelity.** Use the locked P01 visual language and P02 results/discovery patterns while preserving P03 product behavior. P01 and P02 remain LOCKED and unchanged. P03 implementation is not started or authorized by this documentation-only lock; begin only in a separately scoped task.
+**Next visual task = P04 Carrier Profile High-Fidelity.** P01, P02 and P03 remain LOCKED and unchanged. P04 implementation is not started by this documentation-only lock; begin only in a separately scoped task. No backend, Auth, Supabase, i18n rollout or provider work is authorized here.
 
 The later backend-phase order remains **i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence**, with each phase separately scoped. Do not start any of these phases or provider work from this visual lock.
 

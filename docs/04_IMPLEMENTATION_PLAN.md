@@ -12,7 +12,7 @@ The first UI phases use realistic mock data in the real production component sta
 
 ### Current visual milestone
 
-P01 and P02 High-Fidelity are LOCKED after human desktop and mobile browser review. P01 remains the V1 visual foundation under D-051; P02 adds the results/discovery baseline under D-052, including the shared card's result variant, match/alternative treatments, compact search editor and empty-state flow. See `03_TECHNICAL_ARCHITECTURE.md` for mandatory sizing/layout rules and responsive references. The next visual task is **P03 Route Detail High-Fidelity**, separately scoped and preserving locked functionality. P03 does not start as part of this documentation lock. Backend-phase ordering below remains unchanged and does not authorize backend, Auth, Supabase, i18n rollout or provider work now.
+P01, P02 and P03 High-Fidelity are LOCKED after human desktop and mobile browser review. P01 remains the V1 visual foundation under D-051; P02 adds the results/discovery baseline under D-052. P03 adds the route-detail baseline under D-053: route-first hierarchy, flex timeline, compact capabilities and carrier trust, sticky desktop action card, normal-flow mobile action card and preserved capacity/full-route behavior. See `03_TECHNICAL_ARCHITECTURE.md` for mandatory standard sizing, grid/flex/content-driven layout rules and responsive references; arbitrary custom pixel dimensions are prohibited. The next visual task is **P04 Carrier Profile High-Fidelity**, separately scoped and preserving locked functionality. This documentation lock changes no P01/P02/P03 UI and does not start P04. Backend-phase ordering below remains unchanged and does not authorize backend, Auth, Supabase, i18n rollout or provider work now.
 
 ## Phase 0 — Foundation
 

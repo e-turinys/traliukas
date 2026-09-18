@@ -272,6 +272,14 @@ This file records important product/architecture decisions that should not be ca
 
 **Reason:** Human-reviewed production results UI establishes a consistent discovery baseline while preserving matching, capacity, multi-vehicle/multi-location rules and existing URL handoffs. This lock changes documentation only. P03 Route Detail High-Fidelity is the next separately scoped visual task; no P03, backend, Auth, Supabase, i18n rollout or provider work begins here.
 
+### D-053 — P03 High-Fidelity and route-detail visual baseline
+
+**Date:** 2026-09-18. **Status:** LOCKED after human desktop and mobile browser review.
+
+**Decision:** P03 High-Fidelity is approved as part of the V1 design baseline. Lock the route-first detail hierarchy, flex-based ordered timeline, compact transport capabilities, evidence-backed carrier trust/reviews, sticky desktop action card and normal-document-flow mobile action card. Preserve canonical capacity/full-route presentation, unavailable/not-found states and existing account-free Request handoffs. P01 and P02 remain LOCKED and unchanged. Tailwind v4 + shadcn/Base UI standard sizing is mandatory; responsive layouts use grid/flex/content-driven sizing. Arbitrary custom pixel dimensions and fragile absolute-positioned layouts are prohibited. Detailed patterns and responsive references are recorded in `03_TECHNICAL_ARCHITECTURE.md`.
+
+**Reason:** Human-reviewed production Route Detail establishes a consistent destination from the locked results UI without altering domain, privacy or acquisition rules. This lock changes documentation only. P04 Carrier Profile High-Fidelity is the next separately scoped visual task; no P04 implementation, backend, Auth, Supabase, i18n rollout or provider work begins here.
+
 ## How to add a new decision
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:

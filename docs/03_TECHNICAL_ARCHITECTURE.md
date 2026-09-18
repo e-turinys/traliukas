@@ -117,6 +117,24 @@ Tailwind v4 standard spacing/type/height/width/radius scales and shadcn/Base UI 
 
 This visual lock does not change search/matching, capacity, multi-vehicle or multi-location rules. Full routes remain excluded from new matching; no false trust data or additional actions are introduced. P03 Route Detail High-Fidelity is the next separately scoped visual task, not part of this lock.
 
+#### Route-detail visual baseline — LOCKED (D-053, 2026-09-18)
+
+P03 Route Detail High-Fidelity passed human desktop and mobile browser review. Its current responsive browser implementation is part of the V1 design baseline, continuing the Clean Marketplace + Friendly European Marketplace direction, deep teal/slate palette, Geist typography, white surfaces, subtle borders and restrained radii. P01 and P02 remain LOCKED and unchanged.
+
+| Locked pattern | Reference | Approved treatment |
+|---|---|---|
+| Route-first detail hierarchy | `src/features/public/route-detail.tsx` | Route title is strongest, followed by ordered waypoint summary, existing dates and availability. Route information precedes carrier content; no decorative hero. |
+| Route timeline | `src/components/shared/route-stop-list.tsx` | Semantic ordered list, numbered markers, stronger origin/destination and secondary waypoints. Flex columns and content-driven connector lines; public city/country only, no map or absolute positioning. |
+| Transport capabilities | RouteDetail | Compact supported-category rows and restrained running/non-running copy, using only current route data. |
+| Carrier trust | RouteDetail and unchanged `CarrierTrust` | Public carrier identity, evidence-backed verification, rating/review count and completed transports; compact icon/text rows, completed-transport review previews and existing profile navigation. No invented trust attributes. |
+| Desktop action card | RouteDetail | Standard two-column grid composition with a sticky sidebar containing availability, dates, compatibility and the existing Request action. Content determines height. |
+| Mobile action card | RouteDetail | Single-column presentation with the action card in normal document flow; no fixed or sticky mobile action bar. Buttons wrap and grow with content. |
+| Capacity/unavailable states | RouteDetail and existing availability helpers | Available capacity remains `max(0, capacityTotal - capacityReserved)`. Full routes show “Maršrutas pilnas” and no new Request CTA. Expired/closed non-full routes preserve the existing marketplace fallback; unknown IDs retain the not-found flow. |
+
+Tailwind v4 and shadcn/Base UI standard sizing remains mandatory. Responsive layouts must use grid/flex/content-driven sizing; arbitrary custom pixel dimensions and fragile absolute-positioned layouts are prohibited. Preserve practical touch targets, visible focus, readable wrapping and the reviewed 390/768/1280/1440px behavior.
+
+The targeted Request CTA, location/date/carrier/route URL handoff, account-free browsing/drafting and public-location privacy remain unchanged. The runtime model does not expose search-match context, route flexibility or extra CMR/invoice/tracking attributes; this approval does not authorize inventing them. P04 Carrier Profile High-Fidelity is the next separately scoped visual task. No P04 implementation, backend, Auth, Supabase, i18n rollout or provider work starts with this lock.
+
 ### Mobile/performance
 
 - Customer and Carrier UI: mobile-first.

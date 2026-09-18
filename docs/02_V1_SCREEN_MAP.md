@@ -46,6 +46,8 @@ This document defines the canonical V1 screen IDs and intended URLs. Screen IDs 
 
 ### P03 Route detail key rules
 
+**High-Fidelity status: LOCKED** after human desktop and mobile browser review (2026-09-18). D-053 records the route-first hierarchy, flex timeline, compact capabilities, evidence-backed carrier trust, sticky desktop action card and normal-flow mobile action card as part of the V1 visual baseline. Capacity/full-route states and existing Request handoffs remain locked; see `03_TECHNICAL_ARCHITECTURE.md`. P01 and P02 remain LOCKED and unchanged. Do not redesign P03 under subsequent screen work.
+
 - Route information precedes carrier marketing.
 - Show planned route, dates, capacity, vehicle compatibility, carrier trust.
 - Public route does not expose live GPS.
