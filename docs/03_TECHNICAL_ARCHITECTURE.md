@@ -135,6 +135,24 @@ Tailwind v4 and shadcn/Base UI standard sizing remains mandatory. Responsive lay
 
 The targeted Request CTA, location/date/carrier/route URL handoff, account-free browsing/drafting and public-location privacy remain unchanged. The runtime model does not expose search-match context, route flexibility or extra CMR/invoice/tracking attributes; this approval does not authorize inventing them. P04 Carrier Profile High-Fidelity is the next separately scoped visual task. No P04 implementation, backend, Auth, Supabase, i18n rollout or provider work starts with this lock.
 
+#### Carrier-profile visual baseline — LOCKED (D-054, 2026-09-18)
+
+P04 Carrier Profile High-Fidelity passed human desktop and mobile browser review. Its current responsive browser implementation is part of the V1 design baseline, continuing Clean Marketplace + Friendly European Marketplace, deep teal/slate, Geist, white surfaces, subtle borders and restrained radii/shadows. P01/P02/P03 remain LOCKED and unchanged.
+
+| Locked pattern | Reference | Approved treatment |
+|---|---|---|
+| Compact carrier identity | `src/features/public/carrier-profile.tsx` | Public carrier name leads a compact hero, followed by verified/reputation summary and the existing routes-anchor or Request action. No invented logo/photo. |
+| Verified/reputation summary | Unchanged `CarrierTrust` | Evidence-backed verification, rating/review count and completed transports. New carriers show no invented rating or reviews. |
+| Public-safe information and trust cards | CarrierPublicProfile | Existing description, registration country where present and service countries; restrained bordered verification card with icon/text and explanatory copy. No fabricated CMR, invoice or tracking claims. |
+| Transport capabilities | CarrierPublicProfile | P03-style compact category rows and restrained non-running text, explicitly scoped to current active routes. Derived from existing route data and omitted when no active routes exist; not a fabricated carrier-wide capability record. |
+| Active routes | `MarketplaceRouteCard` | Existing result styling with opt-in `context="profile"` suppressing repeated carrier identity/trust. Preserve dates, canonical capacity, compatibility, detail links and active-route eligibility. Default discovery rendering remains unchanged. Empty routes retain the existing Request flow. |
+| Reviews | CarrierPublicProfile, following P03 | Author, numeric star rating, comment, completed-transport marker and readable date in white bordered cards; preserve existing filtering, ordering and preview limit. No artificial rating categories or additional reviews. |
+| Responsive profile layout | CarrierPublicProfile | Desktop two-column marketplace layout: two-thirds main routes/reviews and one-third public information/trust/capabilities. Mobile stacks in normal document flow with single-column route/review cards. Reference widths: 390/768/1280/1440px. |
+
+P04 remains public and account-free. Do not expose phone, email, private exact address, documents, internal data or private Booking/customer information. Only existing public review previews are rendered. No pre-offer messaging CTA: chat starts only after a Carrier submits an Offer. Existing route and Request navigation remains unchanged.
+
+Tailwind v4 + shadcn/Base UI standard sizing is mandatory. Use grid/flex/content-driven responsive layouts, practical touch targets and wrapping text/buttons. Arbitrary custom pixel dimensions, fragile absolute positioning and fixed content heights are prohibited. P05 Create Request High-Fidelity is the next separately scoped visual task; this lock starts no P05, backend, Auth, Supabase, i18n rollout or provider implementation.
+
 ### Mobile/performance
 
 - Customer and Carrier UI: mobile-first.

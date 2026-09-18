@@ -59,6 +59,8 @@ This document defines the canonical V1 screen IDs and intended URLs. Screen IDs 
 
 ### P04 Carrier profile key rules
 
+**High-Fidelity status: LOCKED** after human desktop and mobile browser review (2026-09-18). D-054 records the compact identity/reputation summary, public-safe information and restrained trust/capability cards, MarketplaceRouteCard reuse, P03-style reviews, desktop two-column profile and normal-flow mobile stacking as part of the V1 visual baseline. See `03_TECHNICAL_ARCHITECTURE.md` for mandatory sizing/layout and privacy rules. P01/P02/P03 remain LOCKED and unchanged; do not redesign P04 under subsequent screen work.
+
 - Shows public profile, current verification details, active routes, verified Booking reviews.
 - No phone/email/private documents/direct open message action.
 - New carrier without reviews is “Naujas vežėjas”, not rating 0.0.

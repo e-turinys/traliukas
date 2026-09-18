@@ -17,13 +17,14 @@ const copy = {
 type MarketplaceRouteCardProps = {
   route: CarrierRoute
   variant?: "compact" | "result"
+  context?: "discovery" | "profile"
   level?: MatchLevel
   servedSegment?: { from: LocationOption; to: LocationOption }
 }
 
 const matchLabels = { excellent: "Puikiai tinka", good: "Gerai tinka", possible: "Galimas variantas" }
 
-export function MarketplaceRouteCard({ route, variant = "compact", level, servedSegment }: MarketplaceRouteCardProps) {
+export function MarketplaceRouteCard({ route, variant = "compact", context = "discovery", level, servedSegment }: MarketplaceRouteCardProps) {
   const result = variant === "result"
   const spaces = getAvailableCapacity(route)
   const plural = new Intl.PluralRules("lt-LT").select(spaces)
@@ -43,14 +44,14 @@ export function MarketplaceRouteCard({ route, variant = "compact", level, served
             {servedSegment && <p>Tinka jūsų kelionei: <strong className="font-medium">{servedSegment.from.city} → {servedSegment.to.city}</strong></p>}
             {level === "possible" && <p>Pristatymo miestas skiriasi. Dėl pristatymo reikia tartis su vežėju.</p>}
           </div>}
-          <div className={result ? "flex flex-wrap items-center gap-x-4 gap-y-2 border-y py-4" : "space-y-2 border-y py-4"}>
+          {context !== "profile" && <div className={result ? "flex flex-wrap items-center gap-x-4 gap-y-2 border-y py-4" : "space-y-2 border-y py-4"}>
             <p className="font-medium">{route.carrier.name}</p>
             {route.carrier.verification === "approved" && <p className="flex items-center gap-2 text-sm text-primary"><BadgeCheck aria-hidden="true" className="size-4 shrink-0" />{copy.verified}</p>}
             {route.carrier.reviewCount > 0 && route.carrier.rating !== null ? (
               <p className="flex items-center gap-2 text-sm text-muted-foreground"><Star aria-hidden="true" className="size-4 shrink-0" /><span><strong className="font-medium text-foreground">{route.carrier.rating.toLocaleString("lt-LT")}</strong> · {result ? formatCount(route.carrier.reviewCount, { one: "atsiliepimas", few: "atsiliepimai", other: "atsiliepimų" }) : <>{route.carrier.reviewCount} {copy.reviews}</>}</span></p>
             ) : <p className="text-sm text-muted-foreground">{copy.newCarrier}</p>}
             {result && route.carrier.completedTransports > 0 && <p className="text-sm text-muted-foreground">Užbaigti pervežimai: {route.carrier.completedTransports}</p>}
-          </div>
+          </div>}
           <div className={result ? "grid gap-3 text-sm sm:grid-cols-2" : "space-y-3 text-sm"}>
             <p className="flex items-center gap-2 font-medium"><Car aria-hidden="true" className="size-4 shrink-0 text-primary" />{spaces} {spaceLabel}</p>
             <p className="flex items-start gap-2 text-muted-foreground"><CalendarDays aria-hidden="true" className="size-4 shrink-0" /><span>{formatDateRange(route.dateFrom, route.dateTo)}</span></p>

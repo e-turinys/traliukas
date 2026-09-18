@@ -280,6 +280,14 @@ This file records important product/architecture decisions that should not be ca
 
 **Reason:** Human-reviewed production Route Detail establishes a consistent destination from the locked results UI without altering domain, privacy or acquisition rules. This lock changes documentation only. P04 Carrier Profile High-Fidelity is the next separately scoped visual task; no P04 implementation, backend, Auth, Supabase, i18n rollout or provider work begins here.
 
+### D-054 — P04 High-Fidelity and carrier-profile visual baseline
+
+**Date:** 2026-09-18. **Status:** LOCKED after human desktop and mobile browser review.
+
+**Decision:** P04 High-Fidelity is approved as part of the V1 design baseline. Lock compact carrier identity and verified/reputation summary, public-safe information, restrained trust cards, active-route capability treatment, MarketplaceRouteCard profile reuse, P03-style reviews, desktop two-column marketplace layout and normal-flow mobile stacking. No public phone/email/private address or pre-offer messaging CTA. Preserve active-route eligibility, capacity, review data and existing account-free route/Request actions. P01/P02/P03 remain LOCKED and unchanged. Tailwind v4 + shadcn/Base UI standard sizing and grid/flex/content-driven responsive layouts are mandatory; arbitrary custom pixel dimensions are prohibited. Detailed patterns are recorded in `03_TECHNICAL_ARCHITECTURE.md`.
+
+**Reason:** Human-reviewed production Carrier Profile completes the trust-focused destination from P03 without changing domain, privacy or acquisition behavior. This lock changes documentation only. P05 Create Request High-Fidelity is next, separately scoped; no P05, backend, Auth, Supabase, i18n rollout or provider work starts here.
+
 ## How to add a new decision
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:
