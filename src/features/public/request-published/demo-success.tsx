@@ -16,7 +16,7 @@ export function DemoRequestSuccess({ id, initialSummary }: { id: string; initial
         setSummary(current => ({ ...current, visibility: "marketplace" }))
         status.current?.focus()
       }} />
-      <p ref={status} role="status" tabIndex={-1} className={expanded ? "rounded-lg border p-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" : "sr-only"}>
+      <p ref={status} role="status" tabIndex={-1} className={expanded ? "rounded-lg border border-primary/20 bg-secondary p-4 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring" : "sr-only"}>
         {expanded ? "Užklausą mato ir kiti tinkami vežėjai." : ""}
       </p>
     </div>

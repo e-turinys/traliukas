@@ -88,6 +88,10 @@ The form remains usable locally without an account. Authentication/contact confi
 
 ### P06 Published key rules
 
+**High-Fidelity status: LOCKED** after human desktop and mobile browser review (2026-09-19). D-056 records the restrained confirmation, compact route-first Request summary, concise three-step “Kas toliau?” explanation, primary Request Detail CTA and secondary return-home action as part of the V1 visual baseline. No excessive celebration graphics or promise of real notification delivery. Standard sizing and responsive layout rules are recorded in `03_TECHNICAL_ARCHITECTURE.md`. P01–P05 remain LOCKED and unchanged; do not visually redesign P06 under subsequent screen work. P07 Request Detail + Offers High-Fidelity is next, separately scoped.
+
+**Implementation boundary:** P05 still stops at the local phone-verification/demo boundary without publication. P06 resolves explicit demo fixtures; it does not represent real backend persistence. Local visibility expansion resets on reload and sends no notifications; delivery providers are unimplemented. Optional Request budget remains architecture-locked but absent from actual Request domain/state, deferred to real Request domain/backend work.
+
 Success state only. No fake “X carriers notified” claims.
 
 Summary supports 1–10 vehicles and same-route, multiple-pickup, multiple-delivery or mixed-location Requests using shared compact summaries. It does not expose vehicle photos.

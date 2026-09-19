@@ -17,10 +17,10 @@ export default async function PublishedRequestPage({ params }: PageProps<"/reque
   // Format calendar dates on the server; only public display strings reach the client.
   const summary = publishedRequestSummary(request)
   return (
-    <PageContainer className="py-8 sm:py-12">
-      <div className="mx-auto w-full min-w-0 max-w-xl">
+    <div className="marketplace-theme bg-background text-foreground"><PageContainer className="py-8 sm:py-12">
+      <div className="mx-auto w-full min-w-0 max-w-3xl">
         <DemoRequestSuccess key={id} id={id} initialSummary={summary} />
       </div>
-    </PageContainer>
+    </PageContainer></div>
   )
 }

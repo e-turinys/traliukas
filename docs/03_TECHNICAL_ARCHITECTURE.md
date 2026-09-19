@@ -175,6 +175,24 @@ References: `src/app/(public)/request/new/page.tsx`, `src/features/public/create
 
 P06 Published Success High-Fidelity is the next separately scoped visual task. This documentation lock starts no application, backend, Auth, Supabase, i18n rollout, provider or storage work.
 
+#### Published-success visual baseline — LOCKED (D-056, 2026-09-19)
+
+P06 Published Success High-Fidelity passed human desktop and mobile browser review. Its responsive implementation at 390/768/1280/1440px is part of the V1 visual baseline alongside locked P01–P05. Preserve the existing Clean Marketplace + Friendly European Marketplace direction, deep teal/slate palette, Geist and white bordered surfaces.
+
+| Locked pattern | Approved treatment and behavior |
+|---|---|
+| Restrained success confirmation | Modest Lucide check in a soft-teal surface, semantic success heading and concise supporting copy. Preserve marketplace/targeted wording; no oversized illustrations, confetti, gradients or excessive celebration graphics. |
+| Compact published Request summary | Route-first hierarchy with canonical aggregate location summary, shared pickup date/window, audience, vehicle count and each vehicle's public display line/route. Exclude private exact addresses, contacts, notes and photos. |
+| “Kas toliau?” | Three concise steps: carrier review, offers visible in the Request, carrier selection. Horizontal desktop grid and stacked mobile list; no pre-Offer messaging or promise of real notifications/provider delivery. |
+| Primary/secondary actions | Existing “Peržiūrėti mano užklausą” → `/requests/[id]`; “Grįžti į pradžią” → `/`. Content-sized desktop actions and full-width mobile treatment; no invented Dashboard action. |
+| Demo/local visibility | Preserve targeted-only expansion, heading/audience update, accessible status focus/announcement and reset on reload. Explicit fixture lookup, noindex/nofollow and unknown-ID not-found behavior remain unchanged. |
+
+References: `src/app/(public)/request/[id]/published/page.tsx` and `src/features/public/request-published/`. Reuse PublicHeader, PageContainer, Button, Card/CardContent and Lucide. Tailwind v4 + shadcn/Base UI standard sizing is mandatory. Use responsive grid/flex/content-driven layouts with natural wrapping, visible focus and practical touch targets. Arbitrary custom pixel dimensions, fragile absolute positioning and fixed content heights are prohibited.
+
+**Known gaps preserved:** P05 publication still stops at the current local phone-verification/demo boundary without sending a code or publishing. P06 is a demo published state, not real backend persistence; visibility expansion does not save or notify. Notification delivery providers are not implemented. Optional Request budget remains ARCHITECTURE-LOCKED but NOT YET IMPLEMENTED in actual Request domain/state and belongs to later real Request domain/backend work. This visual lock adds no budget UI or Auth/backend integration.
+
+P01–P06 UI/behavior remain unchanged by this documentation lock. P07 Request Detail + Offers High-Fidelity is next, separately scoped; no P07 implementation or backend/Auth/Supabase/i18n/provider work starts here.
+
 ### Mobile/performance
 
 - Customer and Carrier UI: mobile-first.

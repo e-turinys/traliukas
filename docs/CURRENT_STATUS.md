@@ -6,7 +6,20 @@
 **P03 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its route-detail patterns are part of the V1 visual baseline under D-053. P01/P02 remain LOCKED and unchanged.
 **P04 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its carrier-profile patterns are part of the V1 visual baseline under D-054. P01/P02/P03 remain LOCKED and unchanged.
 **P05 High-Fidelity = LOCKED.** Human desktop/mobile review and the correction pass are approved. Its Request-wizard patterns are part of the V1 visual baseline under D-055. P01–P04 remain LOCKED and unchanged.
-**Next visual task:** P06 Published Success High-Fidelity, separately scoped. This documentation lock does not start P06 implementation.
+**P06 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its published-success patterns are part of the V1 visual baseline under D-056. P01–P05 remain LOCKED and unchanged.
+**Next visual task:** P07 Request Detail + Offers High-Fidelity, separately scoped. This documentation lock does not start P07 implementation.
+
+## P06 High-Fidelity implementation — 2026-09-19
+
+- Applied the existing marketplace theme, focused `max-w-3xl` content width, white bordered Card, restrained teal check indicator, standard Tailwind spacing and responsive content-driven layout. Reused unchanged PublicHeader, PageContainer, Button, Card/CardContent and Lucide icons; extended the existing RequestSuccessCard/DemoRequestSuccess without adding a new component abstraction.
+- Preserved marketplace/targeted success headings and supporting copy from `publicationCopy`. The route-first summary displays the existing canonical aggregate route, shared pickup date, audience, vehicle count and every vehicle's public display line/route. No private addresses, contacts, notes or photos enter this presentation; fixtures, summary helpers and Request domain logic are unchanged.
+- Added a concise three-step explanation: carrier review, offers visible in the Request, then carrier selection. No pre-Offer messaging or provider-delivery promises. Primary “Peržiūrėti mano užklausą” still opens `/requests/[id]`; secondary “Grįžti į pradžią” still opens `/`. No Dashboard or new-request action was invented.
+- Targeted-only local visibility expansion retains the existing action, heading/audience change, status focus/announcement and reset on reload. Its status surface follows the same quiet teal treatment. All six explicit fixtures and unknown-ID not-found behavior remain unchanged; pages retain noindex/nofollow.
+- **Known gap unchanged:** P05 still stops at the local phone-verification boundary without sending a code or publishing. P06 is an explicit demo published state, not a real P05 publication result. Visibility expansion does not persist or notify carriers. Real Auth, verification, publication, persistence and notification delivery remain unimplemented. The optional Request budget gap recorded under P05 remains deferred to real Request domain/backend work.
+- Validation: `npm.cmd run build` passed compilation, lint and types; all 114 unit tests passed. New `tests/request-published.browser.mjs` passed for all six fixtures at 390/768/1280/1440px: summary/date/vehicle accuracy, real Request Detail navigation, home navigation, keyboard expansion and focus, reload reset, noindex, no clipping/overflow, unknown-ID HTTP 404 and no runtime exceptions. Screenshots in ignored `.next/p06-review/` were visually inspected at all four widths. `git diff --check` passed.
+- Review URLs: `/request/marketplace-demo-001/published`, `/request/targeted-demo-001/published`, `/request/targeted-marketplace-demo-001/published`, `/request/multi-vehicle-demo-001/published`, `/request/multi-location-pickups-demo-001/published`, `/request/multi-location-mixed-demo-001/published`.
+- Human desktop and mobile browser review passed; P06 High-Fidelity is LOCKED under D-056. Lock the restrained success confirmation, compact route-first Request summary, concise three-step “Kas toliau?” explanation, Request Detail primary CTA and secondary return-home action. No excessive celebration graphics or promise of real notification/provider delivery. Current demo/local publication behavior is preserved. Tailwind v4 + shadcn/Base UI standard sizing and responsive grid/flex/content-driven layouts remain mandatory; arbitrary custom pixel dimensions are prohibited.
+- This documentation-only lock changes no P01–P06 UI or behavior. No P07 High-Fidelity, backend, Auth, Supabase, i18n rollout, provider or storage work starts here; no commit or push.
 
 ## P05 High-Fidelity and correction review — 2026-09-19
 
@@ -283,7 +296,7 @@
 
 ## Immediate next task
 
-**Next visual task = P06 Published Success High-Fidelity**, separately scoped and preserving existing product behavior. P01, P02, P03, P04 and P05 High-Fidelity remain LOCKED and unchanged. This documentation-only lock does not start P06 implementation, backend, Auth, Supabase, i18n rollout, provider or storage work.
+**Next visual task = P07 Request Detail + Offers High-Fidelity**, separately scoped and preserving existing product behavior. P01, P02, P03, P04, P05 and P06 High-Fidelity remain LOCKED and unchanged. This documentation-only lock does not start P07 implementation, backend, Auth, Supabase, i18n rollout, provider or storage work.
 
 The later backend-phase order remains **i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence**, with each phase separately scoped. Do not start any of these phases or provider work from this visual lock.
 

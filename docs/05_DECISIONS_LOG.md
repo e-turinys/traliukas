@@ -298,6 +298,16 @@ This file records important product/architecture decisions that should not be ca
 
 **Reason:** Human-reviewed production UI and the verified correction pass establish a consistent acquisition baseline without changing domain rules. This lock changes documentation only. P06 Published Success High-Fidelity is the next separately scoped visual task; no P06 implementation, backend, Auth, Supabase, i18n rollout, provider or storage work starts here.
 
+### D-056 — P06 High-Fidelity and published-success visual baseline
+
+**Date:** 2026-09-19. **Status:** LOCKED after human desktop and mobile browser review.
+
+**Decision:** P06 High-Fidelity is approved as part of the V1 visual baseline. Lock the restrained success confirmation, compact route-first published Request summary, concise three-step “Kas toliau?” explanation, primary Request Detail CTA and secondary return-home action. No excessive celebration graphics or promise of real notifications/provider delivery. Preserve current demo/local publication behavior, targeted visibility expansion and existing destinations. Tailwind v4 + shadcn/Base UI standard sizing and responsive grid/flex/content-driven layouts remain mandatory; arbitrary custom pixel dimensions are prohibited. Detailed patterns are in `03_TECHNICAL_ARCHITECTURE.md`. P01–P05 remain LOCKED and unchanged.
+
+**Implementation boundary:** P05 still stops at the phone-verification/demo boundary without publication. P06 does not represent real backend persistence, and notification delivery providers are unimplemented. Optional Request budget remains architecture-locked under D-046 but absent from actual Request domain/state; implement it later with real Request domain/backend work, not under this visual lock.
+
+**Reason:** Human-reviewed production confirmation UI establishes a calm, useful next step without implying backend capabilities or changing lifecycle rules. This lock changes documentation only. P07 Request Detail + Offers High-Fidelity is next, separately scoped; no P07 implementation, backend, Auth, Supabase, i18n rollout or provider work starts here.
+
 ## How to add a new decision
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:

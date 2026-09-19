@@ -12,11 +12,13 @@ The first UI phases use realistic mock data in the real production component sta
 
 ### Current visual milestone
 
-P01, P02, P03, P04 and P05 High-Fidelity are LOCKED after human desktop and mobile browser review. P05 also passed its correction review. P01 supplies the V1 foundation (D-051), P02 results/discovery (D-052), P03 route detail (D-053), P04 carrier profiles (D-054), and P05 the Request wizard (D-055). P05 locks the four steps, default inheritance, 1–10 vehicles, independent locations/photos, canonical route summaries, four-category V1 scope without `other`, shared pickup window, compact review, publication-time registration/phone-verification boundary and private address separation.
+P01, P02, P03, P04, P05 and P06 High-Fidelity are LOCKED after human desktop and mobile browser review. P05 also passed its correction review. P01 supplies the V1 foundation (D-051), P02 results/discovery (D-052), P03 route detail (D-053), P04 carrier profiles (D-054), P05 the Request wizard (D-055), and P06 published success (D-056). P05 locks the four steps, default inheritance, 1–10 vehicles, independent locations/photos, canonical route summaries, four-category V1 scope without `other`, shared pickup window, compact review, publication-time registration/phone-verification boundary and private address separation.
 
 See `03_TECHNICAL_ARCHITECTURE.md` for mandatory Tailwind v4 + shadcn/Base UI standard sizing and responsive grid/flex/content-driven layouts; arbitrary custom pixel dimensions are prohibited. Optional Request budget remains ARCHITECTURE-LOCKED but NOT YET IMPLEMENTED in the actual P05 Request domain/state. Implement it later with real Request domain/backend work, not as a budget UI addition in this lock.
 
-The next visual task is **P06 Published Success High-Fidelity**, separately scoped and preserving existing functionality. This documentation-only lock changes no P01–P05 UI or behavior and does not start P06. Backend-phase ordering below is unchanged and does not authorize backend, Auth, Supabase, i18n rollout, provider or storage work now.
+P06 locks restrained confirmation, compact route-first summary, three-step next actions, Request Detail primary CTA and secondary return-home action, without excessive celebration or promises of real notifications. P05 still stops at its phone-verification/demo boundary; P06 remains demo-only without backend persistence or notification delivery providers.
+
+The next visual task is **P07 Request Detail + Offers High-Fidelity**, separately scoped and preserving existing functionality. This documentation-only lock changes no P01–P06 UI or behavior and does not start P07. Backend-phase ordering below is unchanged and does not authorize backend, Auth, Supabase, i18n rollout, provider or storage work now.
 
 ## Phase 0 — Foundation
 
