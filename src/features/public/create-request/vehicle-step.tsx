@@ -1,4 +1,6 @@
 import { Choices, FieldError, TextField } from "./fields"
+import { Car } from "lucide-react"
+import { vehicleCountLabel, vehicleName } from "../vehicle-summary"
 import { VehiclePhotos } from "./photos"
 import { LocationPicker } from "@/components/shared/location-picker"
 import { Button } from "@/components/ui/button"
@@ -7,25 +9,29 @@ import { addRequestVehicle, maxRequestVehicles, removeRequestVehicle } from "./l
 import { requestCategories, type Errors, type TransportRequestDraft, type VehicleDraft } from "./model"
 
 export function VehicleStep({ draft, update, errors }: { draft: TransportRequestDraft; update: (value: Partial<TransportRequestDraft>) => void; errors: Errors }) {
-  return <VehicleEditor vehicles={draft.vehicles} defaultRoute={draft.route} onChange={vehicles => update({ vehicles })} errors={errors} idPrefix="request" />
+  return <VehicleEditor vehicles={draft.vehicles} defaultRoute={draft.route} onChange={vehicles => update({ vehicles })} errors={errors} idPrefix="request" marketplace />
 }
 
-export function VehicleEditor({ vehicles, defaultRoute, onChange, errors, idPrefix }: {
-  vehicles: VehicleDraft[]; defaultRoute: TransportRequestDraft["route"]; onChange: (vehicles: VehicleDraft[]) => void; errors: Errors; idPrefix: string
+export function VehicleEditor({ vehicles, defaultRoute, onChange, errors, idPrefix, marketplace = false }: {
+  vehicles: VehicleDraft[]; defaultRoute: TransportRequestDraft["route"]; onChange: (vehicles: VehicleDraft[]) => void; errors: Errors; idPrefix: string; marketplace?: boolean
 }) {
   const updateVehicle = (id: string, patch: Partial<VehicleDraft>) => onChange(vehicles.map(vehicle => vehicle.id === id ? { ...vehicle, ...patch } : vehicle))
   return <div id={`${idPrefix}-vehicles`} className="space-y-5">
+    {marketplace && <p className="text-sm text-muted-foreground">{vehicleCountLabel(vehicles.length)} · Vienas vežėjas visai užklausai</p>}
     {errors.vehicleCount && <p role="alert" className="text-sm text-destructive">{errors.vehicleCount}</p>}
     {vehicles.map((vehicle, index) => {
       const field = (name: string) => `${idPrefix}-${vehicle.id}-${name}`
       const vehicleErrors = errors.vehicles?.[vehicle.id] ?? {}
-      return <Card key={vehicle.id} className="min-w-0 bg-muted/15">
-        <CardContent className="space-y-6">
+      return <Card key={vehicle.id} className={marketplace ? "min-w-0 overflow-visible border bg-background py-6 ring-0" : "min-w-0 bg-muted/15"}>
+        <CardContent className={marketplace ? "space-y-6 px-4 sm:px-6" : "space-y-6"}>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h3 className="text-lg font-semibold">Automobilis {index + 1}</h3>
-            {index > 0 && <Button type="button" variant="ghost" className="min-h-11" onClick={() => onChange(removeRequestVehicle(vehicles, vehicle.id))}>Pašalinti automobilį</Button>}
+            <div className="min-w-0 space-y-1">
+              <h3 className="flex items-center gap-2 text-lg font-semibold">{marketplace && <Car aria-hidden="true" className="size-5 shrink-0 text-primary" />}Automobilis {index + 1}</h3>
+              {marketplace && vehicleName(vehicle) && <p className="break-words text-sm text-muted-foreground">{vehicleName(vehicle)}</p>}
+            </div>
+            {index > 0 && <Button type="button" variant="ghost" className={marketplace ? "h-auto min-h-11 px-3 py-2 whitespace-normal text-muted-foreground" : "min-h-11"} onClick={() => onChange(removeRequestVehicle(vehicles, vehicle.id))}>Pašalinti automobilį</Button>}
           </div>
-          <section className="space-y-3 rounded-lg border bg-background p-4" aria-labelledby={field("route-heading")}>
+          <section className={marketplace ? "space-y-3 rounded-lg border bg-white p-4" : "space-y-3 rounded-lg border bg-background p-4"} aria-labelledby={field("route-heading")}>
             <h4 id={field("route-heading")} className="font-medium">Paėmimas ir pristatymas</h4>
             {vehicle.usesDefaultRoute ? <>
               <p className="text-sm text-muted-foreground">Naudoti pagrindinį maršrutą: {defaultRoute.from?.city ?? "—"} → {defaultRoute.to?.city ?? "—"}</p>
@@ -44,19 +50,19 @@ export function VehicleEditor({ vehicles, defaultRoute, onChange, errors, idPref
               <Button type="button" variant="ghost" className="h-auto min-h-11 w-full whitespace-normal py-3" onClick={() => updateVehicle(vehicle.id, { pickupLocation: defaultRoute.from, deliveryLocation: defaultRoute.to, usesDefaultRoute: true })}>Naudoti pagrindinį maršrutą</Button>
             </>}
           </section>
-          <Choices id={field("category")} label="Transporto priemonės kategorija" options={requestCategories} value={vehicle.category} onChange={category => updateVehicle(vehicle.id, { category: category as VehicleDraft["category"] })} error={vehicleErrors.category} />
+          <Choices marketplace={marketplace} id={field("category")} label="Transporto priemonės kategorija" options={requestCategories} value={vehicle.category} onChange={category => updateVehicle(vehicle.id, { category: category as VehicleDraft["category"] })} error={vehicleErrors.category} />
           <div className="grid gap-5 sm:grid-cols-2">
             <TextField id={field("make")} label="Markė" required maxLength={80} value={vehicle.make} onChange={event => updateVehicle(vehicle.id, { make: event.target.value })} error={vehicleErrors.make} />
             <TextField id={field("model")} label="Modelis" required maxLength={80} value={vehicle.model} onChange={event => updateVehicle(vehicle.id, { model: event.target.value })} error={vehicleErrors.model} />
           </div>
           <TextField id={field("year")} label="Metai (neprivaloma)" inputMode="numeric" maxLength={4} value={vehicle.year} onChange={event => updateVehicle(vehicle.id, { year: event.target.value })} error={vehicleErrors.year} />
-          <Choices id={field("condition")} label="Automobilio būklė" options={{ running: "Važiuojantis", "non-running": "Nevažiuojantis" }} value={vehicle.condition} onChange={condition => updateVehicle(vehicle.id, { condition: condition as VehicleDraft["condition"], rolls: condition === "running" ? "" : vehicle.rolls })} error={vehicleErrors.condition} />
-          {vehicle.condition === "non-running" && <Choices id={field("rolls")} label="Ar automobilį galima laisvai užridenti / ar jis rieda?" options={{ yes: "Taip", no: "Ne", unknown: "Nežinau" }} value={vehicle.rolls} onChange={rolls => updateVehicle(vehicle.id, { rolls: rolls as VehicleDraft["rolls"] })} error={vehicleErrors.rolls} />}
-          <VehiclePhotos id={field("photos")} files={vehicle.photos} onChange={photos => updateVehicle(vehicle.id, { photos })} externalError={vehicleErrors.photos} />
+          <Choices marketplace={marketplace} id={field("condition")} label="Automobilio būklė" options={{ running: "Važiuojantis", "non-running": "Nevažiuojantis" }} value={vehicle.condition} onChange={condition => updateVehicle(vehicle.id, { condition: condition as VehicleDraft["condition"], rolls: condition === "running" ? "" : vehicle.rolls })} error={vehicleErrors.condition} />
+          {vehicle.condition === "non-running" && <Choices marketplace={marketplace} id={field("rolls")} label="Ar automobilį galima laisvai užridenti / ar jis rieda?" options={{ yes: "Taip", no: "Ne", unknown: "Nežinau" }} value={vehicle.rolls} onChange={rolls => updateVehicle(vehicle.id, { rolls: rolls as VehicleDraft["rolls"] })} error={vehicleErrors.rolls} />}
+          <VehiclePhotos marketplace={marketplace} id={field("photos")} files={vehicle.photos} onChange={photos => updateVehicle(vehicle.id, { photos })} externalError={vehicleErrors.photos} />
         </CardContent>
       </Card>
     })}
     <Button type="button" variant="outline" className="h-auto min-h-11 w-full whitespace-normal py-3" disabled={vehicles.length >= maxRequestVehicles} onClick={() => onChange(addRequestVehicle(vehicles, defaultRoute.from, defaultRoute.to))}>+ Pridėti kitą automobilį</Button>
-    <p className="text-sm text-muted-foreground">Vienoje užklausoje galite nurodyti iki 10 automobilių. Visiems taikomas tas pats maršrutas ir paėmimo laikas.</p>
+    <p className="text-sm text-muted-foreground">{marketplace ? "Iki 10 automobilių, vienas bendras paėmimo laikas. Kiekvieno automobilio vietas galite pakeisti atskirai." : "Vienoje užklausoje galite nurodyti iki 10 automobilių. Visiems taikomas tas pats maršrutas ir paėmimo laikas."}</p>
   </div>
 }

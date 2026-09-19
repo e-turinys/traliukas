@@ -12,7 +12,11 @@ The first UI phases use realistic mock data in the real production component sta
 
 ### Current visual milestone
 
-P01, P02, P03 and P04 High-Fidelity are LOCKED after human desktop and mobile browser review. P01 remains the V1 foundation under D-051; P02 adds results/discovery under D-052; P03 adds route-detail patterns under D-053. P04 adds the public carrier-profile baseline under D-054: compact identity/reputation, restrained trust/capabilities, MarketplaceRouteCard reuse, P03-style reviews, desktop two-column layout and normal-flow mobile stacking. Privacy and the prohibition on pre-offer messaging remain locked. See `03_TECHNICAL_ARCHITECTURE.md` for mandatory Tailwind v4 + shadcn/Base UI standard sizing, grid/flex/content-driven layouts and responsive references; arbitrary custom pixel dimensions are prohibited. The next visual task is **P05 Create Request High-Fidelity**, separately scoped and preserving locked functionality. This documentation lock changes no P01/P02/P03/P04 UI and does not start P05. Backend-phase ordering below remains unchanged and does not authorize backend, Auth, Supabase, i18n rollout or provider work now.
+P01, P02, P03, P04 and P05 High-Fidelity are LOCKED after human desktop and mobile browser review. P05 also passed its correction review. P01 supplies the V1 foundation (D-051), P02 results/discovery (D-052), P03 route detail (D-053), P04 carrier profiles (D-054), and P05 the Request wizard (D-055). P05 locks the four steps, default inheritance, 1–10 vehicles, independent locations/photos, canonical route summaries, four-category V1 scope without `other`, shared pickup window, compact review, publication-time registration/phone-verification boundary and private address separation.
+
+See `03_TECHNICAL_ARCHITECTURE.md` for mandatory Tailwind v4 + shadcn/Base UI standard sizing and responsive grid/flex/content-driven layouts; arbitrary custom pixel dimensions are prohibited. Optional Request budget remains ARCHITECTURE-LOCKED but NOT YET IMPLEMENTED in the actual P05 Request domain/state. Implement it later with real Request domain/backend work, not as a budget UI addition in this lock.
+
+The next visual task is **P06 Published Success High-Fidelity**, separately scoped and preserving existing functionality. This documentation-only lock changes no P01–P05 UI or behavior and does not start P06. Backend-phase ordering below is unchanged and does not authorize backend, Auth, Supabase, i18n rollout, provider or storage work now.
 
 ## Phase 0 — Foundation
 

@@ -59,7 +59,7 @@ export function targetIssue(draft: TransportRequestDraft, today: string): string
   if (!route) return "Pasirinkto vežėjo maršruto nepavyko rasti. Galite tęsti užklausą kitiems vežėjams."
   const params = new URLSearchParams({ from: draft.route.from?.id ?? "", to: draft.route.to?.id ?? "" })
   writeDate(params, draft.route.date)
-  if (draft.vehicles.some(vehicle => vehicle.category === "other")) return "Bent viena transporto priemonės kategorija nenurodyta pasirinktame maršrute. Galite kreiptis į kitus vežėjus."
+  if (draft.vehicles.some(vehicle => vehicle.category && !Object.hasOwn(requestCategories, vehicle.category))) return "Bent viena transporto priemonės kategorija nenurodyta pasirinktame maršrute. Galite kreiptis į kitus vežėjus."
   if (!canFitVehicleCount(route, draft.vehicles.length)) return "Pasirinktame maršrute nepakanka vietos visiems automobiliams. Galite kreiptis į kitus vežėjus."
   if (draft.vehicles.every(vehicle => vehicle.category && vehicle.pickupLocation && vehicle.deliveryLocation) && !routeCanServeCompleteRequest(route, draft.vehicles)) return "Pasirinktas maršrutas netinka visam automobilių ir vietų rinkiniui. Patikslinkite duomenis arba tęskite su kitais vežėjais."
   if (!matchRoutes([route], params, today).exact.length) return "Pasirinktas maršrutas nepasiekiamas arba netinka nurodytoms vietoms ar datoms. Patikslinkite duomenis arba tęskite su kitais vežėjais."

@@ -153,6 +153,28 @@ P04 remains public and account-free. Do not expose phone, email, private exact a
 
 Tailwind v4 + shadcn/Base UI standard sizing is mandatory. Use grid/flex/content-driven responsive layouts, practical touch targets and wrapping text/buttons. Arbitrary custom pixel dimensions, fragile absolute positioning and fixed content heights are prohibited. P05 Create Request High-Fidelity is the next separately scoped visual task; this lock starts no P05, backend, Auth, Supabase, i18n rollout or provider implementation.
 
+#### Request-wizard visual baseline — LOCKED (D-055, 2026-09-19)
+
+P05 Create Request High-Fidelity passed human desktop/mobile review and the correction pass. Its current browser implementation at 390/768/1280/1440px is the approved Request-wizard reference, continuing the locked P01–P04 teal/slate, Geist and marketplace surface language. Do not visually change P01–P05 under subsequent screen work.
+
+| Locked pattern | Approved treatment and behavior |
+|---|---|
+| Four-step wizard | Focused form column; desktop step indicator and compact mobile progress. Preserve Route/date → Vehicles → Additional information → Contacts/visibility/review, inline validation, focus and Back/Next retention. |
+| Default route and vehicles | Step 1 supplies the default route; newly added vehicles inherit it. Keep 1–10 vehicles with stable local IDs, independent location overrides and existing add/remove rules. One future Offer covers all vehicles; no partial offers. |
+| Vehicle scope | Passenger car, SUV/crossover, van/minivan and motorcycle: `car`, `suv`, `van`, `motorcycle`. No generic `other`, heavy machinery or cargo. Lithuanian labels include “Furgonas / mikroautobusas” and “Motociklas”. |
+| Shared timing | One requested pickup date/window for the entire Request, retaining existing exact/range/flexible date behavior; no per-vehicle dates. |
+| Photos | Each vehicle owns its photos. Preserve local selection, limits, validation and navigation retention; this is not an upload/storage implementation. |
+| Compact review | Human-readable aggregate route/date/count plus individual vehicle routes and optional notes, with existing edit actions. Do not repeat the full form. |
+| Multi-location summary | All same: “Hamburg → Warsaw”. Different pickups only: “2 paėmimo vietos → Warsaw”. Different deliveries only: “Hamburg → 2 pristatymo vietos”. Both differ: “Kelių vietų pervežimas”. No route optimization. |
+| Publication boundary | Public users may start and complete a Request without an account. Progressive registration/contact confirmation belongs at publication. Preserve the current phone-verification handoff, which explicitly does not send a code or publish. P06 remains the existing demo flow. |
+| Location privacy | Public locations are city/area/country. Keep exact/private addresses and contacts separate and out of public projections; future backend access is restricted to authorized parties after Booking. This visual lock does not implement that backend. |
+
+References: `src/app/(public)/request/new/page.tsx`, `src/features/public/create-request/` and the unchanged `src/features/public/request-route-summary.ts`. Reuse PublicHeader, PageContainer, LocationPicker, DateWindowPicker and existing shadcn/Base UI primitives. Standard Tailwind v4 spacing/type/size/radius and shadcn/Base UI sizing are mandatory. Responsive layouts use grid/flex/content-driven sizing; arbitrary custom pixel dimensions, fragile absolute-positioned layouts and fixed card heights are prohibited. Preserve natural wrapping, practical touch targets and visible focus.
+
+**Known implementation gap:** Optional Request budget (`budgetAmount?`, `budgetCurrency?`) is **ARCHITECTURE-LOCKED but NOT YET IMPLEMENTED** in the actual P05 Request domain/state. It remains optional desired overall transport guidance, never a per-vehicle price, fixed price, Offer or auto-accept rule. Implement it later together with real Request domain/backend work; do not add budget UI under this lock. `CURRENT_STATUS.md` identifies the model/state/projection files needing future changes.
+
+P06 Published Success High-Fidelity is the next separately scoped visual task. This documentation lock starts no application, backend, Auth, Supabase, i18n rollout, provider or storage work.
+
 ### Mobile/performance
 
 - Customer and Carrier UI: mobile-first.

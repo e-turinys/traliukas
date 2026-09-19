@@ -17,6 +17,16 @@ const { mockLocations } = await import("../src/lib/mock/locations.ts")
 const byId = id => mockLocations.find(location => location.id === id)
 const vehicle = (pickup, delivery) => ({ pickupLocation: byId(pickup), deliveryLocation: byId(delivery) })
 
+test("Warsaw review scenarios preserve all four canonical multi-location summary rules", () => {
+  const bmw = vehicle("hamburg-de", "warsaw-pl")
+  for (const [audi, expected] of [
+    [vehicle("hamburg-de", "warsaw-pl"), "Hamburg → Warsaw"],
+    [vehicle("berlin-de", "warsaw-pl"), "2 paėmimo vietos → Warsaw"],
+    [vehicle("hamburg-de", "kaunas-lt"), "Hamburg → 2 pristatymo vietos"],
+    [vehicle("berlin-de", "kaunas-lt"), "Kelių vietų pervežimas"],
+  ]) assert.equal(requestRouteSummary([bmw, audi]).compact, expected)
+})
+
 test("route summary handles a shared route", () => {
   assert.deepEqual(requestRouteSummary([vehicle("hamburg-de", "kaunas-lt"), vehicle("hamburg-de", "kaunas-lt")]), {
     compact: "Hamburg → Kaunas", detailed: "Hamburg → Kaunas", locationCount: 2,

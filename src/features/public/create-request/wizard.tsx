@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useState, type FormEvent } from "react"
-import { ArrowLeft, ArrowRight, Phone } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check, Phone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -75,15 +75,22 @@ export function CreateRequestWizard({ query, today }: { query: string; today: st
     requestAnimationFrame(() => handoffHeading.current?.focus())
   }
 
-  return <div className="mx-auto max-w-2xl space-y-6">
+  return <div className="mx-auto max-w-3xl space-y-6 sm:space-y-8 [&_[data-slot=label]]:leading-snug">
     <header className="space-y-3">
-      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Pervežimo užklausa</h1>
+      <p className="text-sm font-medium text-primary">Automobilių pervežimas</p>
+      <h1 className="text-3xl leading-tight font-semibold tracking-tight sm:text-4xl">Pervežimo užklausa</h1>
       <p className="text-sm text-muted-foreground">Vienoje užklausoje galite nurodyti 1–10 automobilių su bendru pageidaujamu paėmimo laiku.</p>
-      <p aria-live="polite" className="font-medium">{step} iš 4 · {steps[step - 1]}</p>
-      <Progress value={step} max={4} aria-label="Užklausos žingsniai" aria-valuetext={`${step} iš 4: ${steps[step - 1]}`} />
+      <p aria-live="polite" className="font-medium sm:sr-only">{step} iš 4 · {steps[step - 1]}</p>
+      <Progress className="sm:hidden" value={step} max={4} aria-label="Užklausos žingsniai" aria-valuetext={`${step} iš 4: ${steps[step - 1]}`} />
+      <ol aria-label="Užklausos žingsniai" className="hidden gap-4 pt-3 sm:grid sm:grid-cols-4">
+        {steps.map((label, index) => <li key={label} aria-current={step === index + 1 ? "step" : undefined} className={`flex items-start gap-2 border-t-2 pt-3 text-sm ${step === index + 1 ? "border-primary font-semibold" : "border-border text-muted-foreground"}`}>
+          <span aria-hidden="true" className={`flex size-6 shrink-0 items-center justify-center rounded-md ${index + 1 <= step ? "bg-secondary text-primary" : "bg-muted"}`}>{index + 1 < step ? <Check className="size-4" /> : index + 1}</span>
+          <span>{label}{index + 1 < step && <span className="sr-only"> · Užbaigta</span>}</span>
+        </li>)}
+      </ol>
     </header>
 
-    {draft.target.requested && <Card><CardContent className="space-y-2">
+    {draft.target.requested && <Card className="overflow-visible border border-primary/20 py-6 ring-0"><CardContent className="space-y-2 px-6">
       {target && <>
         <p className="font-medium">{draft.visibility === "targeted" ? "Pasiūlymo prašote iš" : "Užklausa vežėjui ir kitiems tinkamiems vežėjams:"} {target.carrier.name}</p>
         <p className="text-sm">{target.origin.city} → {target.destination.city}</p>
@@ -95,15 +102,15 @@ export function CreateRequestWizard({ query, today }: { query: string; today: st
       </div>}
     </CardContent></Card>}
 
-    <Card><CardContent className="space-y-6">
+    <Card className="overflow-visible border py-6 ring-0"><CardContent className="space-y-6 px-4 sm:px-6">
       {handoff ? <section className="space-y-4" aria-labelledby="handoff-heading">
-        <Phone aria-hidden="true" className="size-6 text-muted-foreground" />
+        <Phone aria-hidden="true" className="size-6 text-primary" />
         <h2 id="handoff-heading" ref={handoffHeading} tabIndex={-1} className="text-xl font-semibold">Kitas žingsnis – telefono patvirtinimas</h2>
         <p role="status" className="leading-relaxed">Prieš paskelbiant užklausą reikės patvirtinti telefono numerį. Telefono patvirtinimas kol kas nepasiekiamas. Užklausa nepaskelbta, patvirtinimo kodas neišsiųstas.</p>
         <p className="text-sm text-muted-foreground">Įvestus duomenis galite peržiūrėti ir keisti šiame puslapyje. Uždarius ar atnaujinus puslapį jie neišliks.</p>
-        <Button type="button" variant="outline" className="min-h-11 w-full" onClick={() => { setHandoff(false); focusHeading() }}>Grįžti prie užklausos</Button>
+        <Button type="button" variant="outline" className="h-auto min-h-11 w-full px-4 py-3 whitespace-normal" onClick={() => { setHandoff(false); focusHeading() }}>Grįžti prie užklausos</Button>
       </section> : <form noValidate onSubmit={submit} className="space-y-6">
-        <h2 ref={heading} tabIndex={-1} className="text-xl font-semibold tracking-tight sm:text-2xl">{headings[step - 1]}</h2>
+        <h2 ref={heading} tabIndex={-1} className="text-xl leading-snug font-semibold tracking-tight sm:text-2xl">{headings[step - 1]}</h2>
         {step === 1 && <>
           {prefillNotice && <p role="status" className="text-sm text-muted-foreground">Nuorodoje nurodyta data netinkama. Pasirinkite datą arba „Bet kada“.</p>}
           <RouteStep draft={draft} update={update} errors={errors} />
@@ -111,15 +118,15 @@ export function CreateRequestWizard({ query, today }: { query: string; today: st
         {step === 2 && <VehicleStep draft={draft} update={update} errors={errors} />}
         {step === 3 && <div className="space-y-3">
           <Label htmlFor="request-notes">Informacija vežėjui (neprivaloma)</Label>
-          <Textarea id="request-notes" rows={5} maxLength={2000} value={draft.notes} onChange={e => update({ notes: e.target.value })} aria-describedby="notes-hint notes-privacy" />
+          <Textarea id="request-notes" className="bg-white p-3 text-base" rows={5} maxLength={2000} value={draft.notes} onChange={e => update({ notes: e.target.value })} aria-describedby="notes-hint notes-privacy" />
           <p id="notes-hint" className="text-sm text-muted-foreground">Pvz. automobilis aukciono aikštelėje, raktai vietoje, paėmimas galimas darbo dienomis.</p>
           <p id="notes-privacy" className="text-sm text-muted-foreground">Čia nerašykite telefono, el. pašto ar tikslaus adreso – jiems skirti atskiri laukai.</p>
         </div>}
-        {step === 4 && <ContactStep draft={draft} update={update} errors={errors} />}
+        {step === 4 && <ContactStep draft={draft} update={update} errors={errors} onEdit={move} />}
         {errors.target && <p role="alert" className="text-sm text-destructive">{errors.target}</p>}
-        <div className="flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row">
-          {step > 1 && <Button type="button" variant="outline" className="min-h-11 sm:w-auto" onClick={() => move((step - 1) as Step)}><ArrowLeft aria-hidden="true" />Atgal</Button>}
-          <Button type="submit" className="h-auto min-h-11 min-w-0 w-full px-4 py-3 whitespace-normal sm:w-auto sm:flex-1">{step === 4 ? "Tęsti telefono patvirtinimą" : "Toliau"}<ArrowRight aria-hidden="true" /></Button>
+        <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:justify-between">
+          {step > 1 && <Button type="button" variant="outline" className="h-auto min-h-11 px-6 py-3 whitespace-normal sm:w-auto" onClick={() => move((step - 1) as Step)}><ArrowLeft aria-hidden="true" />Atgal</Button>}
+          <Button type="submit" className="h-auto min-h-11 min-w-0 w-full px-6 py-3 whitespace-normal sm:ml-auto sm:w-auto">{step === 4 ? "Tęsti telefono patvirtinimą" : "Toliau"}<ArrowRight aria-hidden="true" /></Button>
         </div>
       </form>}
     </CardContent></Card>

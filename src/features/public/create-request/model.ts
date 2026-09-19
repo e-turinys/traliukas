@@ -1,8 +1,8 @@
 import type { DateWindowValue } from "@/lib/types/date-window"
 import type { LocationOption } from "@/lib/types/location"
-import type { CarrierRoute } from "@/lib/types/carrier-route"
+import type { CarrierRoute, VehicleCategory } from "@/lib/types/carrier-route"
 
-export const requestCategories = { car: "Lengvasis automobilis", suv: "SUV / Crossover", van: "Van / LCV", other: "Kita" } as const
+export const requestCategories = { car: "Lengvasis automobilis", suv: "SUV / Crossover", van: "Furgonas / mikroautobusas", motorcycle: "Motociklas" } as const satisfies Record<VehicleCategory, string>
 export type RequestCategory = keyof typeof requestCategories
 export type Step = 1 | 2 | 3 | 4
 export type VehicleDraft = {

@@ -288,6 +288,16 @@ This file records important product/architecture decisions that should not be ca
 
 **Reason:** Human-reviewed production Carrier Profile completes the trust-focused destination from P03 without changing domain, privacy or acquisition behavior. This lock changes documentation only. P05 Create Request High-Fidelity is next, separately scoped; no P05, backend, Auth, Supabase, i18n rollout or provider work starts here.
 
+### D-055 — P05 High-Fidelity and Request-wizard visual baseline
+
+**Date:** 2026-09-19. **Status:** LOCKED after human desktop/mobile review and the correction pass.
+
+**Decision:** P05 High-Fidelity is approved as part of the V1 design baseline. Lock the four-step wizard, default route inheritance, 1–10 vehicles, per-vehicle location overrides, canonical multi-location summaries, shared pickup date/window, per-vehicle photo ownership and compact final review. V1 categories are passenger car, SUV/crossover, van/minivan and motorcycle, with no generic `other`. Preserve progressive registration at publication, the current phone-verification handoff and exact/private address separation. Tailwind v4 + shadcn/Base UI standard sizing and responsive grid/flex/content-driven layouts are mandatory; arbitrary custom pixel dimensions are prohibited. Detailed patterns are in `03_TECHNICAL_ARCHITECTURE.md`. P01–P04 remain LOCKED and unchanged.
+
+**Implementation boundary:** Optional Request budget under D-046 is ARCHITECTURE-LOCKED but NOT YET IMPLEMENTED in the actual P05 Request domain/state. Implement it later with real Request domain/backend work; add no budget UI in this lock. P05 still stops at the local phone-verification handoff without sending a code or publishing; P06 remains the existing demo flow. This visual approval does not imply working Auth, publication, persistence or photo storage.
+
+**Reason:** Human-reviewed production UI and the verified correction pass establish a consistent acquisition baseline without changing domain rules. This lock changes documentation only. P06 Published Success High-Fidelity is the next separately scoped visual task; no P06 implementation, backend, Auth, Supabase, i18n rollout, provider or storage work starts here.
+
 ## How to add a new decision
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:

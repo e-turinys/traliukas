@@ -20,9 +20,35 @@ const { createRequestDraft, validateStep, targetIssue, switchToMarketplace, phot
 const { calendarDate, writeDate } = await import("../src/features/public/search-query.ts")
 const { routeRequestHref } = await import("../src/features/public/route-detail-context.ts")
 const { mockCarrierRoutes } = await import("../src/lib/mock/carrier-routes.ts")
+const { requestCategories } = await import("../src/features/public/create-request/model.ts")
 const today = "2026-09-13"
 const prefilled = () => createRequestDraft(new URLSearchParams("from=hamburg-de&to=kaunas-lt&dateType=range&dateFrom=2026-09-15&dateTo=2026-09-17"))
 const targeted = () => createRequestDraft(new URL(routeRequestHref(mockCarrierRoutes[0], true), "https://example.test").searchParams)
+
+test("Request categories match the four locked V1 categories and reject out-of-scope values", () => {
+  assert.deepEqual(Object.keys(requestCategories), ["car", "suv", "van", "motorcycle"])
+  assert.equal(requestCategories.van, "Furgonas / mikroautobusas")
+  assert.equal(requestCategories.motorcycle, "Motociklas")
+  const draft = prefilled()
+  const vehicle = { ...draft.vehicles[0], make: "Yamaha", model: "MT-07", condition: "running" }
+  for (const category of Object.keys(requestCategories)) {
+    assert.deepEqual(validateStep({ ...draft, vehicles: [{ ...vehicle, category }] }, 2, today), {})
+  }
+  for (const category of ["other", "machinery", "cargo"]) {
+    assert.ok(validateStep({ ...draft, vehicles: [{ ...vehicle, category }] }, 2, today).vehicles[vehicle.id].category)
+  }
+})
+
+test("motorcycle requests use canonical route compatibility without changing full-request capacity", () => {
+  const route = mockCarrierRoutes.find(route => route.id === "manto-transportas-0917")
+  const draft = createRequestDraft(new URL(routeRequestHref(route, true), "https://example.test").searchParams)
+  const motorcycle = { ...draft.vehicles[0], category: "motorcycle", make: "Yamaha", model: "MT-07", condition: "running" }
+  assert.equal(targetIssue({ ...draft, vehicles: [motorcycle] }, "2026-09-18"), undefined)
+  assert.ok(targetIssue({ ...draft, vehicles: [motorcycle, { ...motorcycle, id: "vehicle-2" }] }, "2026-09-18"))
+  const unsupported = targeted()
+  assert.ok(targetIssue({ ...unsupported, vehicles: [{ ...unsupported.vehicles[0], category: "motorcycle" }] }, today))
+  assert.ok(targetIssue({ ...draft, vehicles: [{ ...motorcycle, category: "other" }] }, "2026-09-18"))
+})
 
 test("blank and invalid locations require selected, distinct public locations", () => {
   const blank = createRequestDraft(new URLSearchParams())

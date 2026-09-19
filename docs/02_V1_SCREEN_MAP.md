@@ -67,6 +67,8 @@ This document defines the canonical V1 screen IDs and intended URLs. Screen IDs 
 
 ### P05 Request wizard key rules
 
+**High-Fidelity status: LOCKED** after human desktop/mobile review and the correction pass (2026-09-19). D-055 records the current responsive wizard, vehicle/location/photo ownership, compact review and publication boundary as part of the V1 visual baseline; see `03_TECHNICAL_ARCHITECTURE.md`. P01–P04 remain LOCKED and unchanged. Do not visually redesign P05 under subsequent screen work. P06 Published Success High-Fidelity is next, separately scoped.
+
 4 steps:
 
 1. Default route + shared pickup date/date window/flexible date.
@@ -78,7 +80,9 @@ Each vehicle initially inherits the Step 1 default route. Its card shows “Naud
 
 Targeted flow must tell the customer before publish whether only the selected carrier or also other matching carriers will see the Request.
 
-An optional overall transport budget may be added in a future data-backed P05 iteration without becoming a fixed price or per-vehicle price. It is not required to publish, and carriers still submit independent Offers.
+Optional Request budget is **ARCHITECTURE-LOCKED but NOT YET IMPLEMENTED** in the actual P05 Request domain/state. Implement `budgetAmount?` / `budgetCurrency?` later with real Request domain/backend work, without adding a fake budget UI now. It is optional overall guidance, not a fixed price, per-vehicle price, Offer or auto-accept rule; carriers still submit independent Offers for all vehicles.
+
+The locked vehicle scope is passenger car, SUV/crossover, van/minivan and motorcycle (`car`, `suv`, `van`, `motorcycle`), with no generic `other`. The review uses the existing summary rules: shared route → city pair; differing pickups only → pickup count and destination; differing deliveries only → origin and delivery count; both differ → “Kelių vietų pervežimas”.
 
 The form remains usable locally without an account. Authentication/contact confirmation is gated at the final Publish action with the concept “Patvirtinkite kontaktus ir paskelbkite užklausą”; V1 retains verified phone as the publication anti-spam/trust requirement. Do not redesign P05 until this backend/auth phase is explicitly scoped.
 

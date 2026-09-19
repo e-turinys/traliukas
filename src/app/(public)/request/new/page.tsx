@@ -13,5 +13,5 @@ export default async function CreateRequestPage({ searchParams }: PageProps<"/re
     if (typeof value === "string") params.set(key, value)
   }
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Vilnius", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())
-  return <PageContainer className="py-8 sm:py-10"><CreateRequestWizard key={params.toString()} query={params.toString()} today={today} /></PageContainer>
+  return <div className="marketplace-theme bg-background text-foreground"><PageContainer className="py-6 sm:py-8 lg:pb-12"><CreateRequestWizard key={params.toString()} query={params.toString()} today={today} /></PageContainer></div>
 }

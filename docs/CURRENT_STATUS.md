@@ -1,11 +1,24 @@
 # Parvezk.lt — Current Status
 
-**Date:** 2026-09-18
+**Date:** 2026-09-19
 **P01 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. The current responsive P01 browser implementation is the approved V1 visual baseline and the visual reference for P02/P03. P01 search behavior remains locked and unchanged.
 **P02 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its responsive search-results implementation is the V1 visual reference for future results/discovery screens under D-052. P01 remains LOCKED and unchanged.
 **P03 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its route-detail patterns are part of the V1 visual baseline under D-053. P01/P02 remain LOCKED and unchanged.
 **P04 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its carrier-profile patterns are part of the V1 visual baseline under D-054. P01/P02/P03 remain LOCKED and unchanged.
-**Next visual task:** P05 Create Request High-Fidelity, separately scoped. This documentation lock does not start P05 or any backend phase.
+**P05 High-Fidelity = LOCKED.** Human desktop/mobile review and the correction pass are approved. Its Request-wizard patterns are part of the V1 visual baseline under D-055. P01–P04 remain LOCKED and unchanged.
+**Next visual task:** P06 Published Success High-Fidelity, separately scoped. This documentation lock does not start P06 implementation.
+
+## P05 High-Fidelity and correction review — 2026-09-19
+
+- P05 uses the established marketplace surfaces, focused form width, compact responsive progress, vehicle cards and editable review summary. The existing four steps, shared date window, local photos, validation, 1–10 vehicles and per-vehicle locations remain in place. The correction pass does not redesign these treatments.
+- Corrected Request categories to the locked D-048 V1 scope: `car`, `suv`, `van`, `motorcycle`. Removed `other` rather than relabeling miscellaneous transport as a motorcycle. `van` remains the canonical value, labeled “Furgonas / mikroautobusas”; `motorcycle` is labeled “Motociklas”. Carrier-route categories already used these values. No existing fixtures contained `other`; unsupported legacy input is rejected, not silently converted.
+- The existing aggregate summary helper remains unchanged: shared route → city pair; different pickups only → pickup count and destination; different deliveries only → origin and delivery count; both vary → “Kelių vietų pervežimas”. The correction browser scenario uses BMW X5 Hamburg → Warsaw and Audi Q5 Berlin → Warsaw, including back/forward retention and individual review routes.
+- **Known budget gap — CASE B:** Optional Request budget is architecture-locked but not yet implemented in the P05 domain/state. D-046 and the product/architecture documents specify the desired overall budget only. No fake budget field was added. A later implementation must extend `TransportRequestDraft` in `src/features/public/create-request/model.ts`, initialization/validation in `logic.ts`, state/UI in `wizard.tsx`, and review in `contact-step.tsx`. Downstream budget support must also extend `PublishedRequestInput`/summary in `src/features/public/request-published/context.ts`, `RequestDetail`/`RequestEdit` in `src/features/public/request-detail/model.ts` and the projection in `src/lib/mock/published-requests.ts`, with corresponding tests.
+- **Existing publication gap unchanged:** P05 ends at the local phone-verification handoff, explicitly saying the Request is not published and no code was sent. P06 remains an explicit mock published-request fixture, not a successful publication from P05. Real verification, persistence and storage remain out of scope. Photos remain local browser files; planned terms/privacy destinations are still unimplemented.
+- Verification: production build (including lint/types) passed; all 114 unit tests passed; `tests/create-request.browser.mjs` passed at 390/768/1280/1440px. Browser checks cover corrected category labels and motorcycle selection, 1–10 vehicles, add/remove, inheritance, overrides, retained photos/fields, validation/focus, review edits, all four summary cases, the verification boundary and unchanged P06 demo. Step 2 and Review screenshots were visually inspected at every width in `.next/p05-review`; no clipping, horizontal overflow or runtime exceptions detected. BMW Hamburg → Warsaw and Audi Berlin → Warsaw correctly produce “2 paėmimo vietos → Warsaw” after back/forward navigation. `git diff --check` passed. A concurrent local dev server was stopped and production rebuilt to eliminate conflicting `.next` output before the successful browser run.
+- Human desktop/mobile review and the correction pass passed; P05 High-Fidelity is now LOCKED under D-055. Lock the four-step wizard, default inheritance, 1–10 vehicles, per-vehicle location overrides/photos, canonical multi-location summaries, four-category V1 scope without `other`, shared pickup window, compact review, publication-time registration/phone-verification boundary and public/private address separation. Standard Tailwind v4 + shadcn/Base UI sizing and responsive grid/flex/content-driven layouts remain mandatory; arbitrary custom pixel dimensions are prohibited.
+- Optional Request budget remains ARCHITECTURE-LOCKED but NOT YET IMPLEMENTED in the actual P05 Request domain/state. Implement it later together with real Request domain/backend work; this lock adds no budget UI.
+- This documentation-only lock changes no P01–P05 UI or behavior and starts no backend, Auth, Supabase, i18n rollout, provider or storage work. No commit or push.
 
 ## P04 High-Fidelity implementation — 2026-09-18
 
@@ -270,7 +283,7 @@
 
 ## Immediate next task
 
-**Next visual task = P05 Create Request High-Fidelity.** P01, P02, P03 and P04 remain LOCKED and unchanged. P05 implementation is not started by this documentation-only lock; begin only in a separately scoped task. No backend, Auth, Supabase, i18n rollout or provider work starts here.
+**Next visual task = P06 Published Success High-Fidelity**, separately scoped and preserving existing product behavior. P01, P02, P03, P04 and P05 High-Fidelity remain LOCKED and unchanged. This documentation-only lock does not start P06 implementation, backend, Auth, Supabase, i18n rollout, provider or storage work.
 
 The later backend-phase order remains **i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence**, with each phase separately scoped. Do not start any of these phases or provider work from this visual lock.
 
