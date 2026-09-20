@@ -78,15 +78,21 @@ const fixtures = {
   accepted: ["booked-demo-001-offer-1", "Pasirinktas"],
   declined: ["historical-offers-demo-001-offer-2", "Atmestas"],
   multi: ["multi-location-pickups-demo-001-offer-1", "Laukia jūsų sprendimo"],
+  mixed: ["multi-location-mixed-demo-001-offer-2", "Laukia jūsų sprendimo"],
+  sameRoute: ["multi-vehicle-demo-001-offer-1", "Laukia jūsų sprendimo"],
 }
 
 try {
-  for (const width of [390, 768, 1280, 1536]) {
+  for (const width of [390, 768, 1280, 1440, 1536]) {
     await cdp("Emulation.setDeviceMetricsOverride", { width, height: 900, deviceScaleFactor: 1, mobile: false })
     for (const [state, [id, status]] of Object.entries(fixtures)) {
       assert.equal((await fetch(`${base}/offers/${id}`)).status, 200)
       await visit(id)
       await overflow(`${state} ${width}`)
+      assert.equal(await evaluate("document.querySelectorAll('main').length"), 1)
+      const clipped = await evaluate(`Array.from(document.querySelectorAll('main button, main a, main h1, main h2, main h3, main p, main dd')).filter(el => el.clientWidth && getComputedStyle(el).position !== 'absolute' && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)).map(el => el.textContent)`)
+      assert.deepEqual(clipped, [], `${state} ${width}`)
+      assert.equal(await evaluate("getComputedStyle(document.querySelector('aside')).position"), width >= 1024 ? 'sticky' : 'static')
       assert.ok(await evaluate(text(status)))
       assert.ok(await evaluate(text(`Pasiūlymas iš vežėjo „${id.endsWith("offer-2") ? "Šiaurės autovežis" : "Baltijos kelias"}“`)))
       assert.equal(await evaluate(text("Demonstracinis pasiūlymas.")), false)
@@ -97,7 +103,12 @@ try {
       assert.ok(await evaluate(text("Jūsų užklausa")))
       assert.equal(await evaluate("document.querySelector('a[href^=\"/carriers/\"]').getAttribute('href')"), id.endsWith("offer-2") ? "/carriers/siaures-autovezis" : "/carriers/baltijos-kelias")
       const decisions = await evaluate("[...document.querySelectorAll('button')].filter(button => ['Priimti pasiūlymą', 'Atmesti pasiūlymą'].includes(button.textContent.trim())).length")
-      assert.equal(decisions, ["pending", "updated", "multi"].includes(state) ? 2 : 0)
+      assert.equal(decisions, ["pending", "updated", "multi", "mixed", "sameRoute"].includes(state) ? 2 : 0)
+      if (state === 'mixed') {
+        assert.ok(await evaluate(text('Kelių vietų pervežimas')))
+        assert.ok(await evaluate(text('Berlin → Vilnius')))
+      }
+      if (state === 'accepted') assert.equal(await evaluate("document.querySelector('a[href^=\"/bookings/\"]').getAttribute('href')"), '/bookings/transport-demo-001')
       if (state === "multi") {
         assert.ok(await evaluate(text("Visa pervežimo kaina už 2 automobilius")))
         assert.ok(await evaluate(text("Automobiliai (2)")))
@@ -112,12 +123,14 @@ try {
         assert.ok(await evaluate(text("Ankstesnė kaina")))
         assert.ok(await evaluate(text("590")))
         assert.equal(await evaluate("document.querySelectorAll('details button').length"), 0)
+        await overflow(`history ${width}`)
+        await screenshot(`history-${width}`)
         await evaluate("document.querySelector('details').open = false")
       }
       if (state === "expired") assert.ok(await evaluate(text("Šio pasiūlymo galiojimo laikas baigėsi.")))
       if (state === "unavailable") assert.ok(await evaluate(text("užklausos duomenys pasikeitė")))
       if (state === "notSelected") assert.ok(await evaluate(text("Pasirinkote kitą vežėją.")))
-      if (width === 390 || width === 1280) await screenshot(`${state}-${width}`)
+      await screenshot(`${state}-${width}`)
     }
 
     await visit(fixtures.pending[0])
@@ -126,7 +139,7 @@ try {
     assert.equal(await evaluate("document.activeElement.textContent.trim()"), "Atšaukti")
     for (const copy of ["Baltijos kelias", "590", "2026 m. rugs. 15 d.", "2026 m. rugs. 17 d.", "Apmokėjimas pristatymo metu"]) assert.ok(await evaluate(text(copy)))
     await overflow(`accept dialog ${width}`)
-    if (width === 390 || width === 1280) await screenshot(`accept-dialog-${width}`)
+    await screenshot(`accept-dialog-${width}`)
     await click("Atšaukti")
     assert.ok(await evaluate(text("Laukia jūsų sprendimo")))
     await click("Priimti pasiūlymą")
@@ -138,6 +151,7 @@ try {
     assert.equal(await evaluate(text("tik šiame puslapyje")), false)
     assert.ok(await evaluate(text("Pasirinktas")))
     assert.equal(await evaluate("[...document.querySelectorAll('button')].some(button => button.textContent.trim() === 'Priimti pasiūlymą')"), false)
+    assert.equal(await evaluate("document.querySelector('a[href^=\"/bookings/\"]')"), null, 'Local acceptance must not invent a Booking')
     await visit(fixtures.pending[0])
     assert.ok(await evaluate(text("Laukia jūsų sprendimo")))
 
@@ -153,13 +167,28 @@ try {
     await visit(fixtures.pending[0])
     await click("Atmesti pasiūlymą")
     await until(text("Atmesti pasiūlymą?"))
+    await overflow(`decline dialog ${width}`)
+    await screenshot(`decline-dialog-${width}`)
     await click("Patvirtinti atmetimą")
     await until(text("Pasiūlymas atmestas tik šiame puslapyje"))
     assert.ok(await evaluate(text("Atmestas")))
     assert.equal(await evaluate("[...document.querySelectorAll('button')].some(button => button.textContent.trim() === 'Priimti pasiūlymą')"), false)
     await visit(fixtures.pending[0])
     assert.ok(await evaluate(text("Laukia jūsų sprendimo")))
-    console.log(`PASS ${width}px: eight states, multi-vehicle scope, history, accept/decline confirmation and reload reset; no overflow`)
+    console.log(`PASS ${width}px: ten states, multi-vehicle/location scope, history, accept/decline confirmation and reload reset; no overflow/clipping`)
+  }
+  for (const [id, prefix, destination] of [
+    [fixtures.pending[0], '/requests/', '/requests/marketplace-demo-001'],
+    [fixtures.pending[0], '/messages/', '/messages/active-prebooking-demo-001'],
+    [fixtures.updated[0], '/messages/', '/messages/updated-offer-demo-001'],
+    [fixtures.accepted[0], '/bookings/', '/bookings/transport-demo-001'],
+    [fixtures.pending[0], '/carriers/', '/carriers/baltijos-kelias'],
+  ]) {
+    await visit(id)
+    await evaluate(`document.querySelector('a[href^="${prefix}"]').focus()`)
+    await cdp('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' })
+    await cdp('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 })
+    await until(`location.pathname === ${JSON.stringify(destination)}`)
   }
   assert.equal((await fetch(`${base}/offers/unknown-p08-offer`)).status, 404)
   await visit("unknown-p08-offer")

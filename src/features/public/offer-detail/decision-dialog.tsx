@@ -18,14 +18,14 @@ export function OfferDecisionDialog({ open, onOpenChange, decision, offer, vehic
   const cancel = useRef<HTMLButtonElement>(null)
   const accepting = decision === "accept"
   return <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent role="alertdialog" showCloseButton={false} initialFocus={cancel} finalFocus={finalFocus}>
+    <DialogContent className="marketplace-theme bg-card text-foreground" role="alertdialog" showCloseButton={false} initialFocus={cancel} finalFocus={finalFocus}>
       <DialogHeader>
         <DialogTitle className="leading-snug">{accepting ? "Priimti pasiūlymą?" : "Atmesti pasiūlymą?"}</DialogTitle>
         <DialogDescription>{accepting
           ? `Priimate ${formatEur(offer.totalPriceEur)} pasiūlymą už ${vehicleTransportScope(vehicleCount)} pagal visus užklausoje nurodytus maršrutus. Pasirinkus šį vežėją, kiti pasiūlymai taptų nebepasirenkami.`
           : "Šioje demonstracijoje pasiūlymas bus atmestas tik šiame puslapyje."}</DialogDescription>
       </DialogHeader>
-      <dl className="grid gap-3 rounded-lg bg-muted p-4 text-sm sm:grid-cols-2">
+      <dl className="grid gap-4 rounded-lg border bg-background p-4 text-sm sm:grid-cols-2">
         <div className="min-w-0 sm:col-span-2"><dt className="text-muted-foreground">Vežėjas</dt><dd className="break-words font-medium">{offer.carrier.name}</dd></div>
         <div><dt className="text-muted-foreground">Visa pervežimo kaina</dt><dd className="font-medium">{formatEur(offer.totalPriceEur)}</dd></div>
         <div><dt className="text-muted-foreground">Paėmimas</dt><dd>{formatDateRange(offer.pickupDate)}</dd></div>

@@ -12,5 +12,5 @@ export default async function OfferDetailPage({ params }: { params: Promise<{ id
   const { id } = await params
   const detail = findMockOfferDetail(id)
   if (!detail) notFound()
-  return <PageContainer className="py-8 sm:py-12"><OfferDetailView key={id} initialRequest={serializeRequestDetail(detail.request)} offerId={id} reviewNow={requestReviewNow} /></PageContainer>
+  return <div className="marketplace-theme bg-background text-foreground"><PageContainer className="py-6 sm:py-8 lg:py-12"><OfferDetailView key={id} initialRequest={serializeRequestDetail(detail.request)} offerId={id} reviewNow={requestReviewNow} /></PageContainer></div>
 }

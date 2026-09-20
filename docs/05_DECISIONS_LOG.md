@@ -318,6 +318,16 @@ This file records important product/architecture decisions that should not be ca
 
 **Reason:** Human-reviewed Request management makes complete-request Offers easy to compare while preserving commercial, privacy and conversation rules. This lock changes documentation only. P08 Offer Detail High-Fidelity is next, separately scoped; no P08 implementation, backend, Auth, Supabase, i18n rollout or provider work starts here.
 
+### D-058 — P08 High-Fidelity and Offer Detail visual baseline
+
+**Date:** 2026-09-20. **Status:** LOCKED after human desktop and mobile browser review.
+
+**Decision:** P08 Offer Detail High-Fidelity is approved as part of the V1 visual baseline. Lock visually dominant canonical total price, complete-Request/all-vehicle scope, Offer terms (pickup, planned delivery, validity and payment), carrier trust sidebar, existing Offer-linked chat entry, primary Accept and secondary Decline actions, confirmation-dialog behavior and Request/vehicle summary. Accepted/declined/expired/unavailable states follow existing lifecycle. No partial Offers or partial acceptance. Tailwind v4 + shadcn/Base UI standard sizing and responsive grid/flex/content-driven layouts remain mandatory; arbitrary custom pixel dimensions are prohibited. Detailed patterns are in `03_TECHNICAL_ARCHITECTURE.md`. P01–P07 remain LOCKED and unchanged.
+
+**Implementation boundary:** fixture/demo data and local decisions remain; no real backend persistence, Auth, payment processing/escrow or notification providers. i18n/label normalization is pending. Local acceptance does not implement atomic Booking creation or propagate lifecycle changes. Optional Request budget remains architecture-locked but absent from actual Request domain/state. This approval does not expand V1 payment scope.
+
+**Reason:** Human-reviewed Offer Detail establishes a consistent decision screen while preserving complete-Request commercial semantics and existing lifecycle behavior. This lock changes documentation only. P09 Customer Dashboard High-Fidelity is next, separately scoped; no P09 implementation, backend, Auth, Supabase, i18n, provider or payment work starts here.
+
 ## How to add a new decision
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:

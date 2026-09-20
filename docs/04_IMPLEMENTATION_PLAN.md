@@ -20,7 +20,9 @@ P06 locks restrained confirmation, compact route-first summary, three-step next 
 
 P07 locks compact Request/status summaries, Offer comparison, prominent complete-Request total prices, carrier trust/status, Offer Detail and existing Offer-linked Conversation actions, canonical multi-vehicle/location summaries, and lifecycle-correct zero-offers/accepted/closed states. No partial Offers or acceptance. Data remains fixture/demo based; real persistence, Auth and notification delivery providers remain unimplemented.
 
-The next visual task is **P08 Offer Detail High-Fidelity**, separately scoped and preserving existing functionality. This documentation-only lock changes no P01–P07 UI or behavior and does not start P08. Backend-phase ordering below is unchanged and does not authorize backend, Auth, Supabase, i18n rollout, provider or storage work now.
+P08 Offer Detail High-Fidelity is also LOCKED after human desktop/mobile browser review (D-058). P01–P08 are now LOCKED. P08 locks visually dominant canonical total price for the complete Request, terms/dates/validity/payment presentation, carrier trust sidebar, Offer-linked chat, Accept/Decline actions and confirmations, lifecycle-correct unavailable/historical states, and Request/vehicle scope summaries without partial Offers or acceptance. Fixture/demo behavior remains; real persistence, Auth, payment processing/escrow and notification providers are unimplemented, and i18n/label normalization is pending.
+
+The next visual task is **P09 Customer Dashboard High-Fidelity**, separately scoped and preserving existing functionality. This documentation-only lock changes no P01–P08 UI or behavior and does not start P09. Backend-phase ordering below is unchanged and does not authorize backend, Auth, Supabase, i18n rollout, provider, payment or storage work now.
 
 ## Phase 0 — Foundation
 

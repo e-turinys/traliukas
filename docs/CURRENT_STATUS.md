@@ -8,7 +8,25 @@
 **P05 High-Fidelity = LOCKED.** Human desktop/mobile review and the correction pass are approved. Its Request-wizard patterns are part of the V1 visual baseline under D-055. P01–P04 remain LOCKED and unchanged.
 **P06 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its published-success patterns are part of the V1 visual baseline under D-056. P01–P05 remain LOCKED and unchanged.
 **P07 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its Request-management and Offer-comparison patterns are part of the V1 visual baseline under D-057. P01–P06 remain LOCKED and unchanged.
-**Next visual task:** P08 Offer Detail High-Fidelity, separately scoped. This documentation lock does not start P08 implementation.
+**P08 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Offer Detail patterns are part of the V1 visual baseline under D-058. P01–P07 remain LOCKED and unchanged.
+**Next visual task:** P09 Customer Dashboard High-Fidelity, separately scoped. This lock does not start P09 implementation.
+
+## P08 High-Fidelity approval — 2026-09-20
+
+- Lock the visually dominant canonical total price, complete-Request/all-vehicle scope, terms treatment (pickup, planned delivery, validity and payment), carrier trust sidebar, Offer-linked chat entry, primary Accept and secondary Decline actions, and existing confirmation-dialog behavior. Preserve Request/vehicle summaries and existing accepted/declined/expired/unavailable lifecycle presentation; no partial Offers or partial acceptance.
+- Tailwind v4 + shadcn/Base UI standard sizing and responsive grid/flex/content-driven layouts remain mandatory; arbitrary custom pixel dimensions are prohibited. Detailed patterns are recorded in `03_TECHNICAL_ARCHITECTURE.md` under D-058.
+- Known gaps remain: fixture/demo data and local decisions, no real backend persistence or Auth, no payment processing/escrow or notification providers, and pending i18n/label normalization. Local acceptance does not create a real Booking or propagate lifecycle changes; optional Request budget remains architecture-locked but absent from Request domain/state.
+- This documentation-only approval changes no P01–P08 UI or behavior and starts no P09, backend, Auth, Supabase, i18n, provider or payment work. No commit or push.
+
+## P08 High-Fidelity implementation and continuation validation — 2026-09-20
+
+- Preserved the existing uncommitted P08 implementation. Offer Detail and its not-found screen use the established marketplace theme, white bordered surfaces, standard Tailwind/shadcn sizing and responsive grid/flex/content-driven layout. The total Offer price is prominent and explicitly covers the complete Request, including all vehicles and routes; no partial acceptance semantics were introduced.
+- Terms show the existing pickup, planned delivery, validity, payment and carrier-comment data. Request summaries reuse canonical multi-location and vehicle helpers. CarrierTrust and profile navigation reuse existing fixture-supported reputation only. Desktop has a sticky action/carrier column; mobile keeps it in normal document flow. Existing revision history is expandable and read-only, with no action to accept old terms.
+- Existing accept/decline confirmation and local state behavior are preserved. Ineligible, expired, declined, unavailable and already accepted states suppress new decision actions. Accepted fixtures with an existing Booking ID link to that Booking; local acceptance does not fabricate a Booking. Existing Request, Carrier Profile and canonical Conversation navigation remain intact.
+- Reused PublicHeader, PageContainer, Button, Card, Badge, CarrierTrust, dialog primitives and existing summary/status helpers. No shared P01–P07 UI, domain models or fixtures were changed. The continuation added browser overflow checks/screenshots for expanded history and decline confirmation, plus this status record; it made no further application changes.
+- Validation: `npm.cmd run build` passed, including lint/types; `node --test tests/*.test.mjs` passed all 114 tests. `node tests/offer-detail.browser.mjs` passed ten fixtures at 390/768/1280/1440/1536px, covering pending, updated, accepted, declined, expired, unavailable/not-selected, multi-vehicle and multi-location Offers, history, accept/decline confirmations, reload reset, keyboard navigation, existing Booking handoff, unknown-ID HTTP 404 and no runtime exceptions. Screenshots in ignored `.next/p08-review/` were visually inspected at the four required widths; no clipping or horizontal overflow was detected. `git diff --check` passed; Windows LF/CRLF warnings are informational.
+- **Known gaps unchanged:** fixtures use the existing fixed review clock. Decisions remain local and reset on reload; they do not persist, create a real Booking, update the Request or archive competing Offers/conversations. Real atomic acceptance, Auth, persistence and notification providers remain unimplemented. Optional Request budget remains architecture-locked but absent from Request domain/state. No backend, Auth, Supabase, i18n, provider or payment work started. No commit or push.
+- Primary reference URL: `http://localhost:3000/offers/marketplace-demo-001-offer-1`. Human desktop/mobile review subsequently passed; P08 is LOCKED under D-058.
 
 ## P07 High-Fidelity approval — 2026-09-20
 
@@ -306,7 +324,7 @@
 
 ## Immediate next task
 
-**Next visual task = P08 Offer Detail High-Fidelity**, separately scoped and preserving existing product behavior. P01, P02, P03, P04, P05, P06 and P07 High-Fidelity remain LOCKED and unchanged. This documentation-only lock does not start P08 implementation, backend, Auth, Supabase, i18n rollout, provider or storage work.
+**Next visual task = P09 Customer Dashboard High-Fidelity**, separately scoped. P01, P02, P03, P04, P05, P06, P07 and P08 High-Fidelity remain LOCKED and unchanged. This documentation lock does not start P09, backend, Auth, Supabase, i18n rollout, provider, payment or storage work.
 
 The later backend-phase order remains **i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence**, with each phase separately scoped. Do not start any of these phases or provider work from this visual lock.
 

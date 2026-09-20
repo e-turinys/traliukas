@@ -215,6 +215,27 @@ References: `src/app/(public)/requests/[id]/` and `src/features/public/request-d
 
 P01–P07 UI/behavior remain unchanged by this documentation lock. P08 Offer Detail High-Fidelity is next, separately scoped. No P08 implementation, backend, Auth, Supabase, i18n rollout or provider work starts here.
 
+#### Offer Detail visual baseline — LOCKED (D-058, 2026-09-20)
+
+P08 Offer Detail High-Fidelity passed human desktop and mobile browser review. Its current responsive implementation joins locked P01–P07 as the V1 visual source of truth, preserving Clean Marketplace + Friendly European Marketplace, deep teal/slate, Geist and restrained white bordered surfaces.
+
+| Locked pattern | Approved treatment and behavior |
+|---|---|
+| Price and complete Request scope | Visually dominant canonical total Offer price, with count-aware scope copy. One Offer covers every vehicle and route in the complete Request; no partial Offer or partial acceptance. |
+| Offer terms | Compact readable pickup, planned delivery, validity and payment terms, plus existing comments. Latest terms remain authoritative; existing revision history is expandable and read-only. |
+| Carrier trust sidebar | Existing verified/reputation data and profile link using CarrierTrust. Sticky desktop action/trust column; normal-flow mobile stacking. No fabricated trust or private contacts. |
+| Conversation entry | Existing canonical Conversation navigation only because an Offer exists; availability follows existing lifecycle. No pre-Offer messaging or embedded transcript. |
+| Decision actions and dialogs | Primary Accept Offer, secondary Decline Offer, existing accessible confirmation dialogs and cancel-first focus. Explicit complete-Request terms; no automatic acceptance or skipped confirmation. |
+| Lifecycle presentation | Accepted, declined, expired and unavailable states follow existing eligibility/status logic and suppress inappropriate actions. Existing accepted Booking fixtures link to their Booking; local acceptance does not fabricate one. |
+| Request/vehicle summary | Reuse canonical multi-vehicle/multi-location summaries, individual public routes and shared requested pickup window. Preserve private-address separation. |
+| Responsive layout | Content-driven two-column desktop layout and normal-flow mobile cards, readable wrapping, visible focus and comfortable controls. Reference widths: 390/768/1280/1440px. |
+
+References: `src/app/(public)/offers/[id]/` and `src/features/public/offer-detail/`. Tailwind v4 + shadcn/Base UI standard sizing is mandatory. Use grid/flex/content-driven responsive layouts; no arbitrary custom pixel dimensions or fragile absolute-positioned page layouts.
+
+**Known gaps preserved:** fixture/demo data and fixed review clock; local decisions reset on reload without backend persistence, real Booking creation or propagated Request/competing-Offer/Conversation changes. Auth, notification providers and payment processing/escrow are not implemented; payments/escrow remain outside V1 scope. i18n/label normalization remains pending. Optional Request budget is architecture-locked but absent from actual Request domain/state.
+
+This documentation-only approval changes no P01–P08 UI or behavior. P09 Customer Dashboard High-Fidelity is next, separately scoped; no P09, backend, Auth, Supabase, i18n, provider or payment work starts here.
+
 ### Mobile/performance
 
 - Customer and Carrier UI: mobile-first.
