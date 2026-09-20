@@ -11,5 +11,5 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
   const { id } = await params
   const request = findMockRequestDetail(id)
   if (!request) notFound()
-  return <PageContainer className="py-8 sm:py-12"><RequestDetailView key={id} initialRequest={serializeRequestDetail(request)} reviewNow={requestReviewNow} /></PageContainer>
+  return <div className="marketplace-theme bg-background text-foreground"><PageContainer className="py-6 sm:py-8 lg:py-12"><RequestDetailView key={id} initialRequest={serializeRequestDetail(request)} reviewNow={requestReviewNow} /></PageContainer></div>
 }

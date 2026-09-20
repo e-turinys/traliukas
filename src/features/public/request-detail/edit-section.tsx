@@ -28,8 +28,8 @@ export function RequestEditSection({ request, today, onSave, onCancel }: {
     } : vehicle)
     return next
   }); setErrors({}) }
-  return <section className="min-w-0 rounded-xl border p-4 sm:p-6" aria-labelledby="edit-heading">
-    <h2 id="edit-heading" ref={heading} tabIndex={-1} className="mb-5 text-xl font-semibold outline-none">Redaguoti užklausą</h2>
+  return <section className="mx-auto min-w-0 max-w-3xl rounded-xl border bg-card p-4 sm:p-6 [&_[data-slot=label]]:leading-snug" aria-labelledby="edit-heading">
+    <h2 id="edit-heading" ref={heading} tabIndex={-1} className="mb-6 text-xl font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring">Redaguoti užklausą</h2>
     <form ref={form} noValidate className="space-y-6" onSubmit={event => {
       event.preventDefault()
       const issues = validateRequestEdit(request, edit, today)
@@ -49,7 +49,7 @@ export function RequestEditSection({ request, today, onSave, onCancel }: {
         <DateWindowPicker id="edit-date" label="Kada automobilį galima paimti?" value={edit.route.date} onValueChange={date => change({ route: { ...edit.route, date } })} invalid={!!errors.date} describedBy={errors.date ? "edit-date-error" : undefined} />
         <FieldError id="edit-date" error={errors.date} />
       </div>
-      <VehicleEditor vehicles={edit.vehicles} defaultRoute={edit.route} onChange={vehicles => change({ vehicles })} errors={errors} idPrefix="edit" />
+      <VehicleEditor marketplace vehicles={edit.vehicles} defaultRoute={edit.route} onChange={vehicles => change({ vehicles })} errors={errors} idPrefix="edit" />
       <div className="space-y-2">
         <Label htmlFor="edit-notes">Informacija vežėjui</Label>
         <Textarea id="edit-notes" value={edit.notes} maxLength={2000} onChange={e => change({ notes: e.target.value })} className="min-h-28 w-full" />

@@ -100,6 +100,10 @@ Targeted-only Requests can be expanded to Marketplace visibility.
 
 ### P07 Request detail key rules
 
+**High-Fidelity status: LOCKED** after human desktop and mobile browser review (2026-09-20). D-057 records the compact Request summary/status, Offer comparison list, prominent full-Request price, carrier trust/status treatment, existing Offer Detail CTA and Offer-linked Conversation entry as part of the V1 visual baseline. Preserve shared multi-vehicle/multi-location summaries, zero-offers, selected/accepted and closed states with the existing lifecycle. No partial Offers or partial acceptance. See `03_TECHNICAL_ARCHITECTURE.md` for mandatory sizing/layout rules. P01–P06 remain LOCKED and unchanged; do not visually redesign P07 in subsequent work. P08 Offer Detail High-Fidelity is next, separately scoped.
+
+**Implementation gaps:** fixture/demo data and local actions only; no real backend persistence, Auth or notification delivery providers. Optional Request budget remains architecture-locked but absent from actual Request domain/state, deferred to real Request domain/backend work.
+
 Customer UI uses human labels, e.g.:
 
 - Draft → Juodraštis

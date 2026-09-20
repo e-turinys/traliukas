@@ -8,7 +8,7 @@ export function ConfirmRequestDialog({ open, onOpenChange, title, description, a
 }) {
   const cancel = useRef<HTMLButtonElement>(null)
   return <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent role="alertdialog" showCloseButton={false} initialFocus={cancel} finalFocus={finalFocus}>
+    <DialogContent className="marketplace-theme bg-card text-foreground" role="alertdialog" showCloseButton={false} initialFocus={cancel} finalFocus={finalFocus}>
       <DialogHeader><DialogTitle className="leading-snug">{title}</DialogTitle><DialogDescription>{description}</DialogDescription></DialogHeader>
       <DialogFooter>
         <Button ref={cancel} variant="outline" className="h-auto min-h-11 py-3 whitespace-normal" onClick={() => onOpenChange(false)}>Atšaukti</Button>

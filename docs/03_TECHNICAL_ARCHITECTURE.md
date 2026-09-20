@@ -193,6 +193,28 @@ References: `src/app/(public)/request/[id]/published/page.tsx` and `src/features
 
 P01–P06 UI/behavior remain unchanged by this documentation lock. P07 Request Detail + Offers High-Fidelity is next, separately scoped; no P07 implementation or backend/Auth/Supabase/i18n/provider work starts here.
 
+#### Request Detail + Offers visual baseline — LOCKED (D-057, 2026-09-20)
+
+P07 High-Fidelity passed human desktop and mobile browser review. Its current responsive browser implementation is part of the V1 visual baseline alongside locked P01–P06, continuing the Clean Marketplace + Friendly European Marketplace direction, deep teal/slate, Geist and white bordered surfaces.
+
+| Locked pattern | Approved treatment and behavior |
+|---|---|
+| Compact Request summary/status | Route-first aggregate summary, vehicle names/count, shared pickup window, visibility and readable existing Request status. Preserve public/private location separation and existing permitted actions. |
+| Offer comparison list | Content-driven cards with carrier identity, existing CarrierTrust, total price, pickup/delivery dates, expiry, available payment terms, status and revision indicator. No fabricated trust or commercial data. |
+| Total-price hierarchy | Total EUR price is a primary comparison element. One Offer covers the complete Request and all vehicles/routes; retain explicit multi-vehicle price scope. No partial Offer, per-vehicle acceptance or partial Booking. |
+| Offer states | Existing pending/updated treatment, selected Offer emphasis and readable secondary expired/declined/unavailable/historical states. Status meaning is conveyed in text, not only color. |
+| Offer/Conversation navigation | Existing eligible “Peržiūrėti pasiūlymą” links to `/offers/[id]`. Conversation entry exists only after an Offer and uses existing `/messages/[conversationId]` links; revisions reuse the same conversation. No pre-Offer messaging. |
+| Request details | Reuse canonical multi-vehicle and multi-location summaries; preserve individual vehicle routes, capabilities/condition, local photos and notes. Editing remains governed by existing lifecycle/validation/invalidation rules. |
+| Zero-offers state | Clear empty state without guaranteed offers, countdowns or public-contact suggestions. Preserve existing targeted visibility-expansion action and local behavior. |
+| Accepted/closed states | Selected Carrier and Offer, collapsed prior Offers and existing Booking destination where allowed. Closed requests stay closed; repeat creates a local draft. P07 does not independently accept Offers or create Bookings. |
+| Responsive layout | Desktop two-column comparison/details layout, normal-flow mobile stacking, wrapping labels and comfortable actions. Preserve keyboard focus and confirmation-dialog behavior. |
+
+References: `src/app/(public)/requests/[id]/` and `src/features/public/request-detail/`. Reuse PublicHeader, PageContainer, Button, Card, CarrierTrust, vehicle/location helpers and existing P05 editor primitives without modifying locked screens. Tailwind v4 + shadcn/Base UI standard sizing is mandatory; use grid/flex/content-driven layouts. Arbitrary custom pixel dimensions, fragile absolute positioning and tightly fitted text containers are prohibited.
+
+**Known gaps preserved:** current data and actions remain fixture/demo based with a fixed review clock and local state, without real backend persistence or Auth. Notification delivery providers are not implemented. Optional Request budget remains ARCHITECTURE-LOCKED but NOT YET IMPLEMENTED in actual Request domain/state and is deferred to real Request domain/backend work.
+
+P01–P07 UI/behavior remain unchanged by this documentation lock. P08 Offer Detail High-Fidelity is next, separately scoped. No P08 implementation, backend, Auth, Supabase, i18n rollout or provider work starts here.
+
 ### Mobile/performance
 
 - Customer and Carrier UI: mobile-first.

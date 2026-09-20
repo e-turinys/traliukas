@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRef, useState } from "react"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, ClipboardList, Info } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { publishedRequestSummary, publicationCopy } from "../request-published/context"
@@ -30,20 +30,20 @@ export function RequestDetailView({ initialRequest, reviewNow }: { initialReques
   }
   const finishEditing = () => { setEditing(false); requestAnimationFrame(() => heading.current?.focus()) }
   return <div className="mx-auto max-w-6xl space-y-6">
-    <p className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">Demonstracinė užklausa. Pakeitimai galioja tik šiame puslapyje ir atnaujinus puslapį dingsta. Duomenys neišsaugomi ir vežėjams nesiunčiami.</p>
-    <header className="space-y-4">
-      <Badge variant="secondary">{requestStatusLabels[request.status]}</Badge>
-      <h1 ref={heading} tabIndex={-1} className="break-words text-3xl font-semibold tracking-tight outline-none">{summary.route}</h1>
-      <dl className="grid gap-4 text-sm sm:grid-cols-3">
+    <p className="flex items-start gap-3 rounded-lg border p-4 text-sm text-muted-foreground"><Info aria-hidden="true" className="size-4 shrink-0" /><span>Demonstracinė užklausa. Pakeitimai galioja tik šiame puslapyje ir atnaujinus puslapį dingsta. Duomenys neišsaugomi ir vežėjams nesiunčiami.</span></p>
+    <header className="space-y-4 rounded-xl border bg-card p-4 sm:p-6">
+      <div className="flex flex-wrap items-center gap-3"><p className="text-sm font-medium text-muted-foreground">Jūsų pervežimas</p><Badge variant="secondary" className="h-auto whitespace-normal py-1">{requestStatusLabels[request.status]}</Badge></div>
+      <h1 ref={heading} tabIndex={-1} className="break-words text-2xl font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-3xl">{summary.route}</h1>
+      <dl className="grid gap-4 border-t pt-4 text-sm sm:grid-cols-3">
         <div className="min-w-0"><dt className="text-muted-foreground">Automobiliai</dt><dd className="break-words">{summary.vehicleSummary}</dd></div>
         <div><dt className="text-muted-foreground">Pageidaujamas paėmimas</dt><dd>{summary.date}</dd></div>
         <div className="min-w-0"><dt className="text-muted-foreground">Matomumas</dt><dd className="break-words">{publicationCopy(summary).audience}</dd></div>
       </dl>
       {!editing && <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        {actions.edit && <Button variant="outline" className="min-h-11" onClick={() => setEditing(true)}>Redaguoti užklausą</Button>}
-        {actions.close && <Button ref={closeButton} variant="outline" className="min-h-11" onClick={() => setClosing(true)}>Uždaryti užklausą</Button>}
-        {actions.booking && <Button nativeButton={false} render={<Link href={`/bookings/${request.bookingId}`} />} className="min-h-11">Atidaryti pervežimą</Button>}
-        {actions.repeat && <Button className="min-h-11" onClick={() => {
+        {actions.edit && <Button variant="outline" className="h-auto min-h-11 px-4 py-3 whitespace-normal" onClick={() => setEditing(true)}>Redaguoti užklausą</Button>}
+        {actions.close && <Button ref={closeButton} variant="outline" className="h-auto min-h-11 px-4 py-3 whitespace-normal" onClick={() => setClosing(true)}>Uždaryti užklausą</Button>}
+        {actions.booking && <Button nativeButton={false} render={<Link href={`/bookings/${request.bookingId}`} />} className="h-auto min-h-11 px-4 py-3 whitespace-normal">Atidaryti pervežimą</Button>}
+        {actions.repeat && <Button className="h-auto min-h-11 px-4 py-3 whitespace-normal" onClick={() => {
           setRequest(repeatRequest(request))
           setNotice("Sukurtas naujas vietinis juodraštis su nukopijuotais duomenimis. Pradinė užklausa lieka uždaryta. Juodraštis neišsaugotas ir nepaskelbtas.")
         }}>Pakartoti užklausą</Button>}
@@ -53,17 +53,18 @@ export function RequestDetailView({ initialRequest, reviewNow }: { initialReques
       {request.status === "closed" && <p className="text-sm text-muted-foreground">Ši užklausa uždaryta ir nebus atidaryta iš naujo.</p>}
       {request.status === "draft" && <p className="text-sm text-muted-foreground">Juodraštis nepaskelbtas. Vežėjai jo nemato.</p>}
     </header>
-    <p role="status" className="text-sm">{notice}</p>
+    <p role="status" className={notice ? "rounded-lg border border-primary/20 bg-secondary p-4 text-sm" : "sr-only"}>{notice}</p>
     {editing ? <RequestEditSection request={request} today={reviewNow.slice(0, 10)} onCancel={finishEditing} onSave={(edit, confirmed) => {
       const next = applyRequestEdit(request, edit, confirmed, reviewNow.slice(0, 10))
       setRequest(next)
       setNotice(next.requestVersion !== request.requestVersion ? "Užklausa atnaujinta. Ankstesni pasiūlymai nebegalioja." : "Pakeitimai pritaikyti šiame puslapyje. Pasiūlymai lieka galioti.")
       finishEditing()
-    }} /> : <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+    }} /> : <div className="grid items-start gap-6 lg:grid-cols-2">
       <section aria-labelledby="offers-heading" className="min-w-0 space-y-4">
-        <h2 id="offers-heading" className="text-xl font-semibold">{offerGroups.selected ? "Pasirinktas vežėjas" : "Vežėjų pasiūlymai"}</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="offers-heading" className="text-xl font-semibold">{offerGroups.selected ? "Pasirinktas vežėjas" : "Vežėjų pasiūlymai"}</h2><p className="text-sm text-muted-foreground">Iš viso: {request.offers.length}</p></div>
         {offerGroups.selected && <OfferCard offer={offerGroups.selected} status={visibleOfferStatus(request, offerGroups.selected, reviewNow)} vehicleCount={request.vehicles.length} emphasis="selected" conversation={conversationFor(offerGroups.selected.carrier.id)} />}
-        {offerGroups.current.length ? offerGroups.current.map(offer => <OfferCard key={offer.id} offer={offer} status={visibleOfferStatus(request, offer, reviewNow)} vehicleCount={request.vehicles.length} conversation={conversationFor(offer.carrier.id)} />) : !offerGroups.selected && request.offers.length === 0 ? <div className="space-y-4 rounded-xl border p-5">
+        {offerGroups.current.length ? offerGroups.current.map(offer => <OfferCard key={offer.id} offer={offer} status={visibleOfferStatus(request, offer, reviewNow)} vehicleCount={request.vehicles.length} conversation={conversationFor(offer.carrier.id)} />) : !offerGroups.selected && request.offers.length === 0 ? <div className="space-y-4 rounded-xl border bg-card p-6">
+          <ClipboardList aria-hidden="true" className="size-8 text-primary" />
           <h3 className="font-semibold">Pasiūlymų dar nėra</h3>
           {request.status === "active" && <p className="text-sm text-muted-foreground">Čia galėsite palyginti vežėjų kainas ir pervežimo datas.</p>}
           {request.status === "active" && request.visibility === "targeted" && <Button className="h-auto min-h-11 w-full whitespace-normal py-3" onClick={() => { setRequest(expandRequestVisibility(request)); setNotice("Matomumas pakeistas tik šiame puslapyje. Vežėjams nieko neišsiųsta.") }}>Parodyti ir kitiems tinkamiems vežėjams</Button>}

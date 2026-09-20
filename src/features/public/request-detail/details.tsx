@@ -31,14 +31,14 @@ export function RequestDetails({ request }: { request: RequestDetail }) {
     [hasVehicleRouteOverride ? "Numatytasis maršrutas" : "Pagrindinis maršrutas", route.from && route.to ? `${route.from.city}, ${formatCountry(route.from.country)} → ${route.to.city}, ${formatCountry(route.to.country)}` : "—"],
     ["Paėmimo laikas", dateLabel(route.date)],
   ]
-  return <Card className="min-w-0"><CardContent className="space-y-5">
+  return <Card className="min-w-0 border py-0 shadow-none ring-0"><CardContent className="space-y-6 p-4 sm:p-6">
     <h2 className="text-xl font-semibold">Užklausos duomenys</h2>
     <dl className="grid gap-4 text-sm sm:grid-cols-2">{rows.map(([label, value]) => <div key={label} className="min-w-0 space-y-1"><dt className="text-muted-foreground">{label}</dt><dd className="break-words">{value}</dd></div>)}</dl>
     <section className="space-y-4 border-t pt-4" aria-labelledby="request-vehicles-heading">
       <h3 id="request-vehicles-heading" className="font-semibold">Automobiliai ({request.vehicles.length})</h3>
-      <div className="space-y-4">{request.vehicles.map((vehicle, index) => <article key={vehicle.id} className="space-y-3 rounded-lg bg-muted/35 p-4">
+      <div className="space-y-4">{request.vehicles.map((vehicle, index) => <article key={vehicle.id} className="space-y-3 rounded-lg border bg-background p-4">
         <h4 className="font-medium">Automobilis {index + 1}: {vehicle.make} {vehicle.model}</h4>
-        <p className="text-sm font-medium">{vehicleRouteLabel(vehicle)}</p>
+        <p className="text-sm font-medium text-primary">{vehicleRouteLabel(vehicle)}</p>
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
           <div><dt className="text-muted-foreground">Kategorija</dt><dd>{vehicle.category ? requestCategories[vehicle.category] : "—"}</dd></div>
           {vehicle.year && <div><dt className="text-muted-foreground">Metai</dt><dd>{vehicle.year}</dd></div>}

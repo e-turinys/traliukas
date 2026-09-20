@@ -1,13 +1,23 @@
 # Parvezk.lt — Current Status
 
-**Date:** 2026-09-19
+**Date:** 2026-09-20
 **P01 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. The current responsive P01 browser implementation is the approved V1 visual baseline and the visual reference for P02/P03. P01 search behavior remains locked and unchanged.
 **P02 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its responsive search-results implementation is the V1 visual reference for future results/discovery screens under D-052. P01 remains LOCKED and unchanged.
 **P03 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its route-detail patterns are part of the V1 visual baseline under D-053. P01/P02 remain LOCKED and unchanged.
 **P04 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its carrier-profile patterns are part of the V1 visual baseline under D-054. P01/P02/P03 remain LOCKED and unchanged.
 **P05 High-Fidelity = LOCKED.** Human desktop/mobile review and the correction pass are approved. Its Request-wizard patterns are part of the V1 visual baseline under D-055. P01–P04 remain LOCKED and unchanged.
 **P06 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its published-success patterns are part of the V1 visual baseline under D-056. P01–P05 remain LOCKED and unchanged.
-**Next visual task:** P07 Request Detail + Offers High-Fidelity, separately scoped. This documentation lock does not start P07 implementation.
+**P07 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its Request-management and Offer-comparison patterns are part of the V1 visual baseline under D-057. P01–P06 remain LOCKED and unchanged.
+**Next visual task:** P08 Offer Detail High-Fidelity, separately scoped. This documentation lock does not start P08 implementation.
+
+## P07 High-Fidelity approval — 2026-09-20
+
+- Human desktop and mobile browser review passed. Lock the compact Request summary and status, Offer comparison list, prominent total Offer price, carrier trust inside Offer cards, readable Offer statuses and existing Offer Detail CTA. The current responsive browser implementation is the reference; no P01–P07 UI or behavior is changed by this documentation lock.
+- One Offer covers the complete Request and all 1–10 vehicles. Preserve shared multi-vehicle/multi-location summaries, individual vehicle routes, shared pickup date/window and total-price scope. No partial Offer, per-vehicle acceptance or partial Booking behavior.
+- Preserve Conversation entry only for existing Offer-linked conversations, the zero-offers state, selected/accepted and historical Offers, closed/read-only states, and current edit/close/repeat/visibility actions. P07 does not independently accept an Offer or create a Booking. Offer Detail, Conversation and Booking destinations remain unchanged.
+- Tailwind v4 + shadcn/Base UI standard sizing and grid/flex/content-driven responsive layouts are mandatory; arbitrary custom pixel dimensions are prohibited. Detailed patterns are recorded in `03_TECHNICAL_ARCHITECTURE.md` under D-057.
+- **Known gaps:** data and actions remain fixture/demo based, using the existing fixed review clock and local state. No real backend persistence or Auth is implemented. Real notification delivery providers remain unimplemented. Optional Request budget is ARCHITECTURE-LOCKED but NOT YET IMPLEMENTED in actual Request domain/state; implement later with real Request domain/backend work, not in this visual lock.
+- No P08 implementation, backend, Auth, Supabase, i18n rollout or provider work starts here. No commit or push.
 
 ## P06 High-Fidelity implementation — 2026-09-19
 
@@ -296,7 +306,7 @@
 
 ## Immediate next task
 
-**Next visual task = P07 Request Detail + Offers High-Fidelity**, separately scoped and preserving existing product behavior. P01, P02, P03, P04, P05 and P06 High-Fidelity remain LOCKED and unchanged. This documentation-only lock does not start P07 implementation, backend, Auth, Supabase, i18n rollout, provider or storage work.
+**Next visual task = P08 Offer Detail High-Fidelity**, separately scoped and preserving existing product behavior. P01, P02, P03, P04, P05, P06 and P07 High-Fidelity remain LOCKED and unchanged. This documentation-only lock does not start P08 implementation, backend, Auth, Supabase, i18n rollout, provider or storage work.
 
 The later backend-phase order remains **i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence**, with each phase separately scoped. Do not start any of these phases or provider work from this visual lock.
 

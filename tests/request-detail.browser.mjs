@@ -60,16 +60,35 @@ const screenshot = async name => {
   await writeFile(path.join(artifacts, `${name}.png`), Buffer.from(data, "base64"))
 }
 try {
-  const states = ["marketplace", "multi-vehicle", "multi-location-pickups", "targeted", "updated-offer", "booked", "closed", "completed", "draft", "non-running", "historical-offers"]
-  for (const width of [390, 768, 1280, 1536]) {
+  const states = ["marketplace", "multi-vehicle", "multi-location-pickups", "multi-location-mixed", "targeted", "updated-offer", "booked", "closed", "completed", "draft", "non-running", "historical-offers", "request-changed"]
+  for (const width of [390, 768, 1280, 1440, 1536]) {
     await cdp("Emulation.setDeviceMetricsOverride", { width, height: 900, deviceScaleFactor: 1, mobile: false })
     for (const state of states) {
       const id = `${state}-demo-001`
       assert.equal((await fetch(`${base}/requests/${id}`)).status, 200)
       await visit(id)
       await overflow(`${state} ${width}`)
+      const clipped = await evaluate(`Array.from(document.querySelectorAll('main button, main a, main h1, main h2, main h3, main p, main dd')).filter(el => el.clientWidth && getComputedStyle(el).position !== 'absolute' && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)).map(el => el.textContent)`)
+      assert.deepEqual(clipped, [], `${state} ${width}: content clipping`)
+      assert.equal(await evaluate("getComputedStyle(document.querySelector('h1')).fontFamily.includes('Geist')"), true)
       if (width >= 1280) assert.equal(await evaluate("getComputedStyle(document.querySelector('[aria-labelledby=\"offers-heading\"]').parentElement).gridTemplateColumns.split(' ').length"), 2, 'Desktop offers and details must use two columns')
-      assert.equal(await offers(), ["marketplace", "multi-vehicle", "multi-location-pickups", "updated-offer"].includes(state) ? 2 : state === "non-running" ? 1 : 0)
+      assert.equal(await offers(), ["marketplace", "multi-vehicle", "multi-location-pickups", "updated-offer"].includes(state) ? 2 : ["non-running", "multi-location-mixed"].includes(state) ? 1 : 0)
+      if (state === "marketplace") {
+        assert.ok(await evaluate(text("590")))
+        assert.ok(await evaluate(text("Apmokėjimas pristatymo metu")))
+        assert.ok(await evaluate(text("Iš viso: 2")))
+        assert.equal(await evaluate("document.querySelector('a[href^=\"/messages/\"]').getAttribute('href')"), '/messages/active-prebooking-demo-001')
+      }
+      if (state === "multi-location-mixed") {
+        assert.ok(await evaluate(text("Kelių vietų pervežimas")))
+        assert.ok(await evaluate(text("Berlin → Vilnius")))
+        assert.ok(await evaluate(text("Visa pervežimo kaina už 2 automobilius")))
+      }
+      if (state === "historical-offers") {
+        assert.ok(await evaluate(text("Galiojimas baigėsi")))
+        assert.ok(await evaluate(text("Atmestas")))
+      }
+      if (state === "request-changed") assert.ok(await evaluate(text("Nebegalioja")))
       if (state === "multi-vehicle") {
         assert.ok(await evaluate(text("Automobiliai (2)")))
         assert.ok(await evaluate(text("BMW X5")))
@@ -96,7 +115,7 @@ try {
       }
       if (state === "booked") assert.equal(await evaluate("document.querySelector('a[href^=\"/bookings/\"]').getAttribute('href')"), "/bookings/transport-demo-001")
       if (["booked", "closed", "completed", "draft"].includes(state)) assert.equal(await evaluate("[...document.querySelectorAll('button')].some(b => b.textContent === 'Redaguoti užklausą' || b.textContent === 'Uždaryti užklausą')"), false)
-      if (width === 390 || width === 1280) await screenshot(`${state}-${width}`)
+      await screenshot(`${state}-${width}`)
     }
     await visit("marketplace-demo-001")
     await click("Redaguoti užklausą")
@@ -145,8 +164,19 @@ try {
     await until(text("Baltijos kelias ir kiti tinkami vežėjai"))
     await visit("targeted-demo-001")
     assert.ok(await evaluate(text("Tik Baltijos kelias")))
-    console.log(`PASS ${width}px: ten fixtures, multi-vehicle details, editor, material confirmation, closure, repeat, visibility, reset; no overflow`)
+    console.log(`PASS ${width}px: ${states.length} fixtures, price/payment/trust presentation, multi-location details, editor, material confirmation, closure, repeat, visibility, reset; no overflow/clipping`)
   }
+  await visit('marketplace-demo-001')
+  await evaluate("document.querySelector('a[href^=\"/offers/\"]').focus()")
+  await cdp('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' })
+  await cdp('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 })
+  await until("location.pathname === '/offers/marketplace-demo-001-offer-1'")
+  await visit('marketplace-demo-001')
+  await evaluate("document.querySelector('a[href^=\"/messages/\"]').click()")
+  await until("location.pathname === '/messages/active-prebooking-demo-001'")
+  await visit('booked-demo-001')
+  await evaluate("document.querySelector('a[href^=\"/bookings/\"]').click()")
+  await until("location.pathname === '/bookings/transport-demo-001'")
   assert.equal((await fetch(`${base}/requests/unknown-p07-request`)).status, 404)
   await visit("unknown-p07-request")
   assert.ok(await evaluate(text("Užklausa nerasta")))
