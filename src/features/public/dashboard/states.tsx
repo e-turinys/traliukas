@@ -22,12 +22,12 @@ export function DashboardSkeleton() {
 }
 
 export function DashboardError({ retry }: { retry: () => void }) {
-  return <Card className="mx-auto max-w-xl"><CardContent role="alert" className="space-y-4 py-6">
+  return <Card className="mx-auto max-w-xl border bg-card shadow-none ring-0"><CardContent role="alert" className="space-y-4 py-6">
     <TriangleAlert aria-hidden="true" className="size-7 text-muted-foreground" />
     <div className="space-y-2">
       <h1 className="text-xl font-semibold">Nepavyko įkelti paskyros duomenų</h1>
       <p className="text-muted-foreground">Bandykite įkelti puslapį dar kartą.</p>
     </div>
-    <Button className="min-h-11" onClick={retry}>Bandyti dar kartą</Button>
+    <Button className="h-auto min-h-11 whitespace-normal py-3" onClick={retry}>Bandyti dar kartą</Button>
   </CardContent></Card>
 }

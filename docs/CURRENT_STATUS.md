@@ -9,7 +9,18 @@
 **P06 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its published-success patterns are part of the V1 visual baseline under D-056. P01–P05 remain LOCKED and unchanged.
 **P07 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its Request-management and Offer-comparison patterns are part of the V1 visual baseline under D-057. P01–P06 remain LOCKED and unchanged.
 **P08 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Offer Detail patterns are part of the V1 visual baseline under D-058. P01–P07 remain LOCKED and unchanged.
-**Next visual task:** P09 Customer Dashboard High-Fidelity, separately scoped. This lock does not start P09 implementation.
+**P09 High-Fidelity = IN REVIEW.** Implementation and automated/browser validation are complete; human desktop and mobile browser review is required. P01–P08 remain LOCKED and unchanged.
+**Next visual task:** Human browser review of P09 Customer Dashboard High-Fidelity.
+
+## P09 High-Fidelity implementation — 2026-09-20
+
+- Applied the existing marketplace theme to Dashboard, loading and error surfaces. Reused PublicHeader, PageContainer, Button, Card, Badge, Base UI Tabs, Skeleton, Lucide and unchanged summary/status helpers. Retained the approved title and new-Request destination with a compact responsive header and full-width mobile CTA.
+- Attention remains above tabs and includes only existing actionable Offer items, with updated Offers prioritized. Restrained icon/text treatment replaces multiple badges; a quiet one-line positive state appears when no attention is needed. No urgency, unread state or delivery-confirmation logic was invented.
+- Requests, Transports and History use route-first white bordered cards in a single main list, responsive metadata grids, quiet text statuses and detail-only actions. Small local ItemHeader/DetailLink compositions keep these existing card types consistent; no shared component or domain abstraction was changed. Mobile stacks content and wraps tabs/actions naturally, using standard Tailwind/shadcn dimensions. Removed the unused tab underline locally to avoid overflow without changing the shared primitive.
+- Preserved Draft exclusion, exclusive lifecycle tabs, whole-dashboard/tab empty states, default tabs, no direct accept/edit/close actions, Offer eligibility, all canonical multi-vehicle/multi-location helpers and existing Request/Booking destinations. History continues to link to Request Detail as specified by the current P09 screen map. No private contacts or exact addresses were added.
+- **Existing scope/gaps:** P09 derives from Request/accepted-Offer fixtures and a fixed review clock, not live Booking state. Its Transports label remains “Vežėjas pasirinktas”; Completed/Closed history labels remain unchanged. Delivered-confirmation attention and detailed Booking lifecycle projections are not present in P09 and were not introduced. Dashboard fixture routes/carriers are locally varied from linked detail fixtures, so some destination summaries differ; fixture data was preserved. Auth, persistence, real notifications and i18n/label normalization remain unimplemented. Optional Request budget remains architecture-locked but absent from Request domain/state.
+- Validation: `npm.cmd run build` passed compilation, lint and types; all 114 unit tests passed. Expanded `tests/dashboard.browser.mjs` passed all five fixtures at 390/768/1280/1440/1536px, checking Requests with/without Offers, attention, Booked transport, Completed/Closed history, multi-vehicle/two-pickup summaries, all tab empty states, full empty state, keyboard tabs and actual Request/Booking/new-Request navigation. No clipping, horizontal overflow or runtime exceptions; screenshots in ignored `.next/p09-review/` were visually inspected at all four required widths. `git diff --check` passed (informational Windows LF/CRLF warnings only).
+- Review: `http://localhost:3000/dashboard`; additional fixtures use `?view=requests`, `?view=transport`, `?view=history` and `?view=empty`. P09 is IN REVIEW, not LOCKED. P01–P08, Chat, Booking and Notifications remain unchanged. No backend, Auth, Supabase, i18n rollout, provider or payment work; no commit or push.
 
 ## P08 High-Fidelity approval — 2026-09-20
 
@@ -324,7 +335,7 @@
 
 ## Immediate next task
 
-**Next visual task = P09 Customer Dashboard High-Fidelity**, separately scoped. P01, P02, P03, P04, P05, P06, P07 and P08 High-Fidelity remain LOCKED and unchanged. This documentation lock does not start P09, backend, Auth, Supabase, i18n rollout, provider, payment or storage work.
+**Next visual task = human desktop/mobile browser review of P09 Customer Dashboard High-Fidelity.** P09 is IN REVIEW. P01–P08 remain LOCKED and unchanged. Do not start another visual screen, backend, Auth, Supabase, i18n rollout, provider, payment or storage work under this review.
 
 The later backend-phase order remains **i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence**, with each phase separately scoped. Do not start any of these phases or provider work from this visual lock.
 

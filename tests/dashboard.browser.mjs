@@ -64,6 +64,8 @@ const clickTab = async label => {
 const overflow = async label => {
   const size = await evaluate("({ width: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth })")
   assert.ok(size.scroll <= size.width, `${label}: ${JSON.stringify(size)}`)
+  const clipped = await evaluate(`Array.from(document.querySelectorAll('main button, main a, main h1, main h2, main h3, main p, main dd')).filter(el => el.clientWidth && getComputedStyle(el).position !== 'absolute' && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)).map(el => el.textContent)`)
+  assert.deepEqual(clipped, [], `${label}: clipped content`)
 }
 const screenshot = async name => {
   const { data } = await cdp("Page.captureScreenshot", { captureBeyondViewport: true })
@@ -71,7 +73,7 @@ const screenshot = async name => {
 }
 
 try {
-  for (const width of [390, 768, 1280, 1536]) {
+  for (const width of [390, 768, 1280, 1440, 1536]) {
     await cdp("Emulation.setDeviceMetricsOverride", { width, height: 900, deviceScaleFactor: 1, mobile: false })
 
     await visit("")
@@ -84,25 +86,41 @@ try {
     assert.equal(await evaluate("[...document.querySelectorAll('[data-slot=\"card-title\"]')].filter(item => item.textContent.trim() === '2 paėmimo vietos → Kaunas').length"), 2)
     assert.equal(await evaluate("[...document.querySelectorAll('section[aria-labelledby=\"attention-heading\"] [data-slot=\"card\"]')].map(card => card.innerText.includes('Atnaujintas pasiūlymas'))[0]"), true)
     assert.equal(await evaluate("document.querySelector('a[href=\"/requests/updated-offer-demo-001\"]')?.textContent.trim()"), "Peržiūrėti pasiūlymus")
+    await screenshot(`requests-${width}`)
     await clickTab("Pervežimai")
     assert.ok(await evaluate(text("Pasirinktas vežėjas")))
     assert.ok(await evaluate(text("Šiaurės autovežis")))
     assert.equal(await evaluate("document.querySelector('a[href=\"/bookings/transport-demo-001\"]')?.textContent.trim()"), "Atidaryti pervežimą")
     assert.equal(await evaluate(text("Baltijos kelias")), false)
+    await overflow(`mixed transports ${width}`)
+    await screenshot(`transports-${width}`)
     await clickTab("Istorija")
     assert.ok(await evaluate(text("Pervežimas užbaigtas")))
     assert.ok(await evaluate(text("Užklausa uždaryta")))
+    await overflow(`mixed history ${width}`)
+    await screenshot(`history-${width}`)
     assert.equal(await evaluate("[...document.querySelectorAll('button,a')].some(item => ['Priimti pasiūlymą','Atmesti pasiūlymą','Redaguoti užklausą','Uždaryti užklausą','Pakartoti užklausą'].includes(item.textContent.trim()))"), false)
 
     await visit("?view=requests")
     await overflow(`requests ${width}`)
     assert.ok(await evaluate(text("Pasiūlymų dar nėra")))
     assert.ok(await evaluate(text("Tik Baltijos kelias")))
+    await clickTab("Pervežimai")
+    assert.ok(await evaluate(text("Aktyvių pervežimų nėra")))
+    await overflow(`empty transports ${width}`)
+    await screenshot(`empty-transports-${width}`)
+    await clickTab("Istorija")
+    assert.ok(await evaluate(text("Istorija tuščia")))
+    await overflow(`empty history ${width}`)
 
     await visit("?view=transport")
     await overflow(`transport ${width}`)
     assert.ok(await evaluate(text("Vežėjas pasirinktas")))
     assert.equal(await evaluate(text("Reikia dėmesio")), false)
+    assert.ok(await evaluate(text("Šiuo metu nieko nereikia atlikti.")))
+    await clickTab("Užklausos")
+    assert.ok(await evaluate(text("Aktyvių užklausų nėra")))
+    await overflow(`empty requests ${width}`)
 
     await visit("?view=history")
     await overflow(`history ${width}`)
@@ -116,12 +134,30 @@ try {
     assert.ok(await evaluate(text("Sukurkite pirmą pervežimo užklausą ir gaukite vežėjų pasiūlymus.")))
     assert.equal(await evaluate("document.querySelector('a[href=\"/request/new\"]')?.textContent.trim()"), "Sukurti naują užklausą")
     assert.equal(await evaluate("document.querySelectorAll('[role=tab]').length"), 0)
+    await screenshot(`empty-${width}`)
 
     await visit("")
     const undersized = await evaluate("[...document.querySelectorAll('[role=tab], main a')].filter(item => { const box = item.getBoundingClientRect(); return box.width > 0 && box.height < 43 }).map(item => [item.textContent.trim(), item.getBoundingClientRect().height])")
     assert.deepEqual(undersized, [])
-    if (width === 390 || width === 1280) await screenshot(`mixed-${width}`)
+    await evaluate(`document.querySelector('[role="tab"]').focus()`)
+    await cdp('Input.dispatchKeyEvent', { type: 'keyDown', key: 'ArrowRight', code: 'ArrowRight', windowsVirtualKeyCode: 39 })
+    await cdp('Input.dispatchKeyEvent', { type: 'keyUp', key: 'ArrowRight', code: 'ArrowRight', windowsVirtualKeyCode: 39 })
+    await cdp('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' })
+    await cdp('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 })
+    await until(`document.querySelector('[role="tab"][aria-selected="true"]').textContent.trim() === 'Pervežimai'`)
     console.log(`PASS ${width}px: five fixtures, tab navigation, destinations and touch targets; no overflow`)
+  }
+  for (const [query, destination] of [
+    ['', '/requests/updated-offer-demo-001'],
+    ['?view=transport', '/bookings/transport-demo-001'],
+    ['?view=history', '/requests/completed-demo-001'],
+    ['?view=empty', '/request/new'],
+  ]) {
+    await visit(query)
+    await evaluate(`document.querySelector('a[href="${destination}"]').focus()`)
+    await cdp('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' })
+    await cdp('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 })
+    await until(`location.pathname === ${JSON.stringify(destination)}`)
   }
   assert.deepEqual(exceptions, [])
   console.log(`PASS no runtime exceptions. Screenshots: ${artifacts}`)

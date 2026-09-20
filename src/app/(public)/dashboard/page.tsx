@@ -13,5 +13,5 @@ export default async function DashboardPage({ searchParams }: {
   const name = dashboardFixtureName((await searchParams).view)
   const fixture = dashboardFixture(name)
   const dashboard = deriveDashboard(fixture.requests, requestReviewNow, fixture.defaultTab)
-  return <PageContainer className="py-8 sm:py-12"><DashboardView dashboard={dashboard} /></PageContainer>
+  return <div className="marketplace-theme bg-background text-foreground"><PageContainer className="py-8 sm:py-12"><DashboardView dashboard={dashboard} /></PageContainer></div>
 }
