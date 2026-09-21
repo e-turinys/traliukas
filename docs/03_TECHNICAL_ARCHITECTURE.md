@@ -255,7 +255,31 @@ References: `src/app/(public)/messages/` and `src/features/public/messages/`. Ex
 
 **Known gaps:** fixture/demo messaging only; no backend persistence, real-time sockets, Auth or notification providers. Local send resets on reload and does not deliver to another participant or update the Inbox. Attachments, real read receipts and location sharing are deferred; fixture `readAt`/unread data does not imply working read receipts. Global i18n/date normalization is pending. No separate expired/declined/unavailable browser fixtures exist; existing generic archived behavior remains the implementation reference.
 
-This documentation-only lock changes no P01–P09 or Messages/Chat UI or behavior. Booking / Transport Detail High-Fidelity is the next separately scoped visual task; no implementation or backend integration begins here.
+The Messages/Chat approval changed no P01–P09 or Messages/Chat UI or behavior. Booking High-Fidelity has since passed review and is locked below.
+
+#### Booking / Transport Detail visual baseline — LOCKED (D-060, 2026-09-21)
+
+Human desktop/mobile browser review passed. Canonical `/bookings/[id]` joins P01–P09, Messages Inbox and Conversation / Chat as the approved V1 visual source of truth.
+
+| Locked pattern | Approved treatment and behavior |
+|---|---|
+| Transport hero | Route-first summary, aggregate status, snapshot carrier, vehicle count and prominent agreed total price. |
+| Agreement | Immutable accepted Offer/Request snapshot: accepted Offer ID/version, carrier, all vehicles/locations, requested pickup window, planned pickup/delivery, agreed total price/currency and payment terms. Later source changes do not silently rewrite terms. No editing Request, carrier, price or payment terms from B01. |
+| Lifecycle | Booked → PickupScheduled → Collected → InTransit → Delivered → Completed. One aggregate status for every vehicle; no per-vehicle lifecycle. |
+| Customer labels | “Vežėjas pasirinktas”; “Paėmimas suplanuotas”; “Automobilis paimtas” for one vehicle / “Automobiliai paimti” for two or more; “Vežama”; “Pristatyta”; “Pervežimas užbaigtas”. |
+| Timeline | All six stages, check/number indicators, explicit completed/current/future wording and `aria-current`. Normal grid/flex horizontal desktop layout and vertical mobile layout; no color-only meaning or fragile absolute positioning. |
+| Next action | Current-stage guidance. Only Delivered exposes the count-aware receipt confirmation; confirmation produces local Completed state. No arbitrary customer stage skipping. |
+| Vehicles and locations | Every snapshot vehicle retains make/model, category, relevant condition and pickup/delivery. Exact canonical summaries: shared route; “2 paėmimo vietos → Kaunas”; “Hamburg → 2 pristatymo vietos”; or “Kelių vietų pervežimas”, as applicable through existing helpers. |
+| Carrier and terms | Existing CarrierTrust/profile link, requested/planned dates, agreed total transport price and payment terms. No private phone/email, price editing, online payments or escrow; payments/escrow remain out of V1 scope. |
+| Conversation | Same accepted Offer Conversation via `/messages/[conversationId]`. Active section “Susirašinėjimas” with “Atidaryti pokalbį”; Completed copy “Peržiūrėkite susirašinėjimo istoriją.” with “Peržiūrėti pokalbį”. No duplicate thread or embedded Chat. |
+| Completed | Historical/read-only presentation with all agreement details accessible and no progression action. Dedicated Completed Conversation is read-only under existing Chat rules. |
+| Responsive layout | Geist, deep teal/slate marketplace language, white cards, subtle borders, restrained radius/shadows; existing header, PageContainer, Button, Card and CarrierTrust. Standard Tailwind v4 + shadcn/Base UI sizing and content-driven grid/flex; no arbitrary custom pixel dimensions. Approved widths: 390/768/1280/1440px. |
+
+References: `src/app/(public)/bookings/[id]/` and `src/features/public/booking-detail/`.
+
+**Known gaps:** demo/fixture data only; no backend persistence, Auth, Supabase, real notifications/providers or payments. Full i18n remains pending. Local completion resets on reload and does not propagate to separate Dashboard/Chat fixtures; dedicated Completed data supports historical review. Existing P09 History opens Completed Request Detail, but locked P07 does not expose an onward Completed Booking action. These fixture/navigation limitations are documented, not repaired by this visual approval.
+
+This documentation-only lock changes no approved UI or domain behavior. Notifications High-Fidelity is the next separately scoped visual task; no implementation or backend integration begins here.
 
 ### Mobile/performance
 

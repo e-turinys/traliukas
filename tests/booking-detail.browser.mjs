@@ -80,7 +80,7 @@ const states = [
 ]
 
 try {
-  for (const width of [390, 768, 1280, 1536]) {
+  for (const width of [390, 768, 1280, 1440]) {
     await cdp("Emulation.setDeviceMetricsOverride", { width, height: 900, deviceScaleFactor: 1, mobile: false })
 
     for (const [id, label] of states) {
@@ -92,39 +92,47 @@ try {
       assert.equal(await evaluate("!!document.querySelector('a[href^=\"/offers/\"]')"), false)
       const showsCompletion = await evaluate(text("Patvirtinti, kad automobilis gautas"))
       assert.equal(showsCompletion, id === "transport-delivered-demo-001")
+      assert.equal(await evaluate("document.querySelectorAll('[aria-current=step]').length"), 1)
+      assert.equal(await evaluate("document.querySelectorAll('ol[aria-label=\"Pervežimo būsenos\"] > li').length"), 6)
+      assert.ok(await evaluate("document.querySelector('main header').innerText.includes('Sutarta bendra kaina')"))
+      await screenshot(`${id}-${width}`)
     }
 
     const connector = await evaluate(`(() => {
-      const line = document.querySelector('[data-timeline-connector]')?.getBoundingClientRect()
+      const lines = [...document.querySelectorAll('[data-timeline-connector]')].filter(item => getComputedStyle(item).visibility !== 'hidden').map(item => item.getBoundingClientRect())
       const nodes = [...document.querySelectorAll('[data-timeline-node]')].map(node => node.getBoundingClientRect())
-      const deliveredStep = document.querySelectorAll('[data-timeline-state]')[4]
-      const border = deliveredStep ? getComputedStyle(deliveredStep) : null
+      const steps = [...document.querySelectorAll('[data-timeline-state]')]
       return {
-        lineVisible: !!line && line.width > 0 && line.height > 0,
-        reachesFirst: !!line && !!nodes[0] && line.left <= nodes[0].left + nodes[0].width / 2 + 1,
-        reachesLast: !!line && !!nodes[5] && line.right >= nodes[5].left + nodes[5].width / 2 - 1,
-        deliveredBorder: border?.borderLeftWidth,
-        deliveredBorderColor: border?.borderLeftColor,
+        lineVisible: lines.some(line => line.width > 0 && line.height > 0),
+        connected: nodes.slice(0, -1).every((node, index) => Math.abs(lines[index * 2].left - node.right) < 2 && Math.abs(lines[index * 2].right - lines[index * 2 + 1].left) < 2 && Math.abs(lines[index * 2 + 1].right - nodes[index + 1].left) < 2),
+        vertical: steps.slice(1).every((step, index) => step.getBoundingClientRect().top >= steps[index].getBoundingClientRect().bottom),
+        explicitStates: steps.every(step => /Atlikta|Dabartinė būsena|Dar neatlikta/.test(step.innerText)),
       }
     })()`)
     if (width >= 768) {
       assert.equal(connector.lineVisible, true)
-      assert.equal(connector.reachesFirst, true)
-      assert.equal(connector.reachesLast, true)
+      assert.equal(connector.connected, true)
     } else {
       assert.equal(connector.lineVisible, false)
-      assert.equal(connector.deliveredBorder, "2px")
-      assert.notEqual(connector.deliveredBorderColor, "rgba(0, 0, 0, 0)")
+      assert.equal(connector.vertical, true)
     }
+    assert.equal(connector.explicitStates, true)
 
     await visit("/bookings/transport-delivered-demo-001")
     assert.ok(await evaluate(text("Jei automobilis pristatytas, patvirtinkite jo gavimą ir užbaikite pervežimą.")))
     await click("Patvirtinti, kad automobilis gautas")
     assert.ok(await evaluate(text("Patvirtinus, kad automobilis gautas, pervežimas bus pažymėtas kaip užbaigtas.")))
+    await overflow(`confirmation dialog ${width}`)
+    await until("document.activeElement?.textContent.trim() === 'Atšaukti'")
+    await click("Atšaukti")
+    assert.ok(await evaluate(text("Patvirtinti, kad automobilis gautas")))
+    await until("document.activeElement?.textContent.trim() === 'Patvirtinti, kad automobilis gautas'")
+    await click("Patvirtinti, kad automobilis gautas")
     await click("Patvirtinti gavimą")
     assert.ok(await evaluate(text("Pervežimas užbaigtas")))
     assert.equal(await evaluate(text("Patvirtinti, kad automobilis gautas")), false)
     assert.ok(await evaluate(text("Peržiūrėkite susirašinėjimo istoriją.")))
+    await until("document.activeElement?.textContent.trim() === 'Pervežimas užbaigtas'")
     assert.equal(await evaluate("document.querySelector('a[href=\"/messages/booking-winning-demo-001\"]')?.textContent.includes('Peržiūrėti pokalbį')"), true)
 
     await visit("/bookings/transport-multi-location-demo-001")
@@ -135,14 +143,28 @@ try {
     const shortTargets = await evaluate("[...document.querySelectorAll('main a, main button')].filter(item => { const rect = item.getBoundingClientRect(); return rect.width > 0 && rect.height < 43 }).map(item => [item.textContent.trim(), item.getBoundingClientRect().height])")
     assert.deepEqual(shortTargets, [])
 
-    if (width === 390 || width === 1280) await screenshot(`multi-location-${width}`)
+    await screenshot(`multi-location-${width}`)
     console.log(`PASS ${width}px: six lifecycle states, Delivered confirmation, timeline and multi-location Booking; no overflow`)
   }
 
   await visit("/dashboard?view=transport")
   assert.equal(await evaluate("document.querySelector('a[href=\"/bookings/transport-demo-001\"]')?.textContent.trim()"), "Atidaryti pervežimą")
+  await visit("/dashboard?view=history")
+  assert.equal(await evaluate("!!document.querySelector('a[href=\"/requests/completed-demo-001\"]')"), true)
+  await visit("/requests/completed-demo-001")
+  // Existing locked P07 gap: Completed Request detail does not expose a Booking action.
+  // Keep this baseline explicit; B01 visual work must not change P07/P09 behavior.
+  assert.equal(await evaluate("!!document.querySelector('a[href^=\"/bookings/\"]')"), false)
+  await visit("/bookings/transport-completed-demo-001")
+  assert.equal(await evaluate("!!document.querySelector('a[href=\"/dashboard?view=history\"]')"), true)
+  await visit("/messages/completed-demo-001")
+  assert.equal(await evaluate("!!document.querySelector('textarea')"), false)
+  await visit("/messages/booking-winning-demo-001")
+  assert.equal(await evaluate("!!document.querySelector('textarea')"), true)
   const unknownStatus = await evaluate(`fetch(${JSON.stringify(`${base}/bookings/unknown-b01-booking`)}, { redirect: 'manual' }).then(response => response.status)`)
   assert.equal(unknownStatus, 404)
+  await visit("/bookings/unknown-b01-booking")
+  await overflow("unknown Booking")
   assert.deepEqual(exceptions, [])
   console.log(`PASS dashboard destination, unknown HTTP 404 and no runtime exceptions. Screenshots: ${artifacts}`)
 } finally {

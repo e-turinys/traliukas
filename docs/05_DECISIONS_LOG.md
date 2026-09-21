@@ -338,6 +338,16 @@ This file records important product/architecture decisions that should not be ca
 
 **Reason:** Human-reviewed marketplace messaging preserves transport context and clear active/read-only behavior without changing Conversation identity or lifecycle. This documentation-only lock starts no implementation or integration. Booking / Transport Detail High-Fidelity is next, separately scoped.
 
+### D-060 — Booking / Transport Detail High-Fidelity baseline
+
+**Date:** 2026-09-21. **Status:** LOCKED after human desktop/mobile browser review.
+
+**Decision:** Lock canonical `/bookings/[id]`, immutable accepted Offer/Request snapshot, one aggregate Booked → PickupScheduled → Collected → InTransit → Delivered → Completed lifecycle for all vehicles, multi-vehicle/multi-location support, agreed total price/currency and payment terms. Customer labels are “Vežėjas pasirinktas”, “Paėmimas suplanuotas”, “Automobilis paimtas” / “Automobiliai paimti” according to vehicle count, “Vežama”, “Pristatyta” and “Pervežimas užbaigtas”. Preserve the responsive marketplace-detail hero, accessible six-stage timeline, stage guidance, Delivered-only confirmation, vehicle/route cards, carrier trust and terms. Continue the same accepted Conversation via `/messages/[conversationId]`; Completed remains historical/read-only with agreement details accessible. B01 cannot edit carrier, price, payment terms or original Request. Payments/escrow remain out of V1 scope. Detailed visual patterns are in `03_TECHNICAL_ARCHITECTURE.md`.
+
+**Implementation boundary:** demo/fixture data, no backend persistence, Auth, Supabase, real notifications/providers or payments; full i18n remains pending. Local confirmation does not persist or propagate to separate Chat/Dashboard fixtures. Existing History-to-Completed-Booking navigation gap remains documented. No domain behavior changes.
+
+**Reason:** Human-reviewed Booking presentation makes the accepted agreement, aggregate progress and available actions clear across desktop/mobile. This documentation-only lock changes no P01–P09, Messages Inbox, Conversation / Chat or Booking UI. Notifications High-Fidelity is next, separately scoped. No implementation/integration, commit or push starts here.
+
 ## How to add a new decision
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:

@@ -207,6 +207,10 @@ Closing a Request does not later re-open the same object; repeating creates a ne
 
 ### Booking screen rules
 
+**Booking / Transport Detail High-Fidelity = LOCKED** after human desktop/mobile review on 2026-09-21 (D-060). Canonical route: `/bookings/[id]`. Preserve the approved responsive marketplace-detail layout, route/status/carrier/vehicle-count/total-price hero, six-stage timeline, current-stage guidance, snapshot vehicle routes, carrier trust and price/payment cards. No visual changes to B01 or previous locked screens under this documentation approval.
+
+Customer-facing lifecycle labels are locked: Booked → “Vežėjas pasirinktas”; PickupScheduled → “Paėmimas suplanuotas”; Collected → “Automobilis paimtas” for one vehicle or “Automobiliai paimti” for two or more; InTransit → “Vežama”; Delivered → “Pristatyta”; Completed → “Pervežimas užbaigtas”. Completed remains historical/read-only, with accepted terms accessible and “Peržiūrėti pokalbį” opening the same Conversation. Payments/escrow remain out of V1 scope.
+
 - B01 is the customer source of truth after one complete Request Offer is accepted. It shows the immutable accepted agreement, one selected carrier, one aggregate Booking lifecycle, every vehicle and its own pickup/delivery route, current progress, price/payment terms, carrier trust and the linked Conversation. It does not compare rejected Offers or permit editing accepted terms.
 - Booking snapshots the accepted Offer ID/version, total price, payment terms, carrier identity/reference, requested pickup window, planned pickup/delivery and every vehicle/location. B01 does not derive these agreed terms from the current mutable Request or Offer.
 - V1 has one Booking status for the complete vehicle set: Booked → Pickup Scheduled → Collected → In Transit → Delivered → Completed. There is no per-vehicle lifecycle even for multi-location Bookings.

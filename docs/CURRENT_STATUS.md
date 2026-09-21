@@ -1,6 +1,6 @@
 # Parvezk.lt — Current Status
 
-**Date:** 2026-09-20
+**Date:** 2026-09-21
 **P01 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. The current responsive P01 browser implementation is the approved V1 visual baseline and the visual reference for P02/P03. P01 search behavior remains locked and unchanged.
 **P02 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its responsive search-results implementation is the V1 visual reference for future results/discovery screens under D-052. P01 remains LOCKED and unchanged.
 **P03 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its route-detail patterns are part of the V1 visual baseline under D-053. P01/P02 remain LOCKED and unchanged.
@@ -12,7 +12,27 @@
 **P09 High-Fidelity = LOCKED.** The current Messages/Chat task handoff identifies P09 as locked; its UI and behavior remain unchanged.
 **Messages Inbox High-Fidelity = LOCKED.** Human desktop/mobile and active/read-only browser review passed (D-059).
 **Conversation / Chat High-Fidelity = LOCKED.** Human desktop/mobile and active/read-only browser review passed (D-059). P01–P09 remain LOCKED and unchanged.
-**Next visual task:** Booking / Transport Detail High-Fidelity, separately scoped; this lock does not start implementation.
+**Booking / Transport Detail High-Fidelity = LOCKED.** Human desktop/mobile browser review passed (D-060). The approved UI and existing Booking product logic remain unchanged.
+**Next visual task:** Notifications High-Fidelity, separately scoped; this documentation lock does not start implementation.
+
+## Booking / Transport Detail High-Fidelity approval — 2026-09-21
+
+- Lock canonical `/bookings/[id]`, immutable accepted Offer/Request snapshot, one aggregate Booked → PickupScheduled → Collected → InTransit → Delivered → Completed lifecycle, multi-vehicle/multi-location support and agreed total price/payment terms. Customer labels remain “Vežėjas pasirinktas”, “Paėmimas suplanuotas”, “Automobilis paimtas” / “Automobiliai paimti”, “Vežama”, “Pristatyta”, “Pervežimas užbaigtas”.
+- Lock the responsive marketplace-detail layout, route-first hero, six-stage accessible timeline, stage guidance, Delivered-only confirmation, vehicle/route cards, carrier trust and agreed terms. Reuse the same accepted Conversation via `/messages/[conversationId]`; Completed remains historical/read-only with details accessible. No editing carrier, price, payment terms or original Request from Booking; no payments/escrow in V1. Detailed visual patterns are recorded under D-060 in `03_TECHNICAL_ARCHITECTURE.md`.
+- Known gaps remain: demo/fixture data, no backend persistence, Auth, Supabase, real notifications/providers or payments; full i18n is pending. Local completion and History-navigation limitations recorded below remain unchanged.
+- This documentation-only approval changes no P01–P09, Messages Inbox, Conversation / Chat or Booking UI. Notifications High-Fidelity is next; no implementation or integration starts here. No commit/push.
+- Lock validation: `npm.cmd run build` passed; `node --test tests/*.test.mjs` passed all 114 tests; `git diff --check` passed with line-ending notices only. `git status --short` confirms these documentation updates alongside the preserved, uncommitted B01 implementation/test files from the previous task.
+
+## Booking / Transport Detail High-Fidelity — 2026-09-21
+
+- Updated only B01 presentation: route-first hero with snapshot carrier, vehicle count, aggregate status and prominent agreed total price; full-width six-stage timeline with numbered/check indicators, visible state descriptions and `aria-current`; responsive white bordered cards using the locked P08 detail patterns.
+- Added BookingStatusTimeline using normal grid/flex layout, with horizontal connected stages on desktop and stacked stages on mobile. No absolute positioning or custom pixel dimensions. Reused PublicHeader, PageContainer, Button, Card, Badge, CarrierTrust, Lucide and existing Booking, route, vehicle, currency and date helpers.
+- Added current-stage guidance. Only Delivered exposes receipt confirmation, using the unchanged local completion function/dialog. Completed keeps terms/vehicles, history navigation and historical Conversation wording. Focus returns to the completion heading after confirmation.
+- All vehicle/location, carrier/trust, price/payment and planned/requested date values come from existing snapshots. No model, fixture, acceptance, lifecycle or Conversation changes. B01 links back to the existing History view when Completed.
+- Existing History navigation gap verified in browser: P09 History links to Completed Request Detail, but P07 only exposes Booking navigation for Booked Requests. Completed Booking is directly accessible at `/bookings/transport-completed-demo-001`; adding an onward History link requires a separately scoped correction to locked P07/P09 and is not included here.
+- Known inherited demo limitation: local confirmation resets on reload and does not propagate to separate Dashboard/Chat fixtures. The dedicated Completed fixture links to the existing read-only Conversation. Shared winning Conversation IDs in other review fixtures remain unchanged. No persistence or integration work is included.
+- Validation: `npm.cmd run build` passed; all 114 unit tests passed; focused B01 lint passed; focused Booking browser checks passed at 390/768/1280/1440px across all six stages and the two-vehicle/multi-location fixture. Checked receipt confirmation/cancel and focus restoration, timeline geometry and explicit state labels, touch targets, canonical active/read-only Chat destinations, existing History behavior, and unknown-ID HTTP 404. No horizontal overflow or runtime exceptions. Screenshots inspected; single-vehicle cards now fill the main column. Artifacts: `.next/b01-review/`. `git diff --check` passed (only Windows line-ending notices).
+- P01–P09 and Messages/Chat remain unchanged. No backend, Auth, Supabase, i18n, provider or payment work; no commit/push. Production review server is available at `http://localhost:3000`.
 
 ## Messages Inbox and Conversation High-Fidelity approval — 2026-09-20
 
@@ -355,7 +375,7 @@
 
 ## Immediate next task
 
-**Next visual task = Booking / Transport Detail High-Fidelity**, separately scoped. P01–P09, Messages Inbox and Conversation / Chat High-Fidelity are LOCKED and unchanged. This documentation lock does not start Booking implementation, backend, Auth, Supabase, realtime, i18n rollout, provider, payment or storage work.
+**Immediate next task = Notifications High-Fidelity**, separately scoped. P01–P09, Messages Inbox, Conversation / Chat and Booking / Transport Detail High-Fidelity are LOCKED and unchanged. This documentation lock does not start Notifications implementation, backend, Auth, Supabase, realtime, i18n rollout, provider, payment or storage work.
 
 The later backend-phase order remains **i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence**, with each phase separately scoped. Do not start any of these phases or provider work from this visual lock.
 
