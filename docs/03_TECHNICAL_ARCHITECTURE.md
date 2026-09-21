@@ -279,7 +279,21 @@ References: `src/app/(public)/bookings/[id]/` and `src/features/public/booking-d
 
 **Known gaps:** demo/fixture data only; no backend persistence, Auth, Supabase, real notifications/providers or payments. Full i18n remains pending. Local completion resets on reload and does not propagate to separate Dashboard/Chat fixtures; dedicated Completed data supports historical review. Existing P09 History opens Completed Request Detail, but locked P07 does not expose an onward Completed Booking action. These fixture/navigation limitations are documented, not repaired by this visual approval.
 
-This documentation-only lock changes no approved UI or domain behavior. Notifications High-Fidelity is the next separately scoped visual task; no implementation or backend integration begins here.
+The Booking approval changed no approved UI or domain behavior. Notifications has since passed review and is locked below.
+
+#### Notifications visual baseline — LOCKED (D-061, 2026-09-21)
+
+Human desktop/mobile review passed. P01–P09, Messages Inbox, Conversation / Chat, Booking / Transport Detail and Notifications High-Fidelity are all LOCKED. No application UI changes accompany this approval.
+
+- Canonical `/notifications`; compact marketplace-style list using existing header, PageContainer, Button, Card, Geist, Lucide and standard Tailwind sizing.
+- Navigation uses each Notification's stored `href`, never a reconstructed event-type destination.
+- Explicit read/unread text, stronger unread titles, small dot and subtle tint; meaning never relies on color alone. Read items remain readable. Responsive content wrapping, visible focus, semantic list and practical touch targets remain approved at 390/768/1280/1440px.
+- Visi / unread filters, local mark-one-on-open and compact secondary mark-all action. The approval calls the unread filter “Neskaityti”; the reviewed UI continues to display “Neperskaityti”. Compact empty states retain supporting copy.
+- `offer.accepted` remains internal-only. `booking.created` is the canonical accepted/booking notification. Self-suppression, future idempotency and channel policy are unchanged; no real email/SMS/push providers are implemented in V1 yet.
+
+**Known gaps:** fixture data, nonpersistent read state, no backend persistence, Auth, Supabase, realtime or real provider integrations; full i18n pending. Some stored fixture bodies lack route context; no invented context is added.
+
+References: `src/app/(public)/notifications/` and `src/features/public/notifications/`. Next phase is BACKEND FOUNDATION under D-062: Auth → Supabase/Postgres schema → Roles and permissions → Replace fixture data with real persistence → End-to-end marketplace flow. This supersedes earlier i18n-first sequencing while retaining the locked locale architecture. No backend implementation starts in this documentation task.
 
 ### Mobile/performance
 

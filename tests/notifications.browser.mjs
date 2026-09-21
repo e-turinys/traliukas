@@ -41,6 +41,7 @@ const { sessionId } = await send("Target.attachToTarget", { targetId, flatten: t
 const cdp = (method, params) => send(method, params, sessionId)
 await cdp("Page.enable")
 await cdp("Runtime.enable")
+await cdp("Page.bringToFront")
 const evaluate = async expression => {
   const result = await cdp("Runtime.evaluate", { expression, returnByValue: true, awaitPromise: true })
   if (result.exceptionDetails) throw new Error(JSON.stringify(result.exceptionDetails))
@@ -67,7 +68,7 @@ const screenshot = async name => {
 }
 
 try {
-  for (const width of [390, 768, 1280, 1536]) {
+  for (const width of [390, 768, 1280, 1440]) {
     await cdp("Emulation.setDeviceMetricsOverride", { width, height: 900, deviceScaleFactor: 1, mobile: false })
     await visit("/notifications")
     const size = await evaluate("({ width: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth })")
@@ -80,14 +81,44 @@ try {
     assert.equal(await evaluate("document.querySelector('[data-notification-id=notification-delivered-001] a')?.getAttribute('href')"), "/bookings/transport-delivered-demo-001")
     const shortTargets = await evaluate("[...document.querySelectorAll('main a, main button')].filter(item => { const rect = item.getBoundingClientRect(); return rect.width > 0 && rect.height < 43 }).map(item => [item.textContent.trim(), item.getBoundingClientRect().height])")
     assert.deepEqual(shortTargets, [])
+    assert.equal(await evaluate("[...document.querySelectorAll('[data-notification-read=false]')].every(row => row.innerText.includes('Neperskaitytas'))"), true)
+    assert.equal(await evaluate("[...document.querySelectorAll('[data-notification-read=true]')].every(row => row.innerText.includes('Perskaitytas'))"), true)
+    await screenshot(`notifications-${width}`)
 
-    await click("Neperskaityti")
+    // Stress wrapping with repeated existing fixture text; no product fixture data is changed.
+    await evaluate(`(() => {
+      const row = document.querySelector('[data-notification-id]')
+      const title = row.querySelector('h2'), body = row.querySelector('p')
+      title.textContent = Array(6).fill(title.textContent).join(' ')
+      body.textContent = Array(8).fill(body.textContent).join(' ')
+    })()`)
+    assert.equal(await evaluate("document.documentElement.scrollWidth <= document.documentElement.clientWidth"), true)
+    assert.equal(await evaluate("[...document.querySelectorAll('[data-notification-id] h2, [data-notification-id] p, [data-notification-id] time')].every(item => item.scrollWidth <= item.clientWidth + 1 && item.scrollHeight <= item.clientHeight + 1)"), true)
+    await screenshot(`long-text-${width}`)
+    await visit("/notifications")
+
+    await evaluate("[...document.querySelectorAll('button')].find(item => item.textContent.trim() === 'Neperskaityti').focus()")
+    await cdp("Input.dispatchKeyEvent", { type: "keyDown", key: "Enter", code: "Enter", windowsVirtualKeyCode: 13, text: "\r" })
+    await cdp("Input.dispatchKeyEvent", { type: "keyUp", key: "Enter", code: "Enter", windowsVirtualKeyCode: 13 })
+    await until("document.querySelectorAll('[data-notification-id]').length === 3")
+    assert.equal(await evaluate("document.activeElement.getAttribute('aria-pressed')"), "true")
     assert.equal(await evaluate("document.querySelectorAll('[data-notification-id]').length"), 3)
     await click("Pažymėti visus kaip perskaitytus")
     assert.ok(await evaluate(text("Visus pranešimus perskaitėte")))
     assert.equal(await evaluate("document.querySelectorAll('[data-notification-id]').length"), 0)
+    await click("Visi")
+    assert.equal(await evaluate("document.querySelectorAll('[data-notification-read=true]').length"), 9)
+    assert.equal(await evaluate("[...document.querySelectorAll('button')].find(item => item.textContent.includes('Pažymėti visus')).disabled"), true)
+    await screenshot(`all-read-${width}`)
 
-    if (width === 390 || width === 1280) { await visit("/notifications"); await screenshot(`notifications-${width}`) }
+    await visit("/notifications?view=empty")
+    assert.ok(await evaluate(text("Pranešimų nėra")))
+    assert.equal(await evaluate("document.documentElement.scrollWidth <= document.documentElement.clientWidth"), true)
+    await screenshot(`empty-${width}`)
+    await visit("/notifications?filter=unread")
+    assert.equal(await evaluate("document.querySelectorAll('[data-notification-id]').length"), 3)
+    await visit("/notifications?view=all-read&filter=unread")
+    assert.ok(await evaluate(text("Visus pranešimus perskaitėte")))
     console.log(`PASS ${width}px: list, unread filter, mark-all state, destinations and touch targets; no overflow`)
   }
 
@@ -99,6 +130,14 @@ try {
   await evaluate("document.querySelector('[data-notification-id=notification-message-created-001] a').click()")
   await until("location.pathname === '/messages/active-prebooking-demo-001'")
   assert.equal(await evaluate("location.pathname"), "/messages/active-prebooking-demo-001")
+  for (const [id, href] of [
+    ['notification-offer-created-001', '/offers/marketplace-demo-001-offer-1'],
+    ['notification-booking-created-001', '/bookings/transport-demo-001'],
+  ]) {
+    await visit('/notifications')
+    await evaluate(`document.querySelector('[data-notification-id="${id}"] a').click()`)
+    await until(`location.pathname === ${JSON.stringify(href)}`)
+  }
   assert.deepEqual(exceptions, [])
   console.log(`PASS empty/all-read fixtures, stored-href click navigation and no runtime exceptions. Screenshots: ${artifacts}`)
 } finally {

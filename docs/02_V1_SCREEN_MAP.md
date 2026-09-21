@@ -256,6 +256,7 @@ Customer-facing lifecycle labels are locked: Booked → “Vežėjas pasirinktas
 
 ### N01 Notifications key rules
 
+- **Notifications High-Fidelity = LOCKED** after human desktop/mobile review on 2026-09-21 (D-061). Together with P01–P09, Messages Inbox, Conversation / Chat and Booking / Transport Detail, it forms the approved customer High-Fidelity baseline. Preserve the compact marketplace list, explicit read/unread wording, stronger unread title, dot/tint, accessible filters and empty states. Unread meaning is not color-only. Approval calls the filters “Visi / Neskaityti”; existing reviewed UI wording “Visi / Neperskaityti” remains unchanged.
 - `/notifications` shows event-driven marketplace activity with stored canonical deep links. Each item has a title, concise description, timestamp and explicit read/unread presentation; destinations are read from `Notification.href`, never reconstructed in the UI.
 - Filters are “Visi” and “Neperskaityti”. Local/mock state supports opening one Notification as read and “Pažymėti visus kaip perskaitytus”. Empty states are “Pranešimų nėra” and “Visus pranešimus perskaitėte”. Persistence remains a backend responsibility.
 - Representative deep links are Offer events → `/offers/[offerId]`, Message events → `/messages/[conversationId]`, and accepted/lifecycle Booking events → `/bookings/[bookingId]`.

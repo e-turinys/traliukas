@@ -13,7 +13,25 @@
 **Messages Inbox High-Fidelity = LOCKED.** Human desktop/mobile and active/read-only browser review passed (D-059).
 **Conversation / Chat High-Fidelity = LOCKED.** Human desktop/mobile and active/read-only browser review passed (D-059). P01–P09 remain LOCKED and unchanged.
 **Booking / Transport Detail High-Fidelity = LOCKED.** Human desktop/mobile browser review passed (D-060). The approved UI and existing Booking product logic remain unchanged.
-**Next visual task:** Notifications High-Fidelity, separately scoped; this documentation lock does not start implementation.
+**Notifications High-Fidelity = LOCKED.** Human desktop/mobile review passed (D-061); notification domain and channel policy remain unchanged.
+**Customer High-Fidelity baseline:** P01–P09, Messages Inbox, Conversation / Chat, Booking / Transport Detail and Notifications are all LOCKED.
+**Next project phase:** BACKEND FOUNDATION — Auth → Supabase/Postgres schema → Roles and permissions → Replace fixture data with real persistence → End-to-end marketplace flow (D-062). This documentation approval starts no implementation.
+
+## Notifications High-Fidelity approval — 2026-09-21
+
+- Lock canonical `/notifications`, stored `href` navigation, compact marketplace-style notification list, explicit read/unread labels, stronger unread titles, dot and subtle tint. Unread meaning never depends on color alone. Preserve Visi / unread filters (called “Neskaityti” in the approval; the reviewed UI label remains “Neperskaityti”), local mark-one-on-open, secondary mark-all and compact empty states. No application UI changes.
+- `offer.accepted` remains internal-only; `booking.created` is the canonical accepted/booking notification. No real email/SMS/push providers are implemented in V1 yet. Domain policy, self-suppression and future idempotency remain locked.
+- Known gaps: fixture data, nonpersistent read state, no backend persistence, Auth, Supabase, realtime or real provider integrations; full i18n pending. Existing fixture context limitations remain documented below.
+- All previous locked screens remain unchanged. Next phase is Backend Foundation in the explicitly approved order under D-062; implementation is not part of this documentation task. No commit/push.
+
+## Notifications High-Fidelity implementation — 2026-09-21
+
+- Refined `/notifications` with the existing header/PageContainer and locked marketplace typography, restrained bordered cards, subtle event icons and readable timestamps. Unread rows use stronger titles, a light tint, dot and visible “Neperskaitytas”; read rows stay readable on white with “Perskaitytas”. No badge-heavy activity-log treatment.
+- Reused Button, Card/CardContent, Lucide, stored-href navigation and read/unread helpers. Extended NotificationsView and its local EmptyState without new shared abstractions. Kept “Visi”/“Neperskaityti”, local mark-one-on-open and secondary mark-all behavior. Filters are native keyboard-operable buttons with `aria-pressed`; an unobtrusive live status announces counts. Empty states retain locked headings and add concise supporting copy.
+- Domain/types/fixtures, actor/entity metadata, self-suppression, future idempotency, channel policy and all stored destinations are unchanged. `offer.accepted` remains internal-only; `booking.created` remains the sole accepted-Booking notification. No notification preferences/settings or global header changes.
+- Known gaps: demo/fixture data, local read state resets on reload, no backend persistence/Auth/Supabase, email/SMS/push providers, real notifications or realtime. Full i18n remains pending. Some existing fixture bodies do not identify a route; preserved their actual text rather than inventing context or joining mutable entities. Long-text browser stress checks repeat existing fixture text in the DOM only.
+- Validation: `npm.cmd run build` passed; all 114 unit tests passed; focused Notifications browser checks passed at 390/768/1280/1440px for mixed/read/unread lists, both empty states, keyboard filter activation, mark-all, touch targets, long-text wrapping and stored Offer/Conversation/Booking navigation. No horizontal overflow, text clipping or runtime exceptions. Screenshots inspected under `.next/n01-review/`. `git diff --check` passed with line-ending notices only.
+- Human review: `http://localhost:3001/notifications`, `?filter=unread`, `?view=empty`, `?view=all-read`, and `?view=all-read&filter=unread`. A fresh production server uses port 3001 because port 3000 was occupied. P01–P09, Messages Inbox, Conversation / Chat and Booking remain unchanged. No commit/push.
 
 ## Booking / Transport Detail High-Fidelity approval — 2026-09-21
 
@@ -154,7 +172,7 @@
 - Human desktop and mobile browser review passed; P01 High-Fidelity is LOCKED. D-051 and the V1 visual baseline in `03_TECHNICAL_ARCHITECTURE.md` record the approved direction, mandatory layout/sizing rules and reusable patterns. No backend, Auth, Supabase, persistence, i18n rollout or provider work started. No commit or push.
 - Validation: production build passed including lint/types; all 111 unit tests passed. Headless Chrome and screenshot review covered 390/768/1280/1440px, no horizontal overflow or clipped controls, desktop control alignment, keyboard location selection, validation focus, both URL handoffs and mobile menu. `git diff --check` passed. Screenshots are in ignored `.next/p01-review/`; production review is served on port 3000. A concurrent development server was stopped after it overwrote build assets; final checks used a fresh production server.
 
-**Current phase:** P01, P02, P03 and P04 High-Fidelity LOCKED; next visual task is P05 Create Request High-Fidelity. Backend implementation has not started.
+**Current phase:** Customer High-Fidelity baseline LOCKED: P01–P09, Messages Inbox, Conversation / Chat, Booking / Transport Detail and Notifications. Next phase is BACKEND FOUNDATION (D-062); implementation has not started.
 **Project status:** P01–P09, Multi-Vehicle, Multi-Location, Carrier Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are implemented, browser-reviewed and LOCKED. The pre-backend Route Distribution, i18n, location privacy, optional budget, carrier trust, light-vehicle scope and progressive Customer/Carrier authentication decisions are also LOCKED. Real authentication, backend, Supabase, persistence, realtime messaging, provider integrations and full translation rollout have not started.
 
 ## Final pre-backend architecture lock — 2026-09-17
@@ -166,7 +184,7 @@
 - D-048 limits V1 capacity/matching to passenger cars, SUV/crossovers, vans/minivans and motorcycles. Heavy machinery, agricultural machinery, loose freight, engines and heavy commercial equipment remain out of scope. The current mock `other` form option is not a persisted heavy-transport category and remains untouched until the data-backed migration is scoped.
 - D-049/D-050 lock progressive passwordless Customer auth at Publish Request and stricter Carrier auth before supply/commercial actions. Verified phone remains the V1 Request-publication trust gate; no OTP/OAuth/provider flow was implemented.
 - The intended growth funnel is external Route post → public Route Detail → account-free browse/local Request form → verification at Publish → Request → Offer → Conversation → Booking.
-- Locked next-phase order: i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence.
+- Historical next-phase order at this checkpoint was i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence; superseded by D-062 on 2026-09-21. Locale architecture remains locked and full i18n remains pending.
 - Not started: Supabase, real auth, real persistence, realtime backend, email/SMS providers, Telegram/Facebook/WhatsApp adapters, Maps/geocoding, address reveal logic and full i18n translation rollout.
 - Final validation: `npm.cmd run build` passed compilation, lint/type checks, static generation and build tracing; all 111 unit tests passed; `git diff --check` passed. This lock changed documentation only and did not alter application behavior.
 
@@ -375,9 +393,15 @@
 
 ## Immediate next task
 
-**Immediate next task = Notifications High-Fidelity**, separately scoped. P01–P09, Messages Inbox, Conversation / Chat and Booking / Transport Detail High-Fidelity are LOCKED and unchanged. This documentation lock does not start Notifications implementation, backend, Auth, Supabase, realtime, i18n rollout, provider, payment or storage work.
+**Next project phase = BACKEND FOUNDATION (D-062).** P01–P09, Messages Inbox, Conversation / Chat, Booking / Transport Detail and Notifications High-Fidelity are LOCKED and unchanged.
 
-The later backend-phase order remains **i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence**, with each phase separately scoped. Do not start any of these phases or provider work from this visual lock.
+1. Auth.
+2. Supabase/Postgres schema.
+3. Roles and permissions.
+4. Replace fixture data with real persistence.
+5. End-to-end marketplace flow.
+
+Begin with a separately scoped Auth implementation task. This sequence supersedes the earlier i18n-first phase order, without changing locked locale architecture; full i18n remains pending. No backend, provider or other implementation begins during this documentation approval.
 
 ## Locked baseline handoff
 

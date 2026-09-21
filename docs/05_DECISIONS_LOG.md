@@ -348,6 +348,24 @@ This file records important product/architecture decisions that should not be ca
 
 **Reason:** Human-reviewed Booking presentation makes the accepted agreement, aggregate progress and available actions clear across desktop/mobile. This documentation-only lock changes no P01–P09, Messages Inbox, Conversation / Chat or Booking UI. Notifications High-Fidelity is next, separately scoped. No implementation/integration, commit or push starts here.
 
+### D-061 — Notifications High-Fidelity baseline
+
+**Date:** 2026-09-21. **Status:** LOCKED after human desktop/mobile review.
+
+**Decision:** Lock canonical `/notifications`, stored `href` navigation, compact marketplace-style list, explicit read/unread text, stronger unread titles, dot/tint and non-color-only state meaning. Preserve Visi / unread filtering, local mark-one-on-open, secondary mark-all and compact empty states. Approval terminology “Neskaityti” refers to the existing reviewed “Neperskaityti” filter; no UI label change. `offer.accepted` remains internal-only; `booking.created` is canonical for accepted/booking notifications. No real email/SMS/push providers are implemented in V1 yet.
+
+**Boundary:** fixture data, nonpersistent read state, no backend persistence/Auth/Supabase/realtime/real provider integrations; full i18n pending. All P01–P09, Messages Inbox, Conversation / Chat, Booking / Transport Detail and Notifications High-Fidelity are LOCKED. No application UI or domain changes, commit or push.
+
+**Reason:** Human review approves the final major customer-side High-Fidelity surface before backend work. Detailed patterns are recorded in `03_TECHNICAL_ARCHITECTURE.md`.
+
+### D-062 — Backend Foundation phase order
+
+**Date:** 2026-09-21. **Status:** LOCKED by explicit project instruction.
+
+**Decision:** Next project phase is BACKEND FOUNDATION: (1) Auth, (2) Supabase/Postgres schema, (3) Roles and permissions, (4) Replace fixture data with real persistence, (5) End-to-end marketplace flow. This supersedes the earlier i18n-first implementation sequence, not the locked locale architecture; full i18n remains pending. Preserve all approved UI and domain rules. Roles/access policies must be enforced before real private data is exposed.
+
+**Reason:** The customer High-Fidelity baseline is approved; the next work connects it to authenticated, authorized persistence and validates the complete marketplace flow. This documentation task records the phase only; implementation begins with a separately scoped Auth task.
+
 ## How to add a new decision
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:

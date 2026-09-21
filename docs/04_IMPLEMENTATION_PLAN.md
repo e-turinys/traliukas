@@ -26,7 +26,9 @@ P01–P09 High-Fidelity remain LOCKED. Messages Inbox and Conversation / Chat Hi
 
 **Booking / Transport Detail High-Fidelity = LOCKED** after human desktop/mobile review (D-060). Preserve canonical `/bookings/[id]`, immutable accepted Offer/Request snapshot, count-aware six-stage aggregate lifecycle, multi-vehicle/multi-location presentation, agreed total price/payment terms, same accepted Conversation, Delivered-only confirmation and historical/read-only Completed state. No editing Request/carrier/price/payment terms; no payments/escrow in V1. Responsive marketplace-detail patterns are recorded in `03_TECHNICAL_ARCHITECTURE.md`. Demo data, absent backend persistence/Auth/Supabase/real notifications/providers/payments and pending full i18n remain documented gaps.
 
-The next visual task is **Notifications High-Fidelity**, separately scoped and preserving existing functionality. This documentation-only lock changes no P01–P09, Messages Inbox, Conversation / Chat or Booking / Transport Detail UI or behavior and does not start Notifications implementation. Backend-phase ordering below is unchanged and does not authorize backend, Auth, Supabase, realtime, i18n rollout, provider, payment or storage work now.
+**Notifications High-Fidelity = LOCKED** after human desktop/mobile review (D-061). P01–P09, Messages Inbox, Conversation / Chat, Booking / Transport Detail and Notifications now form the locked customer High-Fidelity baseline. Preserve `/notifications`, stored `href`, compact marketplace list, explicit non-color-only read/unread treatment and Visi / unread filters (reviewed UI: “Neperskaityti”; approval terminology: “Neskaityti”). `offer.accepted` stays internal-only; `booking.created` is the canonical accepted/booking notification. Fixture data, nonpersistent read state, absent backend persistence/Auth/Supabase/realtime/providers and pending full i18n remain documented gaps. No real email/SMS/push providers are implemented yet.
+
+Next project phase: **BACKEND FOUNDATION**, in the D-062 order below. This documentation-only approval changes no application UI and starts no backend implementation.
 
 ## Phase 0 — Foundation
 
@@ -119,10 +121,13 @@ Connect real persistence/auth/storage without changing locked UX rules.
 
 ### Locked entry order
 
-1. Establish the i18n foundation: English source/fallback, supported locale registry, translation-key boundaries and locale-aware formatting adapters. Do not attempt a full translation rollout in this step.
-2. Implement progressive passwordless Auth/User roles and publish-time Customer verification; retain public browsing and local Request drafting.
-3. Define and migrate the Supabase schema/RLS from the locked domain decisions.
-4. Move mock entities to persistence incrementally, preserving locked screen behavior.
+1. Auth: progressive passwordless authentication and publish-time Customer verification, preserving public browsing and local Request drafting.
+2. Supabase/Postgres schema: define entities and migrations from locked domain decisions.
+3. Roles and permissions: enforce Customer/Carrier/Admin authorization and database access policies before exposing real private data.
+4. Replace fixture data with real persistence, preserving locked screen behavior.
+5. End-to-end marketplace flow: validate Request → Offer → accepted Booking → Conversation → delivery confirmation with persisted state.
+
+This explicitly approved order (D-062, 2026-09-21) supersedes the prior i18n-first entry order. Locked locale architecture remains valid; full i18n is pending. The next implementation task is Auth, separately scoped; the current documentation approval starts none of these steps.
 
 ### Tasks
 
