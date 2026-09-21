@@ -328,6 +328,16 @@ This file records important product/architecture decisions that should not be ca
 
 **Reason:** Human-reviewed Offer Detail establishes a consistent decision screen while preserving complete-Request commercial semantics and existing lifecycle behavior. This lock changes documentation only. P09 Customer Dashboard High-Fidelity is next, separately scoped; no P09 implementation, backend, Auth, Supabase, i18n, provider or payment work starts here.
 
+### D-059 — Messages Inbox and Conversation / Chat High-Fidelity baseline
+
+**Date:** 2026-09-20. **Status:** LOCKED after human desktop/mobile and active/read-only browser review.
+
+**Decision:** Lock `/messages` Inbox and canonical `/messages/[conversationId]`, non-color-only unread presentation, compact route/vehicle/multi-location context, active/archived/completed states, carrier-left/customer-right bubbles and neutral centered system events. Preserve active-only text composer, read-only losing/expired/declined/unavailable Conversations, active winning Conversation while Booking is active and historical/read-only Completed Booking Conversation. One Request + Carrier means one Conversation; revisions reuse it, and no pre-Offer messaging or V1 attachments are introduced. Tailwind v4 + shadcn/Base UI standard sizing and responsive content-driven grid/flex layouts are mandatory; arbitrary custom pixel dimensions are prohibited. Detailed patterns are in `03_TECHNICAL_ARCHITECTURE.md`. P01–P09 remain LOCKED and unchanged.
+
+**Implementation boundary:** fixture/demo messaging only, with no backend persistence, real-time sockets, Auth or notification providers. Attachments, real read receipts and location sharing remain deferred. Existing unread/readAt fixtures do not imply real read receipts. Global i18n/date normalization remains pending; domain and notification architecture are unchanged.
+
+**Reason:** Human-reviewed marketplace messaging preserves transport context and clear active/read-only behavior without changing Conversation identity or lifecycle. This documentation-only lock starts no implementation or integration. Booking / Transport Detail High-Fidelity is next, separately scoped.
+
 ## How to add a new decision
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:

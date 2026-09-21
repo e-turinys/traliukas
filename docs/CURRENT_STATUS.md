@@ -9,8 +9,28 @@
 **P06 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its published-success patterns are part of the V1 visual baseline under D-056. P01–P05 remain LOCKED and unchanged.
 **P07 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its Request-management and Offer-comparison patterns are part of the V1 visual baseline under D-057. P01–P06 remain LOCKED and unchanged.
 **P08 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Offer Detail patterns are part of the V1 visual baseline under D-058. P01–P07 remain LOCKED and unchanged.
-**P09 High-Fidelity = IN REVIEW.** Implementation and automated/browser validation are complete; human desktop and mobile browser review is required. P01–P08 remain LOCKED and unchanged.
-**Next visual task:** Human browser review of P09 Customer Dashboard High-Fidelity.
+**P09 High-Fidelity = LOCKED.** The current Messages/Chat task handoff identifies P09 as locked; its UI and behavior remain unchanged.
+**Messages Inbox High-Fidelity = LOCKED.** Human desktop/mobile and active/read-only browser review passed (D-059).
+**Conversation / Chat High-Fidelity = LOCKED.** Human desktop/mobile and active/read-only browser review passed (D-059). P01–P09 remain LOCKED and unchanged.
+**Next visual task:** Booking / Transport Detail High-Fidelity, separately scoped; this lock does not start implementation.
+
+## Messages Inbox and Conversation High-Fidelity approval — 2026-09-20
+
+- Lock `/messages` and canonical `/messages/[conversationId]`, explicit non-color-only unread state, compact route/vehicle/multi-location context, active/archived/completed presentation, carrier-left/customer-right bubbles and neutral centered system events. Lock the active-only text composer and historical/read-only presentation, with standard Tailwind v4 + shadcn/Base UI sizing and responsive grid/flex/content-driven layouts; arbitrary custom pixel dimensions are prohibited. Detailed patterns are recorded under D-059 in `03_TECHNICAL_ARCHITECTURE.md`.
+- Preserve one Request + Carrier Conversation, Offer-revision reuse, no pre-Offer messaging and no V1 attachments. Winning accepted Conversations remain active while Booking is active; losing/expired/declined/unavailable Conversations and Completed Booking history are read-only.
+- Known gaps: fixture/demo messaging only; no backend persistence, real-time sockets, Auth or notification providers. Attachments, real read receipts and location sharing remain deferred; existing fixture unread/readAt data is not a delivery/read-receipt implementation. Global i18n/date normalization remains pending. Existing local-send/reset and fixture-link limitations remain documented below.
+- This documentation-only lock changes no P01–P09 or Messages/Chat UI or behavior. No Booking High-Fidelity implementation, backend, Auth, Supabase, realtime, i18n rollout or provider work starts here. No commit or push.
+
+## Messages Inbox and Conversation High-Fidelity implementation — 2026-09-20
+
+- Applied the locked marketplace theme, Geist, white bordered surfaces, restrained radii and standard Tailwind/shadcn sizing only to Messages routes/components and their not-found surface. Reused unchanged PublicHeader, PageContainer, Button, Card, Badge, Textarea, Lucide and conversation/vehicle/route helpers; extended MessagesInbox, MessageThread and the local MessageItem without adding a component framework or changing domain models/fixtures.
+- Inbox uses a focused single-column list with carrier identity, canonical compact route/vehicle summary, latest preview/time and quiet state treatment. Real fixture unread counts now have visible “neperskaityta” wording as well as the accessible label and stronger preview; archived/completed rows are secondary. Existing empty-state copy is reviewable via `/messages?view=empty`; no new-conversation action or account feature was added.
+- Conversation uses a compact context card and existing Request-before-Booking/Booking-after-acceptance navigation. Carrier bubbles remain left, customer bubbles right in soft teal, and immutable system events centered/neutral. Standard text sizes replace custom tiny timestamps; date/time semantics remain unchanged. Long text and unbroken words wrap within standard fractional/max-width constraints.
+- Preserved text-only local send, 2000-character field limit, blank-send disabling, message ordering, sender identity and status announcement. Mobile composer stacks textarea and full-width Send; desktop places them alongside. Existing sticky declaration stays contained by the Card so it does not overlay history; browser tests check initial and bottom-of-page visibility. Archived/completed threads omit the composer, and completed history adds concise read-only guidance.
+- Preserved one Request + Carrier Conversation, Offer-revision reuse, canonical `/messages/[conversationId]`, winning Booking linkage, archive rules, unread calculation and notification-ready helpers. No private contacts/addresses or attachments were added. P01–P09, Booking and Notifications application code remained unchanged.
+- Validation: production build passed compilation, lint and types; all 114 unit tests passed. Expanded `tests/conversation.browser.mjs` passed at 390/768/1280/1440/1536px, covering all six existing threads, read/unread and empty Inbox, revised Offer, active/winning/archived/completed/multi-location states, left/right/center orientation, local send/reload reset, long text, composer visibility, keyboard destination navigation, existing P07/P08 links, unknown HTTP 404 and no clipping/overflow/runtime exceptions. Screenshots in ignored `.next/conversation-review/` were inspected at all four required widths. `git diff --check` passed; Windows LF/CRLF warnings are informational.
+- **Known gaps unchanged:** messages and unread state are fixture/local only; visiting a thread does not persist read state, and sending does not update the Inbox or deliver to another participant. No Auth, backend persistence, realtime transport or notification providers. No separate expired/declined/unavailable Conversation fixtures exist; generic archived/read-only behavior remains unchanged. The completed fixture still links to its existing `transport-demo-001` Booking, and fixture system-event wording/date normalization remains deferred. No i18n rollout, Supabase, providers or payments started; no commit or push.
+- Reference URLs: `/messages`, `/messages?view=empty`, `/messages/active-prebooking-demo-001`, `/messages/updated-offer-demo-001`, `/messages/booking-winning-demo-001`, `/messages/booking-losing-demo-001`, `/messages/completed-demo-001`, `/messages/multi-location-demo-001`. Human desktop/mobile and active/read-only review subsequently passed; both high-fidelity screens are LOCKED under D-059.
 
 ## P09 High-Fidelity implementation — 2026-09-20
 
@@ -335,7 +355,7 @@
 
 ## Immediate next task
 
-**Next visual task = human desktop/mobile browser review of P09 Customer Dashboard High-Fidelity.** P09 is IN REVIEW. P01–P08 remain LOCKED and unchanged. Do not start another visual screen, backend, Auth, Supabase, i18n rollout, provider, payment or storage work under this review.
+**Next visual task = Booking / Transport Detail High-Fidelity**, separately scoped. P01–P09, Messages Inbox and Conversation / Chat High-Fidelity are LOCKED and unchanged. This documentation lock does not start Booking implementation, backend, Auth, Supabase, realtime, i18n rollout, provider, payment or storage work.
 
 The later backend-phase order remains **i18n foundation → Auth/User roles → Supabase schema → migrate mock entities to persistence**, with each phase separately scoped. Do not start any of these phases or provider work from this visual lock.
 

@@ -236,6 +236,27 @@ References: `src/app/(public)/offers/[id]/` and `src/features/public/offer-detai
 
 This documentation-only approval changes no P01–P08 UI or behavior. P09 Customer Dashboard High-Fidelity is next, separately scoped; no P09, backend, Auth, Supabase, i18n, provider or payment work starts here.
 
+#### Messages Inbox and Conversation visual baseline — LOCKED (D-059, 2026-09-20)
+
+Human desktop/mobile and active/read-only browser review passed. Messages Inbox and Conversation / Chat join locked P01–P09 as the V1 visual source of truth, continuing deep teal/slate, Geist and restrained marketplace surfaces.
+
+| Locked pattern | Approved treatment and behavior |
+|---|---|
+| Inbox | `/messages`: focused single-column carrier list with compact route, vehicle and canonical multi-location summary, latest preview/time, state and useful empty state. No arbitrary start-conversation action. |
+| Unread state | Visible unread wording/count, accessible label and stronger preview alongside restrained teal treatment; meaning never depends on color alone. Preserve existing unread calculation. |
+| Conversation context | Canonical `/messages/[conversationId]`, compact participant/route/vehicle/state header and existing Request or Booking navigation. No Booking-specific chat route. |
+| Message orientation | Carrier messages left in soft neutral bubbles, customer messages right in soft teal, immutable system messages centered and visually neutral. Readable sender/time labels and wrapping long text. |
+| Active composer | Text-only V1 textarea and Send action, only for active Conversations; existing validation/local send behavior. Mobile stacks controls; containment prevents message overlap. |
+| Lifecycle presentation | Active, archived and completed states are explicit. Losing/expired/declined/unavailable Conversations are read-only. Accepted winning Conversation stays active while Booking is active; Completed Booking Conversation is historical/read-only with no composer. |
+| Conversation identity | Exactly one Request + Carrier Conversation; Offer revisions reuse it. No pre-Offer messaging, arbitrary user messaging or V1 attachments. |
+| Responsive layout | Standard Tailwind v4 + shadcn/Base UI sizing, grid/flex/content-driven layout, practical touch targets and visible focus. No arbitrary custom pixel dimensions or fragile absolute-positioned layouts. Reference widths: 390/768/1280/1440px. |
+
+References: `src/app/(public)/messages/` and `src/features/public/messages/`. Existing helpers, domain rules, system events, privacy boundaries and `message.created` architecture remain unchanged.
+
+**Known gaps:** fixture/demo messaging only; no backend persistence, real-time sockets, Auth or notification providers. Local send resets on reload and does not deliver to another participant or update the Inbox. Attachments, real read receipts and location sharing are deferred; fixture `readAt`/unread data does not imply working read receipts. Global i18n/date normalization is pending. No separate expired/declined/unavailable browser fixtures exist; existing generic archived behavior remains the implementation reference.
+
+This documentation-only lock changes no P01–P09 or Messages/Chat UI or behavior. Booking / Transport Detail High-Fidelity is the next separately scoped visual task; no implementation or backend integration begins here.
+
 ### Mobile/performance
 
 - Customer and Carrier UI: mobile-first.

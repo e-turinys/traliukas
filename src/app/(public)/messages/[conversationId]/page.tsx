@@ -10,5 +10,5 @@ export default async function ConversationPage({ params }: { params: Promise<{ c
   const { conversationId } = await params
   const detail = findMockConversation(conversationId)
   if (!detail) notFound()
-  return <PageContainer className="py-8 sm:py-12"><MessageThread detail={detail} /></PageContainer>
+  return <div className="marketplace-theme bg-background text-foreground"><PageContainer className="py-8 sm:py-12"><MessageThread detail={detail} /></PageContainer></div>
 }

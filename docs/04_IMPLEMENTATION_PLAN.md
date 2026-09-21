@@ -22,7 +22,9 @@ P07 locks compact Request/status summaries, Offer comparison, prominent complete
 
 P08 Offer Detail High-Fidelity is also LOCKED after human desktop/mobile browser review (D-058). P01–P08 are now LOCKED. P08 locks visually dominant canonical total price for the complete Request, terms/dates/validity/payment presentation, carrier trust sidebar, Offer-linked chat, Accept/Decline actions and confirmations, lifecycle-correct unavailable/historical states, and Request/vehicle scope summaries without partial Offers or acceptance. Fixture/demo behavior remains; real persistence, Auth, payment processing/escrow and notification providers are unimplemented, and i18n/label normalization is pending.
 
-The next visual task is **P09 Customer Dashboard High-Fidelity**, separately scoped and preserving existing functionality. This documentation-only lock changes no P01–P08 UI or behavior and does not start P09. Backend-phase ordering below is unchanged and does not authorize backend, Auth, Supabase, i18n rollout, provider, payment or storage work now.
+P01–P09 High-Fidelity remain LOCKED. Messages Inbox and Conversation / Chat High-Fidelity are now LOCKED after human desktop/mobile and active/read-only review (D-059). Preserve canonical routes, non-color-only unread state, compact context, carrier-left/customer-right/system-centered presentation, active-only text composer, Conversation identity/revision reuse and lifecycle-correct read-only history. No pre-Offer messaging or V1 attachments. Fixture/demo messaging, missing persistence/realtime/Auth/providers, deferred attachments/read receipts/location sharing and pending global i18n/date normalization remain documented gaps.
+
+The next visual task is **Booking / Transport Detail High-Fidelity**, separately scoped and preserving existing functionality. This documentation-only lock changes no P01–P09 or Messages/Chat UI or behavior and does not start Booking implementation. Backend-phase ordering below is unchanged and does not authorize backend, Auth, Supabase, realtime, i18n rollout, provider, payment or storage work now.
 
 ## Phase 0 — Foundation
 
