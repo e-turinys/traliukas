@@ -1,6 +1,7 @@
 # Parvezk.lt — Current Status
 
-**Date:** 2026-09-21
+**Date:** 2026-09-22
+**Backend Foundation Architecture = LOCKED.** Human approval of OD-1 through OD-5 is recorded in `06_BACKEND_FOUNDATION_ARCHITECTURE.md`; no implementation started under this approval.
 **P01 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. The current responsive P01 browser implementation is the approved V1 visual baseline and the visual reference for P02/P03. P01 search behavior remains locked and unchanged.
 **P02 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its responsive search-results implementation is the V1 visual reference for future results/discovery screens under D-052. P01 remains LOCKED and unchanged.
 **P03 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its route-detail patterns are part of the V1 visual baseline under D-053. P01/P02 remain LOCKED and unchanged.
@@ -15,7 +16,17 @@
 **Booking / Transport Detail High-Fidelity = LOCKED.** Human desktop/mobile browser review passed (D-060). The approved UI and existing Booking product logic remain unchanged.
 **Notifications High-Fidelity = LOCKED.** Human desktop/mobile review passed (D-061); notification domain and channel policy remain unchanged.
 **Customer High-Fidelity baseline:** P01–P09, Messages Inbox, Conversation / Chat, Booking / Transport Detail and Notifications are all LOCKED.
-**Next project phase:** BACKEND FOUNDATION — Auth → Supabase/Postgres schema → Roles and permissions → Replace fixture data with real persistence → End-to-end marketplace flow (D-062). This documentation approval starts no implementation.
+**NEXT PHASE: Supabase / Auth Foundation Implementation.** Begin only under a separately scoped implementation instruction; this architecture approval starts no implementation.
+
+## Backend Foundation Architecture approval — 2026-09-22
+
+- OD-1 is LOCKED to phone OTP for Request publication, with optional email OTP.
+- OD-2 is LOCKED to one active Carrier owner and no staff/operator access in V1.
+- OD-3 is LOCKED to Customer or selected Carrier-owner cancellation only before `collected`, as an audited terminal exception outcome with atomic exactly-once capacity release. Post-`collected` exceptions require manual support/admin handling.
+- OD-4 is LOCKED to public Customer-to-Carrier and private Carrier-to-Customer reviews after Completed Booking, unique per eligible direction. Review implementation may be deferred beyond initial closed-beta migrations.
+- OD-5 is LOCKED to preserved commercial agreement/history with separately restrictable/anonymizable PII and operational data. Numeric retention periods remain a non-blocking legal/operations approval item and were not invented.
+- RLS, single-owner carrier authority, atomic Offer acceptance/capacity reservation, cancellation capacity release, six-stage normal Booking lifecycle, review eligibility/uniqueness and historical access were rechecked for consistency.
+- Documentation only: no Supabase project/configuration, Auth integration, migrations, packages or application code were created or changed. No commit/push.
 
 ## Notifications High-Fidelity approval — 2026-09-21
 
@@ -172,7 +183,8 @@
 - Human desktop and mobile browser review passed; P01 High-Fidelity is LOCKED. D-051 and the V1 visual baseline in `03_TECHNICAL_ARCHITECTURE.md` record the approved direction, mandatory layout/sizing rules and reusable patterns. No backend, Auth, Supabase, persistence, i18n rollout or provider work started. No commit or push.
 - Validation: production build passed including lint/types; all 111 unit tests passed. Headless Chrome and screenshot review covered 390/768/1280/1440px, no horizontal overflow or clipped controls, desktop control alignment, keyboard location selection, validation focus, both URL handoffs and mobile menu. `git diff --check` passed. Screenshots are in ignored `.next/p01-review/`; production review is served on port 3000. A concurrent development server was stopped after it overwrote build assets; final checks used a fresh production server.
 
-**Current phase:** Customer High-Fidelity baseline LOCKED: P01–P09, Messages Inbox, Conversation / Chat, Booking / Transport Detail and Notifications. Next phase is BACKEND FOUNDATION (D-062); implementation has not started.
+**Current phase:** Backend Foundation Architecture LOCKED; implementation has not started.
+**Next phase:** Supabase / Auth Foundation Implementation, separately scoped.
 **Project status:** P01–P09, Multi-Vehicle, Multi-Location, Carrier Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are implemented, browser-reviewed and LOCKED. The pre-backend Route Distribution, i18n, location privacy, optional budget, carrier trust, light-vehicle scope and progressive Customer/Carrier authentication decisions are also LOCKED. Real authentication, backend, Supabase, persistence, realtime messaging, provider integrations and full translation rollout have not started.
 
 ## Final pre-backend architecture lock — 2026-09-17
@@ -393,7 +405,7 @@
 
 ## Immediate next task
 
-**Next project phase = BACKEND FOUNDATION (D-062).** P01–P09, Messages Inbox, Conversation / Chat, Booking / Transport Detail and Notifications High-Fidelity are LOCKED and unchanged.
+**NEXT PHASE: Supabase / Auth Foundation Implementation.** Backend Foundation Architecture and the customer High-Fidelity baseline are LOCKED and unchanged. Start only under a separately scoped implementation instruction.
 
 1. Auth.
 2. Supabase/Postgres schema.
@@ -401,7 +413,7 @@
 4. Replace fixture data with real persistence.
 5. End-to-end marketplace flow.
 
-Begin with a separately scoped Auth implementation task. This sequence supersedes the earlier i18n-first phase order, without changing locked locale architecture; full i18n remains pending. No backend, provider or other implementation begins during this documentation approval.
+Begin with a separately scoped Supabase/Auth foundation implementation task. This sequence supersedes the earlier i18n-first phase order, without changing locked locale architecture; full i18n remains pending. No backend, provider or other implementation begins during this documentation approval.
 
 ## Locked baseline handoff
 
