@@ -2,13 +2,14 @@ import "server-only"
 
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
+import type { Database } from "./database.types"
 import { getSupabaseEnvironment } from "./env"
 
 /** A new caller-scoped client for each render; middleware owns session refresh. */
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies()
   const { url, key, secureCookies } = getSupabaseEnvironment()
-  return createServerClient(url, key, {
+  return createServerClient<Database, "api">(url, key, {
     db: { schema: "api" },
     cookieOptions: { path: "/", sameSite: "lax", secure: secureCookies },
     cookies: {

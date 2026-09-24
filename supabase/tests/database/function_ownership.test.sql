@@ -13,7 +13,12 @@ with expected(signature, owner_name) as (values
   ('private.is_carrier_owner(uuid)', 'parvezk_authorization'),
   ('api.create_carrier(text,text,text,text,text)', 'parvezk_commands'),
   ('api.update_my_carrier(uuid,text,text,text[],boolean,boolean,boolean)', 'parvezk_commands'),
-  ('private.audit_verification_change()', 'parvezk_verification_audit')
+  ('private.audit_verification_change()', 'parvezk_verification_audit'),
+  ('api.publish_request(jsonb,uuid)', 'parvezk_commands'),
+  ('private.owns_request(uuid)', 'parvezk_authorization'),
+  ('private.can_read_request(uuid)', 'parvezk_authorization'),
+  ('private.lock_request_vehicle()', 'parvezk_authorization'),
+  ('private.require_complete_request()', 'parvezk_authorization')
 )
 select extensions.ok(
   coalesce(p.proowner = r.oid and p.prosecdef and 'search_path=""' = any(p.proconfig), false),
@@ -57,7 +62,10 @@ select extensions.is(
     'api.update_my_profile(text,text,text)'::regprocedure,
     'api.create_carrier(text,text,text,text,text)'::regprocedure,
     'api.update_my_carrier(uuid,text,text,text[],boolean,boolean,boolean)'::regprocedure,
-    'private.is_carrier_owner(uuid)'::regprocedure),
+    'private.is_carrier_owner(uuid)'::regprocedure,
+    'api.publish_request(jsonb,uuid)'::regprocedure,
+    'private.owns_request(uuid)'::regprocedure,
+    'private.can_read_request(uuid)'::regprocedure),
   clients.name || ' EXECUTE allowlist: ' || p.oid::regprocedure::text)
 from pg_catalog.pg_proc p
 join pg_catalog.pg_namespace n on n.oid = p.pronamespace

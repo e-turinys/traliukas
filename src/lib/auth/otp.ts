@@ -3,7 +3,7 @@
 import { createBrowserSupabaseClient } from "../supabase/client"
 import { requireE164, requireOtp } from "./validation"
 
-/** No UI binding yet. OTP delivery is managed by Auth and its abuse controls. */
+/** OTP delivery is managed by Auth and its abuse controls. */
 export async function requestPhoneOtp(phone: string, captchaToken?: string) {
   const { error } = await createBrowserSupabaseClient().auth.signInWithOtp({
     phone: requireE164(phone), options: { shouldCreateUser: true, captchaToken },

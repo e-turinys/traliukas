@@ -16,7 +16,30 @@
 **Booking / Transport Detail High-Fidelity = LOCKED.** Human desktop/mobile browser review passed (D-060). The approved UI and existing Booking product logic remain unchanged.
 **Notifications High-Fidelity = LOCKED.** Human desktop/mobile review passed (D-061); notification domain and channel policy remain unchanged.
 **Customer High-Fidelity baseline:** P01–P09, Messages Inbox, Conversation / Chat, Booking / Transport Detail and Notifications are all LOCKED.
-**Supabase/Auth Foundation Phase 1 = LOCKED.** Full local Linux/PostgreSQL validation passed and human approval is recorded on 2026-09-24. Phase 2 has NOT started.
+**Supabase/Auth Foundation Phase 1 = LOCKED.** Full local Linux/PostgreSQL validation passed and human approval is recorded on 2026-09-24.
+
+**Customer Request Real Persistence Phase 2 = LOCKED.** Full local validation passed and human approval is recorded on 2026-09-24. P05 continues through managed phone OTP to atomic PostgreSQL publication; real P06 IDs load the owner's persisted Request and survive reload.
+
+## Customer Request Real Persistence Phase 2 lock — 2026-09-24
+
+- Human approval locks Phase 2 after clean local database reset, all Phase 1 + Phase 2 migrations from zero and **235/235 database assertions** passed.
+- Human validation confirms the real local phone OTP flow, PostgreSQL Request persistence, returned real UUID, persisted P06 loading and reload, and correct vehicle/location persistence. Database/RLS tests are green; all 235 assertions, build, TypeScript, lint and unit tests passed.
+- The temporary local CSS/dev-server rendering issue is not a Phase 2 persistence blocker and must not trigger UI redesign or reopen the locked UI baseline.
+- Validated local phone OTP and verified customer publication; atomic Request, vehicle, multi-vehicle and multi-location persistence; public/private location separation; optional budget persistence and strict precision validation; immutable Request ownership/publication identity; real-ID P06 loading and reload persistence.
+- P05 browser validation passed at **390/768/1280/1440px**. Database types generation/check, full unit tests, lint, TypeScript and production build passed.
+
+- Started from a clean working tree. Added a forward migration only; the three locked Phase 1 migrations are unchanged.
+- `app.transport_requests`, `request_vehicles`, `request_vehicle_private_details` and immutable `request_revisions` follow the locked names. `api.publish_request` verifies a live session, active/beta-admitted profile, current verified phone, contact completion and terms acceptance, then persists the complete Request/1–10 vehicles/resolved public locations/private instructions/revision/audit atomically. Caller identity, status and version are database-controlled. A per-customer publish key deduplicates retries.
+- P05's existing four steps, field layout and summary helpers remain. The phone handoff uses managed passwordless Auth, preserves the draft in memory, attaches a phone to an existing account where appropriate, and continues publication after verification. No browser service key or long-lived private draft storage.
+- Public city centroids are curated from the existing eight picker localities. Arbitrary locality/address input cannot become public catalog data. Default-route private text maps to per-vehicle instructions only where defaults apply; overridden routes do not inherit it. Anonymous Request reads are denied; active carrier owners see discoverable public-safe data, never exact addresses. Only the customer can read source private details.
+- P06 resolves real UUIDs through authenticated owner views and uses the existing presentation/summary components. Explicit demo IDs retain their visual-regression fixtures; real lookup failures never fall back to fixtures. Reload reads PostgreSQL; unknown/non-owner IDs return not found.
+- Optional overall EUR budget is supported by schema and adapter without adding UI. Shared flexible dates are resolved/frozen by the database using Europe/Vilnius. Technical terms acceptance version: `2026-09-24`, recorded against the existing checkbox; this does not introduce or approve legal text.
+- Local managed-Auth testing: `node scripts/local-phone-auth.mjs` restarts local Supabase with a generated test OTP and invalid local-only SMS provider placeholders required to enable phone Auth in this CLI, restores tracked config, and stores the test values only in ignored `supabase/.temp/local-phone-auth.json`. Beta admission remains trusted local SQL, not user metadata or an Auth bypass. See `07_SUPABASE_LOCAL_SETUP.md`.
+- Deferred: Storage/object uploads. Selected photos must be explicitly removed before this phase's publication; no silent discard, fabricated URL or fake ready metadata. Demo carrier-route targets require explicit marketplace fallback; real targeted route publication waits for the supply phase. `target_route_id` is NULL-guarded until its future FK can be installed. Request detail/dashboard persistence and all Offer/Booking/Chat/Notification/Review flows remain unimplemented.
+- Resumed the existing uncommitted implementation without restarting Phase 2. Clean local reset/all four migrations, 235 pgTAP assertions, database lint/type drift, all 17 JavaScript test files, ESLint, TypeScript and production build passed. Added regression coverage for immutable Request ID/publication retry key and budget boundaries. The production browser flow passed managed local phone OTP → multi-location publication → real owner P06/reload, with anonymous/unknown-ID denial; mobile/desktop screenshots were inspected. Details are in `07_SUPABASE_LOCAL_SETUP.md`.
+- Deferred production items: production SMS provider/configuration; actual vehicle photo Storage upload; remote hosted Supabase deployment; production CAPTCHA/rate-limit/SMTP configuration. Local test OTP validation does not establish production SMS delivery.
+- Phase 2 is LOCKED. This lock update changes documentation only; locked UI is unchanged. No remote Supabase access, Phase 3 implementation, commit or push.
+- Next phase recorded: **PHASE 3 — CARRIER ROUTE REAL PERSISTENCE**. Goal: authenticated verified Carrier → create/publish Route → persist Route + capacity + public route locations → real published Routes appear in Search / Route Detail → real carrier can manage own Routes. Phase 3 has not started.
 
 ## Supabase/Auth Foundation Phase 1 lock — 2026-09-24
 
@@ -25,7 +48,7 @@
 - Generated database types, DB type drift check, database lint, foundation tests, full unit tests, ESLint, TypeScript, Next.js production build and `git diff --check` all passed.
 - Earlier Docker-access and migration/Auth permission blockers are resolved. The Linux validation supersedes the earlier blocked/in-review status. Local validation does not claim production SMS delivery or browser Auth integration.
 - Locked UI and backend architecture remain unchanged. No remote Supabase access, commit or push.
-- Next phase: **PHASE 2 — CUSTOMER REQUEST REAL PERSISTENCE**, recorded below only; no Phase 2 implementation is part of this lock.
+- Next phase: **PHASE 2 — CUSTOMER REQUEST REAL PERSISTENCE**, recorded below only; no Phase 2 implementation was part of that lock.
 
 ## Phase 1 migration ownership correction — 2026-09-23
 
@@ -426,21 +449,21 @@
 - Branch: `main`
 - Canonical local path: `/home/cv95/Projects/traliukas`
 - GitHub → Hostinger auto-deploy: working
-- Supabase: Auth Foundation Phase 1 LOCKED; full local Linux/PostgreSQL validation passed (148/148 pgTAP assertions); no remote project connected
+- Supabase: Auth Foundation Phase 1 and Customer Request Real Persistence Phase 2 LOCKED; full local Linux/PostgreSQL validation passed (235/235 database assertions); no remote project connected
 - shadcn/ui: configured with Base UI, Nova preset and neutral tokens
 - Real product UI: public layout, shared pickers and P01–P09 implemented with mock data; P01–P09 and the Multi-Vehicle, Multi-Location and Carrier Capacity V1 baseline are locked and browser-reviewed.
 
 ## Immediate next task
 
-**PHASE 2 — CUSTOMER REQUEST REAL PERSISTENCE**
+**PHASE 3 — CARRIER ROUTE REAL PERSISTENCE**
 
-Goal: Customer completes P05 locally → Phone OTP verification → authenticated customer → publish Request → persist Request + vehicles + public/private locations in Postgres → published success reads the real persisted Request.
+Goal: authenticated verified Carrier → create/publish Route → persist Route + capacity + public route locations → real published Routes appear in Search / Route Detail → real carrier can manage own Routes.
 
-Recorded as the next phase only. Do not start Phase 2 in this documentation task; keep the locked UI and backend architecture unchanged.
+Phase 2 is LOCKED by human approval after full local validation. Phase 3 is recorded as the next phase only; no Phase 3 work is authorized or started in this documentation task.
 
 ## Locked baseline handoff
 
-P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior, Carrier Route Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are approved, browser-reviewed and LOCKED. D-043–D-050 lock the final pre-backend architecture. Start no new phase until it is separately selected and scoped. Supabase/Auth Foundation Phase 1 is LOCKED after full local PostgreSQL validation. Phase 2 — Customer Request Real Persistence is recorded as next and has not started. Marketplace persistence, realtime messaging, provider delivery, Route-distribution adapters and full i18n translation rollout remain unstarted. Do not commit or push without a separate instruction.
+P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior, Carrier Route Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are approved, browser-reviewed and LOCKED. D-043–D-050 lock the final pre-backend architecture. Start no new phase until it is separately selected and scoped. Supabase/Auth Foundation Phase 1 and Customer Request Real Persistence Phase 2 are LOCKED after full local validation and human approval. Phase 3 — Carrier Route Real Persistence is recorded next, not started. Other marketplace persistence, realtime messaging, production provider delivery, Route-distribution adapters and full i18n translation rollout remain unstarted. Do not commit or push without a separate instruction.
 
 ## Do not reopen without a blocker
 

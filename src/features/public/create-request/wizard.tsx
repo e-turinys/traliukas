@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useState, type FormEvent } from "react"
-import { ArrowLeft, ArrowRight, Check, Phone } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
 import { formatDateRange } from "@/lib/format-date"
 import { readDate } from "../search-query"
+import { PhonePublish } from "../request-persistence/phone-publish"
 import { ContactStep } from "./contact-step"
 import { RouteStep } from "./route-step"
 import { VehicleStep } from "./vehicle-step"
@@ -23,13 +24,13 @@ export function CreateRequestWizard({ query, today }: { query: string; today: st
   const [draft, setDraft] = useState(() => createRequestDraft(new URLSearchParams(query)))
   const [step, setStep] = useState<Step>(reviewStep ? 2 : 1)
   const [errors, setErrors] = useState<Errors>({})
-  // Future U01/U02 integration starts here; this state never means verified or published.
+  // The complete draft and selected files remain in this mounted wizard through OTP.
   const [handoff, setHandoff] = useState(false)
   const [prefillNotice, setPrefillNotice] = useState(() => readDate(new URLSearchParams(query)).invalid)
   const heading = useRef<HTMLHeadingElement>(null)
-  const handoffHeading = useRef<HTMLHeadingElement>(null)
   const target = draft.target.route
-  const issue = targetIssue(draft, today)
+  const issue = targetIssue(draft, today) ?? (draft.target.requested
+    ? "Pasirinktas demonstracinis maršrutas dar nepriima tikrų užklausų. Galite tęsti su kitais vežėjais." : undefined)
 
   function update(value: Partial<TransportRequestDraft>) {
     const next = { ...draft, ...value }
@@ -65,14 +66,14 @@ export function CreateRequestWizard({ query, today }: { query: string; today: st
     const nextErrors = validateStep(draft, step, today)
     if (Object.keys(nextErrors).length) { showErrors(nextErrors); return }
     if (step < 4) { move((step + 1) as Step); return }
-    // Revalidate the whole in-memory draft before the future phone verification boundary.
+    // Revalidate the whole in-memory draft before the phone verification boundary.
     for (const previous of [1, 2] as const) {
       const previousErrors = validateStep(draft, previous, today)
       if (Object.keys(previousErrors).length) { setStep(previous); showErrors(previousErrors); return }
     }
     setErrors({})
     setHandoff(true)
-    requestAnimationFrame(() => handoffHeading.current?.focus())
+    requestAnimationFrame(() => document.getElementById("handoff-heading")?.focus())
   }
 
   return <div className="mx-auto max-w-3xl space-y-6 sm:space-y-8 [&_[data-slot=label]]:leading-snug">
@@ -103,13 +104,7 @@ export function CreateRequestWizard({ query, today }: { query: string; today: st
     </CardContent></Card>}
 
     <Card className="overflow-visible border py-6 ring-0"><CardContent className="space-y-6 px-4 sm:px-6">
-      {handoff ? <section className="space-y-4" aria-labelledby="handoff-heading">
-        <Phone aria-hidden="true" className="size-6 text-primary" />
-        <h2 id="handoff-heading" ref={handoffHeading} tabIndex={-1} className="text-xl font-semibold">Kitas žingsnis – telefono patvirtinimas</h2>
-        <p role="status" className="leading-relaxed">Prieš paskelbiant užklausą reikės patvirtinti telefono numerį. Telefono patvirtinimas kol kas nepasiekiamas. Užklausa nepaskelbta, patvirtinimo kodas neišsiųstas.</p>
-        <p className="text-sm text-muted-foreground">Įvestus duomenis galite peržiūrėti ir keisti šiame puslapyje. Uždarius ar atnaujinus puslapį jie neišliks.</p>
-        <Button type="button" variant="outline" className="h-auto min-h-11 w-full px-4 py-3 whitespace-normal" onClick={() => { setHandoff(false); focusHeading() }}>Grįžti prie užklausos</Button>
-      </section> : <form noValidate onSubmit={submit} className="space-y-6">
+      {handoff ? <PhonePublish draft={draft} onBack={() => { setHandoff(false); focusHeading() }} /> : <form noValidate onSubmit={submit} className="space-y-6">
         <h2 ref={heading} tabIndex={-1} className="text-xl leading-snug font-semibold tracking-tight sm:text-2xl">{headings[step - 1]}</h2>
         {step === 1 && <>
           {prefillNotice && <p role="status" className="text-sm text-muted-foreground">Nuorodoje nurodyta data netinkama. Pasirinkite datą arba „Bet kada“.</p>}

@@ -12,6 +12,89 @@ export type Database = {
       [_ in never]: never
     }
     Views: {
+      marketplace_requests: {
+        Row: {
+          budget_amount: number | null
+          budget_currency: string | null
+          default_delivery_location_id: string | null
+          default_pickup_location_id: string | null
+          id: string | null
+          notes: string | null
+          pickup_anchor_date: string | null
+          pickup_flexible_option: string | null
+          pickup_from: string | null
+          pickup_kind: string | null
+          pickup_to: string | null
+          published_at: string | null
+          request_version: number | null
+          target_carrier_id: string | null
+          visibility: string | null
+        }
+        Insert: {
+          budget_amount?: number | null
+          budget_currency?: string | null
+          default_delivery_location_id?: string | null
+          default_pickup_location_id?: string | null
+          id?: string | null
+          notes?: string | null
+          pickup_anchor_date?: string | null
+          pickup_flexible_option?: string | null
+          pickup_from?: string | null
+          pickup_kind?: string | null
+          pickup_to?: string | null
+          published_at?: string | null
+          request_version?: number | null
+          target_carrier_id?: string | null
+          visibility?: string | null
+        }
+        Update: {
+          budget_amount?: number | null
+          budget_currency?: string | null
+          default_delivery_location_id?: string | null
+          default_pickup_location_id?: string | null
+          id?: string | null
+          notes?: string | null
+          pickup_anchor_date?: string | null
+          pickup_flexible_option?: string | null
+          pickup_from?: string | null
+          pickup_kind?: string | null
+          pickup_to?: string | null
+          published_at?: string | null
+          request_version?: number | null
+          target_carrier_id?: string | null
+          visibility?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_requests_default_delivery_location_id_fkey"
+            columns: ["default_delivery_location_id"]
+            isOneToOne: false
+            referencedRelation: "public_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_requests_default_pickup_location_id_fkey"
+            columns: ["default_pickup_location_id"]
+            isOneToOne: false
+            referencedRelation: "public_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_requests_target_carrier_id_fkey"
+            columns: ["target_carrier_id"]
+            isOneToOne: false
+            referencedRelation: "my_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_requests_target_carrier_id_fkey"
+            columns: ["target_carrier_id"]
+            isOneToOne: false
+            referencedRelation: "public_carriers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       my_carrier_memberships: {
         Row: {
           active: boolean | null
@@ -304,6 +387,206 @@ export type Database = {
         }
         Relationships: []
       }
+      my_request_private_details: {
+        Row: {
+          city: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          country_code: string | null
+          instructions: string | null
+          postcode: string | null
+          side: string | null
+          street: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          city?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country_code?: string | null
+          instructions?: string | null
+          postcode?: string | null
+          side?: string | null
+          street?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          city?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country_code?: string | null
+          instructions?: string | null
+          postcode?: string | null
+          side?: string | null
+          street?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_vehicle_private_details_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "my_request_vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_vehicle_private_details_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "request_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      my_request_vehicles: {
+        Row: {
+          category: string | null
+          condition: string | null
+          delivery_location_id: string | null
+          id: string | null
+          make: string | null
+          model: string | null
+          pickup_location_id: string | null
+          position: number | null
+          request_id: string | null
+          rolling_ability: string | null
+          uses_default_route: boolean | null
+          year: number | null
+        }
+        Insert: {
+          category?: string | null
+          condition?: string | null
+          delivery_location_id?: string | null
+          id?: string | null
+          make?: string | null
+          model?: string | null
+          pickup_location_id?: string | null
+          position?: number | null
+          request_id?: string | null
+          rolling_ability?: string | null
+          uses_default_route?: boolean | null
+          year?: number | null
+        }
+        Update: {
+          category?: string | null
+          condition?: string | null
+          delivery_location_id?: string | null
+          id?: string | null
+          make?: string | null
+          model?: string | null
+          pickup_location_id?: string | null
+          position?: number | null
+          request_id?: string | null
+          rolling_ability?: string | null
+          uses_default_route?: boolean | null
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_vehicles_delivery_location_id_fkey"
+            columns: ["delivery_location_id"]
+            isOneToOne: false
+            referencedRelation: "public_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_vehicles_pickup_location_id_fkey"
+            columns: ["pickup_location_id"]
+            isOneToOne: false
+            referencedRelation: "public_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_vehicles_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_vehicles_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "my_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      my_requests: {
+        Row: {
+          budget_amount: number | null
+          budget_currency: string | null
+          created_at: string | null
+          default_delivery_location_id: string | null
+          default_pickup_location_id: string | null
+          id: string | null
+          notes: string | null
+          pickup_anchor_date: string | null
+          pickup_flexible_option: string | null
+          pickup_from: string | null
+          pickup_kind: string | null
+          pickup_to: string | null
+          published_at: string | null
+          request_version: number | null
+          status: string | null
+          visibility: string | null
+        }
+        Insert: {
+          budget_amount?: number | null
+          budget_currency?: string | null
+          created_at?: string | null
+          default_delivery_location_id?: string | null
+          default_pickup_location_id?: string | null
+          id?: string | null
+          notes?: string | null
+          pickup_anchor_date?: string | null
+          pickup_flexible_option?: string | null
+          pickup_from?: string | null
+          pickup_kind?: string | null
+          pickup_to?: string | null
+          published_at?: string | null
+          request_version?: number | null
+          status?: string | null
+          visibility?: string | null
+        }
+        Update: {
+          budget_amount?: number | null
+          budget_currency?: string | null
+          created_at?: string | null
+          default_delivery_location_id?: string | null
+          default_pickup_location_id?: string | null
+          id?: string | null
+          notes?: string | null
+          pickup_anchor_date?: string | null
+          pickup_flexible_option?: string | null
+          pickup_from?: string | null
+          pickup_kind?: string | null
+          pickup_to?: string | null
+          published_at?: string | null
+          request_version?: number | null
+          status?: string | null
+          visibility?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_requests_default_delivery_location_id_fkey"
+            columns: ["default_delivery_location_id"]
+            isOneToOne: false
+            referencedRelation: "public_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_requests_default_pickup_location_id_fkey"
+            columns: ["default_pickup_location_id"]
+            isOneToOne: false
+            referencedRelation: "public_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_carriers: {
         Row: {
           cmr_insurance_available: boolean | null
@@ -376,6 +659,77 @@ export type Database = {
         }
         Relationships: []
       }
+      request_vehicles: {
+        Row: {
+          category: string | null
+          condition: string | null
+          delivery_location_id: string | null
+          id: string | null
+          make: string | null
+          model: string | null
+          pickup_location_id: string | null
+          position: number | null
+          request_id: string | null
+          rolling_ability: string | null
+          year: number | null
+        }
+        Insert: {
+          category?: string | null
+          condition?: string | null
+          delivery_location_id?: string | null
+          id?: string | null
+          make?: string | null
+          model?: string | null
+          pickup_location_id?: string | null
+          position?: number | null
+          request_id?: string | null
+          rolling_ability?: string | null
+          year?: number | null
+        }
+        Update: {
+          category?: string | null
+          condition?: string | null
+          delivery_location_id?: string | null
+          id?: string | null
+          make?: string | null
+          model?: string | null
+          pickup_location_id?: string | null
+          position?: number | null
+          request_id?: string | null
+          rolling_ability?: string | null
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_vehicles_delivery_location_id_fkey"
+            columns: ["delivery_location_id"]
+            isOneToOne: false
+            referencedRelation: "public_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_vehicles_pickup_location_id_fkey"
+            columns: ["pickup_location_id"]
+            isOneToOne: false
+            referencedRelation: "public_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_vehicles_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_vehicles_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "my_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       create_carrier: {
@@ -386,6 +740,10 @@ export type Database = {
           p_registration_country: string
           p_slug: string
         }
+        Returns: string
+      }
+      publish_request: {
+        Args: { p_client_publish_key: string; p_payload: Json }
         Returns: string
       }
       update_my_carrier: {
@@ -805,6 +1163,290 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      request_revisions: {
+        Row: {
+          changed_by: string
+          created_at: string
+          public_terms_snapshot: Json
+          request_id: string
+          snapshot_schema_version: number
+          version: number
+        }
+        Insert: {
+          changed_by: string
+          created_at?: string
+          public_terms_snapshot: Json
+          request_id: string
+          snapshot_schema_version?: number
+          version: number
+        }
+        Update: {
+          changed_by?: string
+          created_at?: string
+          public_terms_snapshot?: Json
+          request_id?: string
+          snapshot_schema_version?: number
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_revisions_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_revisions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "transport_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      request_vehicle_private_details: {
+        Row: {
+          city: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          country_code: string | null
+          created_at: string
+          instructions: string | null
+          postcode: string | null
+          side: string
+          street: string | null
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          city?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country_code?: string | null
+          created_at?: string
+          instructions?: string | null
+          postcode?: string | null
+          side: string
+          street?: string | null
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          city?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country_code?: string | null
+          created_at?: string
+          instructions?: string | null
+          postcode?: string | null
+          side?: string
+          street?: string | null
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_vehicle_private_details_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "request_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      request_vehicles: {
+        Row: {
+          category: string
+          condition: string
+          created_at: string
+          delivery_location_id: string
+          id: string
+          make: string
+          model: string
+          pickup_location_id: string
+          position: number
+          removed_at: string | null
+          request_id: string
+          rolling_ability: string | null
+          updated_at: string
+          uses_default_route: boolean
+          year: number | null
+        }
+        Insert: {
+          category: string
+          condition: string
+          created_at?: string
+          delivery_location_id: string
+          id?: string
+          make: string
+          model: string
+          pickup_location_id: string
+          position: number
+          removed_at?: string | null
+          request_id: string
+          rolling_ability?: string | null
+          updated_at?: string
+          uses_default_route?: boolean
+          year?: number | null
+        }
+        Update: {
+          category?: string
+          condition?: string
+          created_at?: string
+          delivery_location_id?: string
+          id?: string
+          make?: string
+          model?: string
+          pickup_location_id?: string
+          position?: number
+          removed_at?: string | null
+          request_id?: string
+          rolling_ability?: string | null
+          updated_at?: string
+          uses_default_route?: boolean
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_vehicles_delivery_location_id_fkey"
+            columns: ["delivery_location_id"]
+            isOneToOne: false
+            referencedRelation: "public_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_vehicles_pickup_location_id_fkey"
+            columns: ["pickup_location_id"]
+            isOneToOne: false
+            referencedRelation: "public_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_vehicles_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "transport_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transport_requests: {
+        Row: {
+          budget_amount: number | null
+          budget_currency: string | null
+          client_publish_key: string
+          closed_at: string | null
+          created_at: string
+          customer_id: string
+          default_delivery_location_id: string
+          default_pickup_location_id: string
+          id: string
+          moderation_status: string
+          notes: string
+          pickup_anchor_date: string | null
+          pickup_flexible_option: string | null
+          pickup_from: string | null
+          pickup_kind: string
+          pickup_to: string | null
+          published_at: string | null
+          request_version: number
+          status: string
+          target_carrier_id: string | null
+          target_route_id: string | null
+          terms_accepted_at: string | null
+          terms_version: string | null
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          budget_amount?: number | null
+          budget_currency?: string | null
+          client_publish_key: string
+          closed_at?: string | null
+          created_at?: string
+          customer_id: string
+          default_delivery_location_id: string
+          default_pickup_location_id: string
+          id?: string
+          moderation_status?: string
+          notes?: string
+          pickup_anchor_date?: string | null
+          pickup_flexible_option?: string | null
+          pickup_from?: string | null
+          pickup_kind: string
+          pickup_to?: string | null
+          published_at?: string | null
+          request_version?: number
+          status?: string
+          target_carrier_id?: string | null
+          target_route_id?: string | null
+          terms_accepted_at?: string | null
+          terms_version?: string | null
+          updated_at?: string
+          visibility: string
+        }
+        Update: {
+          budget_amount?: number | null
+          budget_currency?: string | null
+          client_publish_key?: string
+          closed_at?: string | null
+          created_at?: string
+          customer_id?: string
+          default_delivery_location_id?: string
+          default_pickup_location_id?: string
+          id?: string
+          moderation_status?: string
+          notes?: string
+          pickup_anchor_date?: string | null
+          pickup_flexible_option?: string | null
+          pickup_from?: string | null
+          pickup_kind?: string
+          pickup_to?: string | null
+          published_at?: string | null
+          request_version?: number
+          status?: string
+          target_carrier_id?: string | null
+          target_route_id?: string | null
+          terms_accepted_at?: string | null
+          terms_version?: string | null
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_requests_default_delivery_location_id_fkey"
+            columns: ["default_delivery_location_id"]
+            isOneToOne: false
+            referencedRelation: "public_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_requests_default_pickup_location_id_fkey"
+            columns: ["default_pickup_location_id"]
+            isOneToOne: false
+            referencedRelation: "public_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_requests_target_carrier_id_fkey"
+            columns: ["target_carrier_id"]
+            isOneToOne: false
+            referencedRelation: "carriers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

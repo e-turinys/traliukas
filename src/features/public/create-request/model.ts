@@ -26,6 +26,8 @@ export type TransportRequestDraft = {
   contact: { name: string; phone: string; email: string }
   visibility: "targeted" | "marketplace"
   target: { requested: boolean; route: CarrierRoute | null }
+  budgetAmount?: number
+  budgetCurrency?: "EUR"
   termsAccepted: boolean
 }
 export type VehicleErrors = Partial<Record<"category" | "make" | "model" | "year" | "condition" | "rolls" | "photos" | "pickupLocation" | "deliveryLocation", string>>

@@ -28,7 +28,7 @@ Both variables can remain absent while reviewing the unchanged fixture UI. Creat
 
 ## Passwordless Auth and local delivery
 
-The browser helper supports phone OTP, verification, and attaching/changing a phone within an existing authenticated account. It is intentionally not wired into P05 or any locked screen. A verified session does not publish a Request. No password-first UI, anonymous Auth account, magic-link callback or Request persistence is introduced.
+P05 now binds the existing phone OTP helpers at Publish, including attaching/changing a phone within an existing authenticated account. Verification continues the in-tab pending publication; the database independently checks all publication gates. The original four-step layout remains. No password-first UI, anonymous Auth account or magic-link callback is introduced.
 
 Local email confirmation is enabled, with messages captured by the local inbox. Optional email OTP application helpers are not introduced. Phone confirmation is enabled in config, but **phone login is unavailable until a local test OTP map or a real SMS provider is configured**. The CLI reports this honestly; do not disable confirmation to make tests pass.
 
@@ -69,7 +69,7 @@ Initial beta admission/admin bootstrap is an out-of-band, controlled SQL operati
 
 SQL migrations remain authoritative; database names stay snake_case and future screen adapters use camelCase. The locked architecture specifies that boundary but does not prescribe a generated-file path or CLI command. `npm run db:types` concretizes the strategy: generate `Database` and helpers from the **local migrated** `app,api` schemas into `src/lib/supabase/database.types.ts`. It writes atomically only after success. `db:types:check` regenerates and compares byte-for-byte for drift; it never rewrites the checked file.
 
-Generation and `db:types:check` both passed against the local migrated database. `src/lib/supabase/database.types.ts` contains generated output. Current Auth helpers use SDK Auth types and select the `api` schema; future persisted screen adapters should use the generated database types.
+Generation and `db:types:check` pass against the local migrated database. `src/lib/supabase/database.types.ts` contains generated output. Browser/server clients use the generated Database generic with the `api` schema; the publication RPC and real P06 adapter use these types.
 
 ## Current workstation validation — 2026-09-24
 
@@ -87,6 +87,52 @@ Generation and `db:types:check` both passed against the local migrated database.
 
 This lock records successful local database/foundation validation. It does not claim real SMS delivery or browser Auth cookie integration. The earlier browser-script run remains historical: 9 of 13 passed; four failed on expired route fixture expectations or a P06 summary-string expectation. Those locked code/test files were not changed by the database fixes.
 
-Next phase: **PHASE 2 — CUSTOMER REQUEST REAL PERSISTENCE**. Customer completes P05 locally → Phone OTP verification → authenticated customer → publish Request → persist Request + vehicles + public/private locations in Postgres → published success reads the real persisted Request. This is recorded only; Phase 2 has not started.
+Next phase: **PHASE 2 — CUSTOMER REQUEST REAL PERSISTENCE**. Customer completes P05 locally → Phone OTP verification → authenticated customer → publish Request → persist Request + vehicles + public/private locations in Postgres → published success reads the real persisted Request. Phase 2 is now IN REVIEW as described below.
 
 The installed Next.js 15.5.25 package contains no `node_modules/next/dist/docs/` directory. Implementation checked its installed cookie API types and the official [Next.js 15 middleware](https://nextjs.org/docs/15/app/api-reference/file-conventions/middleware), [cookies](https://nextjs.org/docs/15/app/api-reference/functions/cookies), and [Supabase SSR](https://supabase.com/docs/guides/auth/server-side/creating-a-client) guidance. Next.js 15 requires `middleware.ts`; `proxy.ts` is a later-version convention.
+
+## Phase 2 publication and local phone test — IN REVIEW
+
+The forward migration `20260924000100_customer_requests.sql` adds the four Request tables and `api.publish_request(jsonb,uuid)`. Existing Phase 1 migrations remain unchanged. Publication is one transaction including profile completion, all vehicles and locations, terms evidence, revision 1 and audit. The caller is derived from the validated session; client owner/status/version fields are rejected. The first committed payload wins for a per-customer retry key. The UI freezes the pending payload/key across network retries. Incomplete anonymous drafts remain in memory only.
+
+Public locations use the eight existing picker city centroids, linked by curated slug and stored UUID. Exact address text stays in owner-only `request_vehicle_private_details.instructions`; it is not heuristically parsed or copied onto overridden vehicle routes. Request discovery requires carrier ownership; anonymous and unrelated customer discovery is denied by the locked RLS matrix. Carrier projections omit customer identity/contact/terms/publish-key/private-address data. The owner P06 server loader emits only the existing safe summary shape, never private instructions, contacts or notes. Explicit demo IDs remain; unknown or unauthorized real IDs never resolve via fixture fallback.
+
+To test managed phone Auth without production SMS credentials:
+
+```sh
+node scripts/local-phone-auth.mjs
+```
+
+This script uses only `supabase stop` / `supabase start` for the local `traliukas` project, retaining local data. It temporarily adds a generated six-digit test code and deliberately invalid local-only Twilio-shaped placeholders to local Auth configuration (this CLI otherwise disables phone Auth even with a test map), restores the tracked file in `finally`, and writes the local phone/code to ignored `supabase/.temp/local-phone-auth.json` with mode 0600. Read that file locally for manual entry; do not share/log its contents. `PARVEZK_TEST_PHONE` may select a dedicated test number in digits with country code. Only the mapped test number is supported: managed Auth bypasses SMS delivery for that number. The placeholders are not production credentials; other numbers cannot receive SMS through them. There is no production provider and no fixed OTP in tracked files. Restarting normally removes the test map; rerun the script when needed. If the process is forcibly killed, restore `supabase/config.toml` from its reviewed local-only baseline before any commit. Check its diff: it must contain no test OTP.
+
+Set `.env.local` from the local CLI URL and **public anon/publishable key only**, as described above. Start the app with those settings. Complete P05, continue at Publish, request the code, and enter the locally generated code. Newly created profiles are not automatically beta-admitted: a trusted local operator must set `beta_access=true` for the dedicated test profile and append the `profile.beta_access` audit in the same transaction. Never grant beta through user metadata or weaken publication checks. If publication is denied while awaiting admission, keep the page open and retry after admission; the in-tab draft remains intact.
+
+Automated local browser validation (requires Docker, Chrome and a running application with local environment settings):
+
+```sh
+node scripts/local-phone-auth.mjs
+npm run build
+npm start
+# In another terminal:
+node tests/request-persistence.browser.mjs
+```
+
+The browser test uses the ignored local test account and performs its explicit local SQL beta admission with an audit record. It fills P05 with two vehicles and separate locations, verifies through managed Auth, publishes, checks real P06/reload, and checks anonymous/unknown-ID denial. It creates disposable local test records. It never uses a service-role browser client. Override `P05_BASE_URL` only with a loopback URL and `CHROME_PATH` if necessary.
+
+Deferred behavior is explicit:
+
+- Selected photos block publication with an actionable message to return and remove them if publishing without photos. Files remain in memory during OTP. No object upload, fake uploaded URL or ready metadata is persisted; Storage staging/sanitization is deferred.
+- Demo carrier Routes are not persisted or interpreted as real targets. Use the existing explicit marketplace fallback before publishing. `target_route_id` stays NULL until a future supply migration installs the FK; no Carrier Route implementation is included.
+- P06's existing Request Detail link is visually unchanged, but real P07/detail and Dashboard loaders are deferred; they still resolve their explicit fixtures. This phase's real flow ends at persisted P06.
+- Optional EUR budget has schema/adapter support only; no new P05 field. The existing terms checkbox records technical version `2026-09-24`; production legal text/delivery approval is not supplied by this work.
+- No Route/Offer/Booking/Message/Notification/Review persistence, payment, realtime, provider distribution or full translation rollout.
+
+Validation completed on 2026-09-24 after resuming the existing working tree:
+
+- Clean local reset applied all four migrations from zero. All **235 pgTAP assertions** passed, including immutable customer/Request ID/publication retry key and rejection of fractional-cent, zero, negative, non-finite and out-of-range budgets.
+- Database lint, generated-type drift check, all 17 JavaScript test files (including foundation and Request persistence), ESLint, standalone TypeScript, production build and `git diff --check` passed.
+- `tests/request-persistence.browser.mjs` passed against the production server: real managed phone OTP, two vehicles with separate routes, atomic publication, owner P06/reload, anonymous and unknown-ID 404 responses, and no runtime exceptions. Mobile (390px) and desktop (1440px) screenshots were inspected at `.next/phase2-review/real-p06-{mobile,desktop}.png`; neither viewport overflowed.
+- Existing P05 regression script passed at 390, 768, 1280 and 1440px, including wizard state, validation/focus, photos, 1–10 vehicles, route overrides, verification handoff, demo P06 and explicit target fallback. On Linux run it with `CHROME_PATH=/usr/bin/google-chrome node tests/create-request.browser.mjs`.
+- Local test OTP setup restored tracked `supabase/config.toml` without a diff. The browser run left its disposable local customer/Request records for review; no remote database was used. This proves local test-OTP behavior, not production SMS delivery.
+
+Human review is required before Phase 2 can be LOCKED. No Phase 3 work, commit or push.

@@ -13,7 +13,7 @@ select extensions.is((select phone_e164 from app.profiles where id='10000000-000
 select extensions.ok((select phone_verified_at is not null from app.profiles where id='10000000-0000-0000-0000-000000000001'),'trusted phone confirmation synchronized');
 select extensions.is((select count(*)::int from app.platform_roles),0,'metadata cannot grant admin');
 select extensions.ok(not (select beta_access from app.profiles where id='10000000-0000-0000-0000-000000000001'),'metadata cannot admit beta');
-select extensions.is((select count(*)::int from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='app' and c.relkind='r' and c.relrowsecurity),8,'all eight foundation tables have RLS');
+select extensions.is((select count(*)::int from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='app' and c.relkind='r' and c.relrowsecurity and c.relname in ('profiles','platform_roles','audit_log','carriers','carrier_memberships','carrier_private_details','carrier_verifications','public_locations')),8,'all eight foundation tables have RLS');
 select extensions.ok(not has_function_privilege('anon','api.update_my_profile(text,text,text)','execute'),'anonymous cannot execute profile command');
 select extensions.ok(not has_function_privilege('authenticated','private.sync_auth_profile()','execute'),'client cannot execute Auth trigger');
 select extensions.ok(not has_column_privilege('authenticated','app.carrier_verifications','decision_reason','select'),'reviewer notes inaccessible even via SQL');
@@ -70,7 +70,7 @@ reset role;
 set local role anon;
 select set_config('request.jwt.claims','{"role":"anon"}',true);
 select extensions.is((select count(*)::int from api.public_carriers),1,'anonymous can read published carrier');
-select extensions.is((select count(*)::int from api.public_locations),1,'anonymous can read curated catalog');
+select extensions.is((select count(*)::int from api.public_locations where slug='test-city'),1,'anonymous can read curated catalog');
 select extensions.throws_ok($$select * from api.my_profile$$,'42501',null,'anonymous private profile denied');
 select extensions.throws_ok($$select * from api.my_carrier_private_details$$,'42501',null,'anonymous legal data denied');
 select extensions.throws_ok($$select * from api.my_carrier_verifications$$,'42501',null,'anonymous verification evidence denied');

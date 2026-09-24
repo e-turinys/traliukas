@@ -153,7 +153,7 @@ try {
     await click('Toliau')
     assert.equal(await evaluate('document.getElementById("request-email").value'), 'jonas@example.test')
     await click('Tęsti telefono patvirtinimą')
-    await until(hasText('Užklausa nepaskelbta, patvirtinimo kodas neišsiųstas.'))
+    await until(hasText('Užklausa dar nepaskelbta.'))
     assert.equal(await evaluate('location.pathname'), '/request/new')
     assert.equal(await evaluate('document.activeElement.id'), 'handoff-heading')
     await review(`handoff-${width}`)
