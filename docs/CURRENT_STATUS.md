@@ -1,6 +1,6 @@
 # Parvezk.lt — Current Status
 
-**Date:** 2026-09-22
+**Date:** 2026-09-24
 **Backend Foundation Architecture = LOCKED.** Human approval of OD-1 through OD-5 is recorded in `06_BACKEND_FOUNDATION_ARCHITECTURE.md`; no implementation started under this approval.
 **P01 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. The current responsive P01 browser implementation is the approved V1 visual baseline and the visual reference for P02/P03. P01 search behavior remains locked and unchanged.
 **P02 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its responsive search-results implementation is the V1 visual reference for future results/discovery screens under D-052. P01 remains LOCKED and unchanged.
@@ -16,7 +16,34 @@
 **Booking / Transport Detail High-Fidelity = LOCKED.** Human desktop/mobile browser review passed (D-060). The approved UI and existing Booking product logic remain unchanged.
 **Notifications High-Fidelity = LOCKED.** Human desktop/mobile review passed (D-061); notification domain and channel policy remain unchanged.
 **Customer High-Fidelity baseline:** P01–P09, Messages Inbox, Conversation / Chat, Booking / Transport Detail and Notifications are all LOCKED.
-**NEXT PHASE: Supabase / Auth Foundation Implementation.** Begin only under a separately scoped implementation instruction; this architecture approval starts no implementation.
+**Supabase/Auth Foundation Phase 1 = LOCKED.** Full local Linux/PostgreSQL validation passed and human approval is recorded on 2026-09-24. Phase 2 has NOT started.
+
+## Supabase/Auth Foundation Phase 1 lock — 2026-09-24
+
+- Clean local Supabase reset and all migrations from zero passed; 148/148 pgTAP assertions passed on real PostgreSQL.
+- Validated RLS, cross-user isolation, anonymous access rules, exactly one active Carrier owner, rejection of staff/operator roles, Auth/profile synchronization, carrier verification protection and audit immutability.
+- Generated database types, DB type drift check, database lint, foundation tests, full unit tests, ESLint, TypeScript, Next.js production build and `git diff --check` all passed.
+- Earlier Docker-access and migration/Auth permission blockers are resolved. The Linux validation supersedes the earlier blocked/in-review status. Local validation does not claim production SMS delivery or browser Auth integration.
+- Locked UI and backend architecture remain unchanged. No remote Supabase access, commit or push.
+- Next phase: **PHASE 2 — CUSTOMER REQUEST REAL PERSISTENCE**, recorded below only; no Phase 2 implementation is part of this lock.
+
+## Phase 1 migration ownership correction — 2026-09-23
+
+- Host-terminal clean startup/reset failed at `ALTER FUNCTION private.sync_auth_profile() OWNER TO parvezk_auth_sync`: the non-superuser migration executor lacked SET permission on the target role. The target roles also lacked the schema CREATE privilege required by PostgreSQL ownership transfer.
+- Corrected all nine transfers across all three migrations. Trigger creation and function EXECUTE grants now precede transfers. Each migration temporarily grants only CURRENT_USER SET permission with inheritance disabled, temporarily grants the target owners CREATE on the required schema, then revokes SET/schema CREATE before commit. Existing creator ADMIN-only membership is retained for later migrations and clean local resets.
+- Dedicated non-login owners, SECURITY DEFINER/empty search_path, table privileges and RLS are unchanged. No membership is granted to anon/authenticated/authenticator/service_role. Added catalog-based pgTAP regression checks for owners, function protection and privilege cleanup.
+- Static ordering/temporary-privilege cleanup checks passed for all nine transfers. The subsequent clean local reset, migrations, pgTAP ownership/security tests and database lint passed in the 2026-09-24 validation. Phase 1 is now LOCKED; no temporary SET/schema CREATE privileges remain.
+
+## Supabase/Auth Foundation Phase 1 implementation — 2026-09-23
+
+- Reimplemented from the locked architecture in `/home/cv95/Projects/traliukas`; initial working tree was clean and no previous Supabase configuration existed. No old workstation implementation was recovered.
+- Added Supabase JS/SSR clients, project-local CLI, public environment contract, Next.js 15 middleware session refresh, per-request server client, phone OTP/change helpers and origin/return-path validation. No locked screen is wired to Auth yet; no service-role key is required by the app.
+- Three migrations define private identity/carrier/catalog foundations and append-only audit, with RLS, column grants, trusted Auth profile/contact synchronization, timestamp hooks, live-session mutation checks, beta admission checks and exact single-owner constraints. Owner verification writes and internal reviewer-column reads are denied. No fixtures are seeded.
+- Added executable pgTAP authorization tests and focused JavaScript Auth tests. Local-only type generation and drift checks now pass against the running local database; generated output is available for future persisted screen adapters.
+- `npm install`, production build (outside sandbox), TypeScript, ESLint and the 16-file JavaScript test run passed. The five new focused Auth test cases are included. `git diff --check` passed. All 13 existing browser scripts ran: 9 passed, 4 failed on fixed-date route expectations or a P06 summary-string expectation; details are in the local setup guide. Existing tests and locked screens were not changed.
+- Docker and local Supabase now work on Linux. Clean reset, migrations, pgTAP, database lint and type generation passed on 2026-09-24, replacing the initial Docker-permission blocker. Real OTP delivery is outside this database validation.
+- Setup and limitations: `07_SUPABASE_LOCAL_SETUP.md`. Phone delivery needs explicit local test configuration or an operations-selected SMS provider; none was fabricated. Carrier aggregate verification/publication and administrative onboarding workflows remain unexposed.
+- P01–P09, Messages/Chat, Booking, Notifications, fixtures and locked architecture are unchanged. No Request/Route/Offer/Booking/Message/Notification persistence, payments, realtime or full i18n work. No remote Supabase project touched; no commit/push.
 
 ## Backend Foundation Architecture approval — 2026-09-22
 
@@ -397,27 +424,23 @@
 - Live domain: `parvezk.lt`
 - GitHub repo: `https://github.com/e-turinys/traliukas.git`
 - Branch: `main`
-- Local path: `C:\Projects\traliukas`
+- Canonical local path: `/home/cv95/Projects/traliukas`
 - GitHub → Hostinger auto-deploy: working
-- Supabase: not connected yet
+- Supabase: Auth Foundation Phase 1 LOCKED; full local Linux/PostgreSQL validation passed (148/148 pgTAP assertions); no remote project connected
 - shadcn/ui: configured with Base UI, Nova preset and neutral tokens
 - Real product UI: public layout, shared pickers and P01–P09 implemented with mock data; P01–P09 and the Multi-Vehicle, Multi-Location and Carrier Capacity V1 baseline are locked and browser-reviewed.
 
 ## Immediate next task
 
-**NEXT PHASE: Supabase / Auth Foundation Implementation.** Backend Foundation Architecture and the customer High-Fidelity baseline are LOCKED and unchanged. Start only under a separately scoped implementation instruction.
+**PHASE 2 — CUSTOMER REQUEST REAL PERSISTENCE**
 
-1. Auth.
-2. Supabase/Postgres schema.
-3. Roles and permissions.
-4. Replace fixture data with real persistence.
-5. End-to-end marketplace flow.
+Goal: Customer completes P05 locally → Phone OTP verification → authenticated customer → publish Request → persist Request + vehicles + public/private locations in Postgres → published success reads the real persisted Request.
 
-Begin with a separately scoped Supabase/Auth foundation implementation task. This sequence supersedes the earlier i18n-first phase order, without changing locked locale architecture; full i18n remains pending. No backend, provider or other implementation begins during this documentation approval.
+Recorded as the next phase only. Do not start Phase 2 in this documentation task; keep the locked UI and backend architecture unchanged.
 
 ## Locked baseline handoff
 
-P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior, Carrier Route Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are approved, browser-reviewed and LOCKED. D-043–D-050 lock the final pre-backend architecture. Start no new phase until it is separately selected and scoped. Real authentication, backend, Supabase, persistence, realtime messaging, provider delivery, Route-distribution adapters and full i18n translation rollout remain unstarted. Do not commit or push without a separate instruction.
+P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior, Carrier Route Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are approved, browser-reviewed and LOCKED. D-043–D-050 lock the final pre-backend architecture. Start no new phase until it is separately selected and scoped. Supabase/Auth Foundation Phase 1 is LOCKED after full local PostgreSQL validation. Phase 2 — Customer Request Real Persistence is recorded as next and has not started. Marketplace persistence, realtime messaging, provider delivery, Route-distribution adapters and full i18n translation rollout remain unstarted. Do not commit or push without a separate instruction.
 
 ## Do not reopen without a blocker
 

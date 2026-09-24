@@ -1,0 +1,81 @@
+# Local development only. This is a local container namespace, not a remote project ID.
+project_id = "traliukas"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["api"]
+extra_search_path = ["extensions"]
+max_rows = 1000
+auto_expose_new_tables = false
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+
+[db.migrations]
+enabled = true
+schema_paths = []
+
+[db.seed]
+enabled = false
+sql_paths = []
+
+[realtime]
+enabled = false
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://127.0.0.1"
+
+[local_smtp]
+enabled = true
+port = 54324
+
+[storage]
+enabled = false
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:3000"
+additional_redirect_urls = []
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+enable_signup = true
+enable_anonymous_sign_ins = false
+enable_manual_linking = false
+
+[auth.rate_limit]
+email_sent = 30
+sms_sent = 30
+token_refresh = 150
+sign_in_sign_ups = 30
+token_verifications = 30
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = true
+max_frequency = "60s"
+otp_length = 6
+otp_expiry = 600
+
+[auth.sms]
+enable_signup = true
+enable_confirmations = true
+template = "Your code is {{ .Code }}"
+max_frequency = "60s"
+
+# Deliberately no SMS provider or fixed test OTP committed. See local setup guide.
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
+[edge_runtime]
+enabled = false
+
+[analytics]
+enabled = false
