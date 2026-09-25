@@ -29,6 +29,7 @@ export type CarrierRoute = {
   capacityReserved: number
   acceptingNewRequests: boolean
   vehicleCategories: VehicleCategory[]
+  routeFlexible: boolean
   supportsNonRunning: boolean
 }
 

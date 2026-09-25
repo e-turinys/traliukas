@@ -136,3 +136,30 @@ Validation completed on 2026-09-24 after resuming the existing working tree:
 - Local test OTP setup restored tracked `supabase/config.toml` without a diff. The browser run left its disposable local customer/Request records for review; no remote database was used. This proves local test-OTP behavior, not production SMS delivery.
 
 Human review is required before Phase 2 can be LOCKED. No Phase 3 work, commit or push.
+
+## Phase 3 Carrier supply — IN REVIEW (2026-09-25)
+
+The earlier Phase 1/2 boundaries above are historical. Phase 3 adds two forward migrations: `20260925000100_carrier_routes.sql` (Routes/stops/revisions/RLS) and `20260925000200_route_commands.sql` (approved beta policy and atomic commands). No locked migration is rewritten. D-063 in the Decisions Log records the human-approved policy.
+
+Admission uses the existing controlled SQL/bootstrap path. In one audited transaction, the operator approves the owner's `profiles.beta_access` and the Carrier's `visibility='published'` with `suspended_at IS NULL`, ensures the single active owner membership and required `carrier_private_details` legal name/business kind/registration country. Carrier name/legal constraints remain enforced by the schema. Append `profile.beta_access` and `carrier.updated` audit entries for those changes. No browser/admin key, user metadata, CMR/category approval or public Verified Carrier claim substitutes for admission. Phone OTP is the provided login UI; the database policy requires a live authenticated session, not an additional phone/document verification gate.
+
+- `api.save_route(payload, publish, route_id?, expected_version?, create_key?, carrier_slug?)`: create draft/published supply, publish saved draft, edit existing owned supply. The payload contains only public ordered locality **slugs**, dates, total capacity, categories, non-running, flexibility and accepting-new-requests. Slugs resolve to immutable catalog UUIDs. An optional Carrier slug selects among the caller's owned admitted Carriers and grants no authority. With no selection, creation requires unambiguous ownership. Ownership cannot be reassigned and reserved capacity is never an input.
+- Creation retries reuse the same create key and original payload; audit correlation identifies the original Route. Published updates require the viewed version. Immutable revisions accompany material changes. The atomic `carrierRoute.published` audit entry records the publication boundary alongside revision 1; Route distribution and the later cross-domain outbox remain deferred.
+- `api.close_route(route_id, expected_version)`: idempotent cancellation, hidden from public reads. Pausing `accepting_new_requests` is separate and retains public detail. No capacity reservation/release transaction exists.
+- Browser/server clients use only the ordinary public key and caller JWT. Views use invoker security and RLS; commands independently check a live Auth session and trusted eligibility. There is no new cookie-based mutation endpoint.
+- Search uses real database supply whenever Supabase is configured, with no error fallback. Explicit demo Route/Carrier IDs remain for isolated visual review; unknown UUIDs return not-found. Real carriers have no fixture reputation/reviews or inferred verification. Production aggregate verification display requires a separately approved trust policy.
+- The existing eight curated locations remain the Search picker catalog. No private Carrier address input is exposed. Public centroid coordinates are optional; missing coordinates stay absent.
+
+Run the full validation commands listed above, then run the focused production browser test:
+
+```sh
+node scripts/local-phone-auth.mjs
+npm run build
+npm run start -- -p 3001
+# In another terminal:
+node tests/route-persistence.browser.mjs
+```
+
+The script allows only a loopback application URL (`PHASE3_BASE_URL`, default `http://127.0.0.1:3001`), signs in through managed test OTP, performs audited local SQL admission and creates actual supply through the UI/RPC. It checks draft/publish/reload, Search, detail, Carrier Profile, capacity/category/direction filters, edits, pause/close, unknown-ID denial and widths 390/768/1280/1440px. Artifacts and the remaining review Route ID are in ignored `.next/phase3-review/`. It uses no service-role browser client and never connects to remote Supabase.
+
+Phase 2's targeted Request publication guard remains; public Route targeting continues to require the existing explicit marketplace fallback before Request publication. This phase proves Carrier supply persistence and discovery, not Offers, Bookings, Messages, Notifications, Reviews, production SMS delivery or a complete targeted commercial flow. No commit/push is authorized by these instructions.

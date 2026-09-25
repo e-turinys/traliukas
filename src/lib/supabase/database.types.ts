@@ -587,6 +587,118 @@ export type Database = {
           },
         ]
       }
+      my_route_stops: {
+        Row: {
+          location_id: string | null
+          position: number | null
+          route_id: string | null
+        }
+        Insert: {
+          location_id?: string | null
+          position?: number | null
+          route_id?: string | null
+        }
+        Update: {
+          location_id?: string | null
+          position?: number | null
+          route_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_stops_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "public_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stops_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "my_routes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stops_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "public_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      my_routes: {
+        Row: {
+          accepting_new_requests: boolean | null
+          capacity_reserved: number | null
+          capacity_total: number | null
+          carrier_id: string | null
+          created_at: string | null
+          date_from: string | null
+          date_to: string | null
+          id: string | null
+          moderation_status: string | null
+          published_at: string | null
+          route_flexible: boolean | null
+          route_version: number | null
+          status: string | null
+          supported_categories: string[] | null
+          supports_non_running: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          accepting_new_requests?: boolean | null
+          capacity_reserved?: number | null
+          capacity_total?: number | null
+          carrier_id?: string | null
+          created_at?: string | null
+          date_from?: string | null
+          date_to?: string | null
+          id?: string | null
+          moderation_status?: string | null
+          published_at?: string | null
+          route_flexible?: boolean | null
+          route_version?: number | null
+          status?: string | null
+          supported_categories?: string[] | null
+          supports_non_running?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          accepting_new_requests?: boolean | null
+          capacity_reserved?: number | null
+          capacity_total?: number | null
+          carrier_id?: string | null
+          created_at?: string | null
+          date_from?: string | null
+          date_to?: string | null
+          id?: string | null
+          moderation_status?: string | null
+          published_at?: string | null
+          route_flexible?: boolean | null
+          route_version?: number | null
+          status?: string | null
+          supported_categories?: string[] | null
+          supports_non_running?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carrier_routes_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "my_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carrier_routes_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "public_carriers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_carriers: {
         Row: {
           cmr_insurance_available: boolean | null
@@ -658,6 +770,72 @@ export type Database = {
           time_zone?: string | null
         }
         Relationships: []
+      }
+      public_route_stops: {
+        Row: {
+          location_id: string | null
+          position: number | null
+          route_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_stops_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "public_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stops_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "my_routes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stops_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "public_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_routes: {
+        Row: {
+          accepting_new_requests: boolean | null
+          capacity_available: number | null
+          capacity_reserved: number | null
+          capacity_total: number | null
+          carrier_id: string | null
+          created_at: string | null
+          date_from: string | null
+          date_to: string | null
+          id: string | null
+          published_at: string | null
+          route_flexible: boolean | null
+          route_version: number | null
+          status: string | null
+          supported_categories: string[] | null
+          supports_non_running: boolean | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carrier_routes_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "my_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carrier_routes_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "public_carriers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       request_vehicles: {
         Row: {
@@ -732,6 +910,10 @@ export type Database = {
       }
     }
     Functions: {
+      close_route: {
+        Args: { p_expected_version: number; p_route_id: string }
+        Returns: string
+      }
       create_carrier: {
         Args: {
           p_business_kind: string
@@ -744,6 +926,17 @@ export type Database = {
       }
       publish_request: {
         Args: { p_client_publish_key: string; p_payload: Json }
+        Returns: string
+      }
+      save_route: {
+        Args: {
+          p_carrier_slug?: string
+          p_create_key?: string
+          p_expected_version?: number
+          p_payload: Json
+          p_publish: boolean
+          p_route_id?: string
+        }
         Returns: string
       }
       update_my_carrier: {
@@ -913,6 +1106,71 @@ export type Database = {
             foreignKeyName: "carrier_private_details_carrier_id_fkey"
             columns: ["carrier_id"]
             isOneToOne: true
+            referencedRelation: "carriers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      carrier_routes: {
+        Row: {
+          accepting_new_requests: boolean
+          capacity_reserved: number
+          capacity_total: number
+          carrier_id: string
+          created_at: string
+          date_from: string
+          date_to: string
+          id: string
+          moderation_status: string
+          published_at: string | null
+          route_flexible: boolean
+          route_version: number
+          status: string
+          supported_categories: string[]
+          supports_non_running: boolean
+          updated_at: string
+        }
+        Insert: {
+          accepting_new_requests?: boolean
+          capacity_reserved?: number
+          capacity_total: number
+          carrier_id: string
+          created_at?: string
+          date_from: string
+          date_to: string
+          id?: string
+          moderation_status?: string
+          published_at?: string | null
+          route_flexible?: boolean
+          route_version?: number
+          status?: string
+          supported_categories: string[]
+          supports_non_running?: boolean
+          updated_at?: string
+        }
+        Update: {
+          accepting_new_requests?: boolean
+          capacity_reserved?: number
+          capacity_total?: number
+          carrier_id?: string
+          created_at?: string
+          date_from?: string
+          date_to?: string
+          id?: string
+          moderation_status?: string
+          published_at?: string | null
+          route_flexible?: boolean
+          route_version?: number
+          status?: string
+          supported_categories?: string[]
+          supports_non_running?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carrier_routes_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
             referencedRelation: "carriers"
             referencedColumns: ["id"]
           },
@@ -1335,6 +1593,90 @@ export type Database = {
           },
         ]
       }
+      route_revisions: {
+        Row: {
+          changed_by: string
+          created_at: string
+          public_terms_snapshot: Json
+          route_id: string
+          snapshot_schema_version: number
+          version: number
+        }
+        Insert: {
+          changed_by: string
+          created_at?: string
+          public_terms_snapshot: Json
+          route_id: string
+          snapshot_schema_version?: number
+          version: number
+        }
+        Update: {
+          changed_by?: string
+          created_at?: string
+          public_terms_snapshot?: Json
+          route_id?: string
+          snapshot_schema_version?: number
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_revisions_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_revisions_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "carrier_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_stops: {
+        Row: {
+          created_at: string
+          id: string
+          location_id: string
+          position: number
+          route_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location_id: string
+          position: number
+          route_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location_id?: string
+          position?: number
+          route_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_stops_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "public_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stops_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "carrier_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transport_requests: {
         Row: {
           budget_amount: number | null
@@ -1418,6 +1760,13 @@ export type Database = {
           visibility?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "request_target_route_fk"
+            columns: ["target_route_id"]
+            isOneToOne: false
+            referencedRelation: "carrier_routes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "transport_requests_customer_id_fkey"
             columns: ["customer_id"]

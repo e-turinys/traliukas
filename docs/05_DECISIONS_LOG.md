@@ -366,6 +366,16 @@ This file records important product/architecture decisions that should not be ca
 
 **Reason:** The customer High-Fidelity baseline is approved; the next work connects it to authenticated, authorized persistence and validates the complete marketplace flow. This documentation task records the phase only; implementation begins with a separately scoped Auth task.
 
+### D-063 — Closed Beta Carrier Route publication eligibility
+
+**Date:** 2026-09-25. **Status:** Approved by explicit human decision; Phase 3 implementation remains IN REVIEW.
+
+**Decision:** Route create/publish/manage requires a live Auth session, active single-owner membership, an active non-suspended Carrier, explicit controlled beta admission and the base Carrier profile/legal identity fields required by the existing schema. Individual and company Carriers use the same eligibility rule. CMR verification, invoice/tracking declarations, a generic Verified Carrier badge and transport-document categories are not additional Closed Beta Route gates. Beta admission never establishes verification.
+
+**Implementation mapping:** Reuse the admin-controlled owner `profiles.beta_access` and Carrier `visibility='published'`/`suspended_at` fields for explicit admission/public eligibility; ordinary users cannot write these. The trusted bootstrap records both approvals in `audit_log`. Carrier display/legal name, legal business kind and registration country remain schema-validated. No second role model, self-approval endpoint or category policy is introduced. The internal Route eligibility helper can change for a future approved production policy without changing ownership.
+
+**Boundary:** This decision applies to Route supply only. It does not authorize Offer/Booking/Message/Notification/Review persistence, production document rules or distribution providers. Real carriers receive no fabricated verification or reputation.
+
 ## How to add a new decision
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:

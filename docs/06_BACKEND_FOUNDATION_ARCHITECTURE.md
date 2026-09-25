@@ -237,6 +237,12 @@ Public carrier/route projections remain available to anyone, but hidden/draft ro
 
 Carrier verification rows require the same column discipline: the carrier owner may read only an owner-safe status/submission projection (for example category, status, expiry and submitted evidence metadata), while reviewer notes, internal decision context and unrestricted evidence access are admin/server-only. If the physical table cannot enforce that column boundary, expose an explicit owner-safe view/RPC and keep direct base-table SELECT revoked; RLS alone is not a column-level privacy control.
 
+### Closed Beta Route eligibility clarification — 2026-09-25 (D-063)
+
+Human-approved Route create/publish/manage eligibility is: live Auth session + active single owner + active/non-suspended Carrier + explicit controlled beta admission + required base Carrier/legal profile fields. This rule is identical for individual and company Carriers. For Closed Beta, CMR, invoice/tracking capability, generic `verified_carrier` and transport-document verification categories are **not** Route gates. They remain separate trust/capability attributes. Beta admission must never imply a Verified Carrier badge. Future production category requirements require a separate decision.
+
+Phase 3 reuses `profiles.beta_access` and the Carrier's admin-controlled public eligibility (`visibility='published'`, no suspension) through the existing audited bootstrap mechanism. No client can self-admit. The policy is isolated in a narrow internal helper; owner resolution and parent locks remain unchanged. This clarification does not change future Offer verification policy or authorize later-phase persistence.
+
 ### 9.2 Authorized write commands and column boundaries
 
 | Command family | Caller / allowed changes |

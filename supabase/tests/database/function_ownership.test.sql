@@ -18,7 +18,12 @@ with expected(signature, owner_name) as (values
   ('private.owns_request(uuid)', 'parvezk_authorization'),
   ('private.can_read_request(uuid)', 'parvezk_authorization'),
   ('private.lock_request_vehicle()', 'parvezk_authorization'),
-  ('private.require_complete_request()', 'parvezk_authorization')
+  ('private.require_complete_request()', 'parvezk_authorization'),
+  ('private.owns_route(uuid)', 'parvezk_authorization'),
+  ('private.lock_route_stop()', 'parvezk_authorization'),
+  ('private.require_complete_route()', 'parvezk_authorization'),
+  ('api.save_route(jsonb,boolean,uuid,integer,uuid,text)', 'parvezk_commands'),
+  ('api.close_route(uuid,integer)', 'parvezk_commands')
 )
 select extensions.ok(
   coalesce(p.proowner = r.oid and p.prosecdef and 'search_path=""' = any(p.proconfig), false),
@@ -65,7 +70,10 @@ select extensions.is(
     'private.is_carrier_owner(uuid)'::regprocedure,
     'api.publish_request(jsonb,uuid)'::regprocedure,
     'private.owns_request(uuid)'::regprocedure,
-    'private.can_read_request(uuid)'::regprocedure),
+    'private.can_read_request(uuid)'::regprocedure,
+    'private.owns_route(uuid)'::regprocedure,
+    'api.save_route(jsonb,boolean,uuid,integer,uuid,text)'::regprocedure,
+    'api.close_route(uuid,integer)'::regprocedure),
   clients.name || ' EXECUTE allowlist: ' || p.oid::regprocedure::text)
 from pg_catalog.pg_proc p
 join pg_catalog.pg_namespace n on n.oid = p.pronamespace

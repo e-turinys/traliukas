@@ -8,8 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet"
 import { MarketplaceRouteCard } from "@/components/shared/marketplace-route-card"
 import { EmptySearchResults } from "@/components/shared/search-result-states"
-import { mockCarrierRoutes } from "@/lib/mock/carrier-routes"
-import type { RouteMatch } from "@/lib/types/carrier-route"
+import type { CarrierRoute, RouteMatch } from "@/lib/types/carrier-route"
 import type { LocationOption } from "@/lib/types/location"
 import { cn } from "@/lib/utils"
 import { SearchEditForm } from "./search-edit-form"
@@ -43,7 +42,7 @@ function RouteList({ matches, servedSegment }: { matches: RouteMatch[]; servedSe
   </div>
 }
 
-export function SearchResults({ today }: { today: string }) {
+export function SearchResults({ today, routes, demo = false }: { today: string; routes: CarrierRoute[]; demo?: boolean }) {
   const searchParams = useSearchParams()
   const query = searchParams.toString()
   const params = new URLSearchParams(query)
@@ -53,13 +52,13 @@ export function SearchResults({ today }: { today: string }) {
   const [desktopFilters, setDesktopFilters] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [view, setView] = useState<"list" | "map">("list")
-  const { exact, alternatives } = matchRoutes(mockCarrierRoutes, params, today)
+  const { exact, alternatives } = matchRoutes(routes, params, today)
   const activeCount = Number(filters.verified) + Number(filters.rating !== "any") + Number(filters.vehicle !== "any") + Number(filters.nonRunning) + Number(search.date.type !== "anytime")
   const showEditor = editing || search.invalid
   const sort = ["date", "rating"].includes(params.get("sort") ?? "") ? params.get("sort")! : "best"
 
   function update(next: URLSearchParams) {
-    // Native history updates integrate with useSearchParams; mock filtering needs no server request.
+    // Native history updates integrate with useSearchParams; filtering the server-loaded supply needs no server request.
     window.history.pushState(null, "", `/search${next.size ? `?${next}` : ""}`)
   }
 
@@ -79,7 +78,7 @@ export function SearchResults({ today }: { today: string }) {
     </CardContent></Card>
 
     <div className="space-y-2"><h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{copy.title}</h1>
-      <p className="text-sm text-muted-foreground">{copy.mock}</p>
+      {demo && <p className="text-sm text-muted-foreground">{copy.mock}</p>}
       {!search.invalid && <p role="status" className="text-sm">Tinkami maršrutai: <strong>{exact.length}</strong>{alternatives.length > 0 && <> · Alternatyvūs maršrutai: <strong>{alternatives.length}</strong></>}</p>}
     </div>
     {!search.invalid && <>

@@ -4,6 +4,6 @@ export type LocationOption = {
   city: string
   country: string
   countryCode: string
-  lat: number
-  lng: number
+  lat?: number
+  lng?: number
 }

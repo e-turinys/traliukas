@@ -1,6 +1,6 @@
 # Parvezk.lt — Current Status
 
-**Date:** 2026-09-24
+**Date:** 2026-09-25
 **Backend Foundation Architecture = LOCKED.** Human approval of OD-1 through OD-5 is recorded in `06_BACKEND_FOUNDATION_ARCHITECTURE.md`; no implementation started under this approval.
 **P01 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. The current responsive P01 browser implementation is the approved V1 visual baseline and the visual reference for P02/P03. P01 search behavior remains locked and unchanged.
 **P02 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its responsive search-results implementation is the V1 visual reference for future results/discovery screens under D-052. P01 remains LOCKED and unchanged.
@@ -19,6 +19,61 @@
 **Supabase/Auth Foundation Phase 1 = LOCKED.** Full local Linux/PostgreSQL validation passed and human approval is recorded on 2026-09-24.
 
 **Customer Request Real Persistence Phase 2 = LOCKED.** Full local validation passed and human approval is recorded on 2026-09-24. P05 continues through managed phone OTP to atomic PostgreSQL publication; real P06 IDs load the owner's persisted Request and survive reload.
+
+## Carrier Route Real Persistence Phase 3 lock — 2026-09-25
+
+**Carrier Route Real Persistence Phase 3 = LOCKED.** Human review passed and explicit approval is recorded on 2026-09-25.
+
+- Human review confirms Carrier authentication; Route create/edit; draft/publish/pause/close; reload persistence; real Search and Route Detail; Carrier Profile persisted active Routes; ownership/eligibility enforcement; protected capacity; and unchanged locked public UI.
+- Human approval confirms **353/353 pgTAP assertions passed**, with DB lint, generated types/check, tests and production build passed. These validation results are retained from implementation; this documentation-only lock does not rerun tests or change application code.
+- Next phase recorded: **PHASE 4 — REAL OFFER → CHAT → ACCEPT → BOOKING + CAPACITY RESERVATION**. Phase 4 is not started; implementation requires a separate instruction.
+
+- Continued the existing Phase 3 working tree and preserved its schema migration/tests. Added forward command migration `20260925000200_route_commands.sql`; all four locked Phase 1/2 migrations remain unchanged.
+- Human decision D-063 resolves the earlier eligibility blocker: live Auth session, active single owner, active/non-suspended Carrier, explicit controlled beta admission and required base Carrier/legal profile. Reuses trusted `profiles.beta_access` and Carrier public eligibility (`visibility='published'`, no suspension). Identical rule for individual/company; no CMR, invoice, tracking, generic verification badge or transport-document requirement. No self-admission or verification endpoint.
+- `api.save_route` atomically creates a draft or published Route, publishes an existing draft, or edits owned supply. PostgreSQL resolves the Carrier through active membership, locks profile → Carrier → Route, rechecks eligibility, validates allowlisted fields, persists all ordered stops/capacity/categories/non-running/flexibility, writes immutable material revisions and appends audit. Returns canonical UUID. A creation key deduplicates retries; published edits use expected version checks. Optional Carrier slug is only a selector among owned admitted Carriers, never authority; no client `carrier_id`, reserved-capacity, moderation, verification or timestamp writes.
+- `api.close_route` is owner/eligibility gated and idempotently sets `cancelled`; cancelled Routes disappear publicly. `accepting_new_requests=false` is separately editable: it pauses Search matching while leaving published detail visible. Neither publishing, editing nor closing reserves/releases slots. Available remains `max(0,total-reserved)`; total cannot fall below reserved.
+- `app.carrier_routes`, ordered `app.route_stops` and immutable `app.route_revisions` retain RLS and parent locking. Public invoker Route/stop projections exclude drafts/cancelled/hidden supply and private Carrier data. Full/expired published Routes retain safe detail visibility. Public locations reference the existing curated catalog only; optional centroid coordinates are not fabricated. Installed the future Request target-route FK without lifting Phase 2's NULL/targeted-publication guard.
+- Search loads persisted public supply with paginated database reads and the unchanged P02 matching helpers. Configured Search does not mix fixtures into live supply or fall back on database errors. Complete count, category/non-running, date overlap, ordered stops and descriptive-only flexibility remain unchanged. Explicit demo detail IDs remain isolated for review; real UUID failures never fall back to fixtures.
+- `/routes/[id]` and `/carriers/[id]` reuse locked P03/P04 presentation with persisted data. Unknown/nonpublic UUIDs are not-found. Carrier Profile active routes use the existing availability helper. No real carrier gets fixture reviews, invented ratings/completions or a fabricated Verified Carrier badge; aggregate verification display remains unclaimed in this phase.
+- Minimum Carrier flow: `/carrier` → `/carrier/routes`, managed phone sign-in, `/carrier/routes/new`, owned `/carrier/routes/[id]` (with `/edit` alias). Supports draft, direct create+publish, saved-draft publication, public ordered waypoints, dates, total capacity, all four categories, non-running/flexibility, pause, close and reload persistence. No enterprise dashboard or new public-screen design.
+- Local validation: clean reset of all six migrations; **353/353 pgTAP assertions passed**, preserving the original 290 and adding command/security coverage. DB lint, type generation/drift check, foundation tests and all 18 unit-test files passed. Production build and `git diff --check` passed. Browser checks cover managed Auth and controlled local admission, draft/private detail, draft reload, publication, public Search/Route/Profile at 390/768/1280/1440px, complete-count/category/direction filtering, persisted edit, pause, close, direct create+publish, anonymous public reads and unknown-ID 404. No runtime exceptions, private-data exposure, fabricated badge or horizontal overflow; mobile/desktop screenshots inspected under `.next/phase3-review/`.
+- Deferred: targeted Request publication still uses Phase 2's explicit marketplace fallback; Request Detail/Dashboard persistence, production SMS delivery, verification/onboarding admin UI, Offer/Booking/capacity reservation, Messages, Notifications, Reviews, distribution, payments, realtime and full i18n remain outside this phase. `carrierRoute.published` is an audited transactional publication boundary linked to immutable Route revision 1; no distribution jobs/provider calls or later cross-domain outbox are added.
+- Human review passed. Reviewed local entry: `http://127.0.0.1:3001/carrier/routes`, the local managed test account, public Route `http://127.0.0.1:3001/routes/49580fea-23f0-41cd-b011-17d4f4b2489e`, and Carrier `http://127.0.0.1:3001/carriers/a4a293fe-ed22-4fea-9fdb-806590393fc2`. The latest test IDs are also in `.next/phase3-review/result.json`. The test uses disposable local records only; local OTP configuration is restored in tracked files. This proves local test OTP, not production SMS delivery.
+- Locked UI/layouts and Phase 1/2 migrations unchanged. No Phase 4, remote Supabase access, commit or push.
+
+Phase 3 file inventory (29 files):
+
+```text
+docs/05_DECISIONS_LOG.md
+docs/06_BACKEND_FOUNDATION_ARCHITECTURE.md
+docs/07_SUPABASE_LOCAL_SETUP.md
+docs/CURRENT_STATUS.md
+src/app/(public)/carrier/page.tsx
+src/app/(public)/carrier/routes/[id]/edit/page.tsx
+src/app/(public)/carrier/routes/[id]/page.tsx
+src/app/(public)/carrier/routes/new/page.tsx
+src/app/(public)/carrier/routes/page.tsx
+src/app/(public)/carriers/[id]/page.tsx
+src/app/(public)/routes/[id]/page.tsx
+src/app/(public)/search/page.tsx
+src/features/carrier/routes/access.tsx
+src/features/carrier/routes/form.tsx
+src/features/carrier/routes/sign-in.tsx
+src/features/public/route-persistence/adapter.ts
+src/features/public/route-persistence/load.ts
+src/features/public/search-results.tsx
+src/lib/mock/carrier-routes.ts
+src/lib/supabase/database.types.ts
+src/lib/types/carrier-route.ts
+src/lib/types/location.ts
+supabase/migrations/20260925000100_carrier_routes.sql
+supabase/migrations/20260925000200_route_commands.sql
+supabase/tests/database/carrier_routes.test.sql
+supabase/tests/database/function_ownership.test.sql
+supabase/tests/database/route_commands.test.sql
+tests/route-persistence.browser.mjs
+tests/route-persistence.test.mjs
+```
 
 ## Customer Request Real Persistence Phase 2 lock — 2026-09-24
 
@@ -449,21 +504,19 @@
 - Branch: `main`
 - Canonical local path: `/home/cv95/Projects/traliukas`
 - GitHub → Hostinger auto-deploy: working
-- Supabase: Auth Foundation Phase 1 and Customer Request Real Persistence Phase 2 LOCKED; full local Linux/PostgreSQL validation passed (235/235 database assertions); no remote project connected
+- Supabase: Auth Foundation Phase 1 and Customer Request Real Persistence Phase 2 LOCKED; Carrier Route Real Persistence Phase 3 LOCKED; 353/353 local PostgreSQL assertions passed; no remote project connected
 - shadcn/ui: configured with Base UI, Nova preset and neutral tokens
 - Real product UI: public layout, shared pickers and P01–P09 implemented with mock data; P01–P09 and the Multi-Vehicle, Multi-Location and Carrier Capacity V1 baseline are locked and browser-reviewed.
 
 ## Immediate next task
 
-**PHASE 3 — CARRIER ROUTE REAL PERSISTENCE**
+**PHASE 4 — REAL OFFER → CHAT → ACCEPT → BOOKING + CAPACITY RESERVATION**
 
-Goal: authenticated verified Carrier → create/publish Route → persist Route + capacity + public route locations → real published Routes appear in Search / Route Detail → real carrier can manage own Routes.
-
-Phase 2 is LOCKED by human approval after full local validation. Phase 3 is recorded as the next phase only; no Phase 3 work is authorized or started in this documentation task.
+Recorded as the next phase only. **Do NOT start Phase 4 yet.** Wait for a separate implementation instruction and scope. Supabase/Auth Foundation Phase 1, Customer Request Real Persistence Phase 2 and Carrier Route Real Persistence Phase 3 remain LOCKED.
 
 ## Locked baseline handoff
 
-P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior, Carrier Route Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are approved, browser-reviewed and LOCKED. D-043–D-050 lock the final pre-backend architecture. Start no new phase until it is separately selected and scoped. Supabase/Auth Foundation Phase 1 and Customer Request Real Persistence Phase 2 are LOCKED after full local validation and human approval. Phase 3 — Carrier Route Real Persistence is recorded next, not started. Other marketplace persistence, realtime messaging, production provider delivery, Route-distribution adapters and full i18n translation rollout remain unstarted. Do not commit or push without a separate instruction.
+P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior, Carrier Route Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are approved, browser-reviewed and LOCKED. D-043–D-050 lock the final pre-backend architecture. Start no new phase until it is separately selected and scoped. Supabase/Auth Foundation Phase 1 and Customer Request Real Persistence Phase 2 are LOCKED after full local validation and human approval. Carrier Route Real Persistence Phase 3 is LOCKED after human review and explicit approval under the D-063 beta admission policy. Phase 4 — Real Offer → Chat → Accept → Booking + Capacity Reservation is recorded next only and must not start without a separate instruction. Other marketplace persistence, realtime messaging, production provider delivery, Route-distribution adapters and full i18n translation rollout remain unstarted. Do not commit or push without a separate instruction.
 
 ## Do not reopen without a blocker
 
