@@ -105,6 +105,8 @@ delete from auth.sessions where id='52000000-0000-0000-0000-000000000001';
 set local role authenticated;
 select extensions.throws_ok($$select api.save_route(pg_temp.payload(),true,null,null,gen_random_uuid())$$,'42501',null,'revoked live session blocks valid JWT');
 reset role;
+-- Restore the Phase 3 synthetic reservation; Phase 4 requires Booking-backed counters.
+update app.carrier_routes set capacity_reserved=0 where id=pg_temp.route_id();
 set constraints all immediate;
 select * from extensions.finish();
 rollback;

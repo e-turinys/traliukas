@@ -60,7 +60,7 @@ export function appendLocalMessage(
 }
 
 export function orderedMessages(messages: readonly Message[]) {
-  return [...messages].sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt) || a.id.localeCompare(b.id))
+  return [...messages].sort((a, b) => a.sequence !== undefined && b.sequence !== undefined ? a.sequence - b.sequence : Date.parse(a.createdAt) - Date.parse(b.createdAt) || a.id.localeCompare(b.id))
 }
 
 export function unreadMessageCount(messages: readonly Message[], viewer: Exclude<MessageSenderType, "system">) {
