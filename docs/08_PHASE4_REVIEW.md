@@ -2,6 +2,26 @@
 
 Phase 4 — Offer / Conversation / Booking Transaction = **IN REVIEW**, not LOCKED. Local production app: http://127.0.0.1:3002. These are disposable local test identities and records, not real verification decisions for production users.
 
+## Current human-review correction — 2026-09-29
+
+Current human review runs at **http://127.0.0.1:3000**. The older completed example URLs below remain historical review records; use port 3000 for the running development app.
+
+- Reproduced the Carrier's submitted terms through managed OTP Auth: HTTP 400, PostgreSQL `23514`, `Route cannot serve complete Request`. Selected Route `fb966219-d8e9-4a94-9770-3d6cdf0b14ff` has Amsterdam → Hamburg → Kaunas, with **no Berlin stop**. Its capacity, categories, non-running support and dates pass; the second vehicle's Berlin pickup fails complete ordered-stop matching. `routeFlexible` does not override missing stops. D-005, active beta ownership and current Request/Route versions passed. The submitted expiry was future and before pickup midnight in Europe/Berlin at reproduction time.
+- Fixed the Offer form's candidate list to reuse complete-request matching, exclude unavailable/expired Routes and preserve the existing Offer's Route on revision. Date inputs and submission preflight enforce the selected Route's window and pickup/delivery order. Development console diagnostics expose the actual RPC error; safe UI copy and database validation remain unchanged.
+- Updated only the unused local review Route `2a1e7d0e-5ec2-4d1e-b646-560d4a87bb9b` through authenticated `save_route`: Hamburg → Berlin → Kaunas, **2026-09-30–2026-10-07**, Route version 2, two slots. The Amsterdam Route and prior Booking/full Route were not changed. No schema or policy changes.
+- Browser submission on Request `56cda6c8-51bc-47ed-985a-482ecd937e5c` now created Offer **`8797a8dd-50bd-4c4b-a809-1a109a7be1e2`** and Conversation **`585d1632-a171-40fd-9565-731dad347cc7`**. Terms: €1,000, pickup September 30, delivery October 2, validity September 29 at 23:55 Europe/Riga, payment `Bankiniu pavedimu po pristatymo`. Offer persists after reload. Capacity remains **2 total / 0 reserved / 2 available**. No Booking exists for this transaction; no acceptance was performed.
+- This Request now has an Offer: the Carrier form is an **update** form. Refresh before retrying. After the short original validity/pickup window passes, enter new future dates within the Route window and a future validity before pickup midnight; do not reuse expired September 29 terms.
+- Separate Customer managed-OTP browser verification PASS: the new Offer appears on the Customer Request and Offer Detail reload retains the price/payment terms. No acceptance was performed.
+- Regression coverage includes the exact missing-Berlin case despite flexibility, stop direction, complete count/category/non-running compatibility, Route availability, revision Route identity, and date bounds. Unit suite 19/19 PASS; relevant Phase 4 SQL suites 326 assertions PASS in an isolated local database; production build PASS in an isolated working-tree copy; `git diff --check` PASS. Existing review records were not reset.
+
+Current transaction links:
+
+- Carrier form: http://127.0.0.1:3000/carrier/requests/56cda6c8-51bc-47ed-985a-482ecd937e5c
+- Customer Request: http://127.0.0.1:3000/requests/56cda6c8-51bc-47ed-985a-482ecd937e5c
+- Offer: http://127.0.0.1:3000/offers/8797a8dd-50bd-4c4b-a809-1a109a7be1e2
+- Conversation: http://127.0.0.1:3000/messages/585d1632-a171-40fd-9565-731dad347cc7
+- Compatible Route: http://127.0.0.1:3000/routes/2a1e7d0e-5ec2-4d1e-b646-560d4a87bb9b
+
 ## Review entry
 
 Use separate browser profiles for Carrier and Customer. Existing local phone Auth tooling configures one test number at a time; switching its map does not require recreating the database. Do not run `db:reset` before reviewing these records.

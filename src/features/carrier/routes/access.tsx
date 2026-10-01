@@ -14,7 +14,17 @@ export async function carrierAccess() {
     client.from("my_profile").select("account_status,beta_access").maybeSingle(),
     client.from("my_carriers").select("*"), client.from("my_carrier_private_details").select("carrier_id,legal_name,business_kind,registration_country"),
   ])
-  if (profile.error || carriers.error || legal.error) throw new Error("Nepavyko patikrinti vežėjo prieigos.")
+  if (profile.error || carriers.error || legal.error) {
+    // Write directly to the server stream: Next dev can forward console calls
+    // from Server Components to the browser. Never serialize DB errors into UI.
+    for (const [query, result] of [["my_profile", profile], ["my_carriers", carriers], ["my_carrier_private_details", legal]] as const) {
+      if (result.error) process.stderr.write(`${JSON.stringify({
+        event: "carrier_access_read_failed", schema: "api", query,
+        status: result.status, code: result.error.code, message: result.error.message,
+      })}\n`)
+    }
+    throw new Error("Nepavyko patikrinti vežėjo prieigos.")
+  }
   const admitted = carriers.data?.filter(c => c.visibility === "published" && !c.suspended_at
     && legal.data?.some(l => l.carrier_id === c.id && l.legal_name && l.business_kind && l.registration_country)) ?? []
   if (profile.data?.account_status !== "active" || !profile.data.beta_access || admitted.length < 1) {
