@@ -1,5 +1,17 @@
 # Phase 4 human review
 
+## Windows review bootstrap — 2026-10-03
+
+The fresh local Windows database supersedes the historical Linux transaction IDs below. Phase 4 remains IN REVIEW. App: http://127.0.0.1:3000. No Offer, Conversation or Booking is pre-created; human submission and acceptance are next.
+
+- Customer phone: `+37062557545`; Carrier phone: `+37065603638`. Separate identities/browser profiles; Customer has no Carrier membership.
+- Request: `fc762fed-6dc9-4668-8bf3-2baf4fefabbe`: Volkswagen Golf Hamburg → Kaunas; Toyota Corolla Berlin → Kaunas.
+- Route: `cec6d9f1-bc8b-4a1e-8501-4d272bfe9be6`: Hamburg → Berlin → Kaunas, October 5–12, capacity 2 total / 0 reserved / 2 available.
+- Suggested Offer: €1,000, pickup October 8, delivery October 10, validity October 6 at 12:00 browser-local time, payment `Bankiniu pavedimu po pristatymo`. Submit and accept before validity expires. Expected capacity after acceptance: 2 / 2 / 0.
+- Managed local Auth identities and trusted local audited admission/identity approval were restored. Offer submission passed in a rolled-back transaction. No RLS, auth, D-005, D-063 or product behavior changes. The local OTP helper now launches the installed CLI through Node to support Windows.
+- PowerShell, from `C:\Projects\traliukas`: set `$env:PARVEZK_TEST_PHONE = '37065603638'` (Carrier) or `'37062557545'` (Customer), run `node scripts/local-phone-auth.mjs`, then `Get-Content supabase/.temp/local-phone-auth.json`. Sign in before switching the test-number map. Do not reset the database.
+- Ignored manifest: `supabase/.temp/phase4-review.json`. No remote access, commit, push, acceptance or later-phase work.
+
 Phase 4 — Offer / Conversation / Booking Transaction = **IN REVIEW**, not LOCKED. Local production app: http://127.0.0.1:3002. These are disposable local test identities and records, not real verification decisions for production users.
 
 ## Current human-review correction — 2026-09-29
