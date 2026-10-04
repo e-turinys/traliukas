@@ -1,6 +1,6 @@
 import type { Database, Json } from "@/lib/supabase/database.types"
 import type { RequestDetail, RequestOffer } from "../request-detail/model"
-import type { Booking } from "@/lib/types/booking"
+import { bookingStatuses, type Booking, type BookingStatus } from "@/lib/types/booking"
 import type { VehicleDraft } from "../create-request/model"
 import type { DateWindowValue } from "@/lib/types/date-window"
 import { parseCalendarDate } from "../search-query"
@@ -77,9 +77,9 @@ export function bookingProjection(row: Views["bookings"]["Row"]): Booking {
     void _photos; void _default
     return result
   })
-  if (!row.id || row.status !== "booked" || row.snapshot_schema_version !== 1) throw new Error("Unsupported persisted Booking")
+  if (!row.id || !bookingStatuses.includes(row.status as BookingStatus) || row.snapshot_schema_version !== 1) throw new Error("Unsupported persisted Booking")
   return { id: row.id, requestId: row.request_id!, acceptedOfferId: row.accepted_offer_id!, acceptedOfferVersion: row.accepted_offer_version!,
     carrierId: string(carrier.id), carrier: safeCarrier(string(carrier.id),string(carrier.display_name)), conversationId: row.conversation_id!, vehicles,
     agreedTotalPrice: row.agreed_total_price!, currency: "EUR", paymentTerms: row.payment_terms!, plannedPickup: row.planned_pickup_date!, plannedDelivery: row.planned_delivery_date!,
-    requestedPickupWindow: pickupWindow(string(pickup.kind),pickup.from as string | null,pickup.to as string | null), status: "booked", createdAt: row.created_at! }
+    requestedPickupWindow: pickupWindow(string(pickup.kind),pickup.from as string | null,pickup.to as string | null), status: row.status as BookingStatus, createdAt: row.created_at! }
 }

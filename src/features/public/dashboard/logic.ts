@@ -3,6 +3,36 @@ import { visibleOfferStatus } from "../request-detail/logic"
 import { requestStatusLabels, type RequestDetail } from "../request-detail/model"
 import { formatDateRange } from "@/lib/format-date"
 import type { DashboardTab, DashboardViewModel } from "./model"
+import type { Booking } from "@/lib/types/booking"
+import { bookingStatusLabel } from "../booking-detail/logic"
+import { requestRouteSummary } from "../request-route-summary"
+import { compactVehicleSummary } from "../vehicle-summary"
+
+export function dashboardTabFromQuery(value: string | string[] | undefined): DashboardTab {
+  const tab = Array.isArray(value) ? value[0] : value
+  return tab === "transport" || tab === "transports" ? "transports" : tab === "history" ? "history" : "requests"
+}
+
+export function derivePersistedDashboard(requests: RequestDetail[], bookings: Booking[], now: string, defaultTab: DashboardTab = "requests"): DashboardViewModel {
+  const unique = [...new Map(bookings.map(b => [b.id, b])).values()]
+  const booked = new Set(unique.map(b => b.requestId))
+  const view = deriveDashboard(requests.filter(r => !booked.has(r.id)), now, defaultTab)
+  for (const booking of unique) {
+    const item = {
+      id: booking.requestId, bookingId: booking.id,
+      route: requestRouteSummary(booking.vehicles).compact,
+      vehicle: compactVehicleSummary(booking.vehicles), vehicleCount: booking.vehicles.length,
+      carrier: booking.carrier.name, status: bookingStatusLabel(booking.status, booking.vehicles.length),
+    }
+    if (booking.status === "completed") {
+      view.history.push({ ...item, dateLabel: "Pristatyta", date: formatDateRange(booking.plannedDelivery) })
+    } else {
+      view.transports.push({ ...item, pickupDate: formatDateRange(booking.plannedPickup), deliveryDate: formatDateRange(booking.plannedDelivery) })
+    }
+  }
+  view.empty = !view.requests.length && !view.transports.length && !view.history.length
+  return view
+}
 
 export function dashboardTabForStatus(status: RequestDetail["status"]): DashboardTab | undefined {
   if (status === "active") return "requests"

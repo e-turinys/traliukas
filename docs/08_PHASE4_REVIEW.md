@@ -1,68 +1,66 @@
-# Phase 4 human review
+# Phase 4 — final human review and lock
 
-## Windows review bootstrap — 2026-10-03
+**Phase 4 — Offer / Conversation / Booking Transaction = LOCKED.** Human review PASSED and explicit approval was recorded on **2026-10-04**. This document records the completed review; no acceptance or Dashboard review remains pending for Phase 4.
 
-The fresh local Windows database supersedes the historical Linux transaction IDs below. Phase 4 remains IN REVIEW. App: http://127.0.0.1:3000. No Offer, Conversation or Booking is pre-created; human submission and acceptance are next.
+## Human-validated marketplace flow
 
-- Customer phone: `+37062557545`; Carrier phone: `+37065603638`. Separate identities/browser profiles; Customer has no Carrier membership.
-- Request: `fc762fed-6dc9-4668-8bf3-2baf4fefabbe`: Volkswagen Golf Hamburg → Kaunas; Toyota Corolla Berlin → Kaunas.
-- Route: `cec6d9f1-bc8b-4a1e-8501-4d272bfe9be6`: Hamburg → Berlin → Kaunas, October 5–12, capacity 2 total / 0 reserved / 2 available.
-- Suggested Offer: €1,000, pickup October 8, delivery October 10, validity October 6 at 12:00 browser-local time, payment `Bankiniu pavedimu po pristatymo`. Submit and accept before validity expires. Expected capacity after acceptance: 2 / 2 / 0.
-- Managed local Auth identities and trusted local audited admission/identity approval were restored. Offer submission passed in a rolled-back transaction. No RLS, auth, D-005, D-063 or product behavior changes. The local OTP helper now launches the installed CLI through Node to support Windows.
-- PowerShell, from `C:\Projects\traliukas`: set `$env:PARVEZK_TEST_PHONE = '37065603638'` (Carrier) or `'37062557545'` (Customer), run `node scripts/local-phone-auth.mjs`, then `Get-Content supabase/.temp/local-phone-auth.json`. Sign in before switching the test-number map. Do not reset the database.
-- Ignored manifest: `supabase/.temp/phase4-review.json`. No remote access, commit, push, acceptance or later-phase work.
+Carrier authentication → eligible Carrier reads the real Customer Request → complete-request compatible Route → persisted Offer/revisions → created/reused Conversation → persisted Customer/Carrier messages → Customer acceptance → exactly one atomic Booking → Booked Request and capacity reservation → persisted Booking Detail and Dashboard.
 
-Phase 4 — Offer / Conversation / Booking Transaction = **IN REVIEW**, not LOCKED. Local production app: http://127.0.0.1:3002. These are disposable local test identities and records, not real verification decisions for production users.
+- Incompatible Routes are excluded from Offer submission. The complete Request contains Volkswagen Golf Hamburg → Kaunas and Toyota Corolla Berlin → Kaunas; the compatible Route is Hamburg → Berlin → Kaunas.
+- Customer can view and accept the real Offer. The immutable Booking snapshot contains the accepted price, terms, vehicles and routes. The winning Conversation remains active and both participants' messages survive reload.
+- Capacity before acceptance: **2 total / 0 reserved / 2 available**. Capacity after acceptance: **2 total / 2 reserved / 0 available**. Offer creation/revision does not reserve capacity.
+- The Booked Request leaves active **Užklausos**. Its Booking appears **exactly once** in **Pervežimai**, shows **Vežėjas pasirinktas**, and links to the real Booking. Booking and Dashboard survive reload. Locked public UI remains preserved.
+- Realtime Chat/websockets were intentionally deferred. New messages appearing after reload is accepted Phase 4 behavior, not an unfinished review blocker.
 
-## Current human-review correction — 2026-09-29
+## Resolved human-review fixes
 
-Current human review runs at **http://127.0.0.1:3000**. The older completed example URLs below remain historical review records; use port 3000 for the running development app.
+1. **Carrier access diagnostics/session handling:** server-only diagnostics exposed the failed profile/Carrier/private-detail reads. On Windows, recorded failures were HTTP 401 / `PGRST303: JWT issued at future`; local Auth restart and fresh managed sessions passed all reads. Existing admission/membership/private details/verification and local environment were verified. No RLS or eligibility bypass, and stale reset cookies were not established as the root cause.
+2. **Complete-request Offer Route filtering:** the former Amsterdam → Hamburg → Kaunas Route omitted Berlin. The form now uses complete-request matching, excludes incompatible/unavailable Routes and constrains dates to Route bounds. Database D-005/RLS/matching remain authoritative.
+3. **Customer global login / returnTo:** header links targeted a missing `/login` route. The new minimal phone OTP route reuses existing Auth helpers, recognizes existing sessions and validates local return destinations. Desktop/mobile header styling and Carrier auth remain unchanged.
+4. **Persisted Dashboard Booking integration:** the old Booking back link `?view=transport` selected mock fixtures. Configured Dashboard now always reads caller-authenticated real data; tab queries select only the tab. Transport/history cards consume accepted Booking snapshots, preserve compact multi-location/count-aware status labels and prevent duplicate Requests across tabs. Canonical transport destination remains `/bookings/[id]`.
 
-- Reproduced the Carrier's submitted terms through managed OTP Auth: HTTP 400, PostgreSQL `23514`, `Route cannot serve complete Request`. Selected Route `fb966219-d8e9-4a94-9770-3d6cdf0b14ff` has Amsterdam → Hamburg → Kaunas, with **no Berlin stop**. Its capacity, categories, non-running support and dates pass; the second vehicle's Berlin pickup fails complete ordered-stop matching. `routeFlexible` does not override missing stops. D-005, active beta ownership and current Request/Route versions passed. The submitted expiry was future and before pickup midnight in Europe/Berlin at reproduction time.
-- Fixed the Offer form's candidate list to reuse complete-request matching, exclude unavailable/expired Routes and preserve the existing Offer's Route on revision. Date inputs and submission preflight enforce the selected Route's window and pickup/delivery order. Development console diagnostics expose the actual RPC error; safe UI copy and database validation remain unchanged.
-- Updated only the unused local review Route `2a1e7d0e-5ec2-4d1e-b646-560d4a87bb9b` through authenticated `save_route`: Hamburg → Berlin → Kaunas, **2026-09-30–2026-10-07**, Route version 2, two slots. The Amsterdam Route and prior Booking/full Route were not changed. No schema or policy changes.
-- Browser submission on Request `56cda6c8-51bc-47ed-985a-482ecd937e5c` now created Offer **`8797a8dd-50bd-4c4b-a809-1a109a7be1e2`** and Conversation **`585d1632-a171-40fd-9565-731dad347cc7`**. Terms: €1,000, pickup September 30, delivery October 2, validity September 29 at 23:55 Europe/Riga, payment `Bankiniu pavedimu po pristatymo`. Offer persists after reload. Capacity remains **2 total / 0 reserved / 2 available**. No Booking exists for this transaction; no acceptance was performed.
-- This Request now has an Offer: the Carrier form is an **update** form. Refresh before retrying. After the short original validity/pickup window passes, enter new future dates within the Route window and a future validity before pickup midnight; do not reuse expired September 29 terms.
-- Separate Customer managed-OTP browser verification PASS: the new Offer appears on the Customer Request and Offer Detail reload retains the price/payment terms. No acceptance was performed.
-- Regression coverage includes the exact missing-Berlin case despite flexibility, stop direction, complete count/category/non-running compatibility, Route availability, revision Route identity, and date bounds. Unit suite 19/19 PASS; relevant Phase 4 SQL suites 326 assertions PASS in an isolated local database; production build PASS in an isolated working-tree copy; `git diff --check` PASS. Existing review records were not reset.
+## Final Windows review records
 
-Current transaction links:
+Local app: **http://127.0.0.1:3000**. Customer: `+37062557545`; Carrier: `+37065603638`. These are disposable local identities, not production verification decisions. Separate browser profiles were used.
 
-- Carrier form: http://127.0.0.1:3000/carrier/requests/56cda6c8-51bc-47ed-985a-482ecd937e5c
-- Customer Request: http://127.0.0.1:3000/requests/56cda6c8-51bc-47ed-985a-482ecd937e5c
-- Offer: http://127.0.0.1:3000/offers/8797a8dd-50bd-4c4b-a809-1a109a7be1e2
-- Conversation: http://127.0.0.1:3000/messages/585d1632-a171-40fd-9565-731dad347cc7
-- Compatible Route: http://127.0.0.1:3000/routes/2a1e7d0e-5ec2-4d1e-b646-560d4a87bb9b
-
-## Review entry
-
-Use separate browser profiles for Carrier and Customer. Existing local phone Auth tooling configures one test number at a time; switching its map does not require recreating the database. Do not run `db:reset` before reviewing these records.
-
-1. For Carrier, run `PARVEZK_TEST_PHONE=37065603638 node scripts/local-phone-auth.mjs`. Read the generated OTP from ignored `supabase/.temp/local-phone-auth.json` locally. Open http://127.0.0.1:3002/carrier/routes in a fresh browser profile and sign in with `+37065603638` and that OTP.
-2. For Customer, run `PARVEZK_TEST_PHONE=37062557545 node scripts/local-phone-auth.mjs`. In a second browser profile use the same sign-in form with `+37062557545` and the newly generated OTP, then navigate to the Customer URLs below. The Customer has no Carrier membership; the Carrier access notice after sign-in does not block the Customer's own Dashboard/Request/Chat.
-3. The browser bootstrap has already admitted these local test accounts and created the applicable reviewed identity records through trusted local SQL. No browser service key or self-verification endpoint is provided. No further policy decision is needed for this review.
-
-## Exact current URLs
-
-| Screen | URL |
+| Record | Final local URL |
 |---|---|
-| Carrier Request list | http://127.0.0.1:3002/carrier/requests |
-| Fresh Carrier Offer form | http://127.0.0.1:3002/carrier/requests/56cda6c8-51bc-47ed-985a-482ecd937e5c |
-| Fresh Customer Request | http://127.0.0.1:3002/requests/56cda6c8-51bc-47ed-985a-482ecd937e5c |
-| Available review Route | http://127.0.0.1:3002/routes/2a1e7d0e-5ec2-4d1e-b646-560d4a87bb9b |
-| Already booked Request | http://127.0.0.1:3002/requests/05f765b8-6ed7-43d2-b3f5-73864ff402cc |
-| Accepted Offer | http://127.0.0.1:3002/offers/1872741d-42a9-447a-a0ff-ec9264da628c |
-| Losing Offer (Customer) | http://127.0.0.1:3002/offers/8dcf1f15-c469-4422-915d-0c0414edff90 |
-| Winning Conversation | http://127.0.0.1:3002/messages/6ef6ed36-3c71-460d-a32a-81622aff5406 |
-| Losing Conversation (Customer) | http://127.0.0.1:3002/messages/be13a498-0b09-4e21-9605-1f2a0cc65ca5 |
-| Real Booking snapshot | http://127.0.0.1:3002/bookings/db30e422-a536-4f06-bb98-745945b82c71 |
-| Inbox | http://127.0.0.1:3002/messages |
-| Dashboard → Pervežimai | http://127.0.0.1:3002/dashboard |
-| Reserved/full Route | http://127.0.0.1:3002/routes/25924655-e007-4029-af98-9c258f803a67 |
+| Booked Request | http://127.0.0.1:3000/requests/fc762fed-6dc9-4668-8bf3-2baf4fefabbe |
+| Accepted Offer | http://127.0.0.1:3000/offers/1ed61c0a-8b13-4a33-add7-3f31c5ec76e5 |
+| Winning Conversation | http://127.0.0.1:3000/messages/fcfde71b-85f1-429a-9451-bfa5afbfa271 |
+| Booking | http://127.0.0.1:3000/bookings/735b9cf9-bd2f-42b7-b0a6-246cbfd7e6f2 |
+| Reserved Route | http://127.0.0.1:3000/routes/cec6d9f1-bc8b-4a1e-8501-4d272bfe9be6 |
+| Dashboard Transports | http://127.0.0.1:3000/dashboard?tab=transports |
 
-For a fresh transaction, select the available review Route in the Carrier form. Supply a total EUR price, pickup/delivery within the Route dates, payment terms and validity strictly before the pickup day's start in the pickup locality. Submit, reload, revise from the same Request form, then open the Customer Request. Exchange messages, accept from Offer Detail and reload the resulting Booking. Verify two reserved slots, Request under Dashboard Transports, continued winning Chat and read-only losing history in the already-booked example.
+Historical Linux URLs and the ignored pre-acceptance bootstrap manifest are superseded by these records. Do not reset the review database or submit another acceptance to reproduce the completed human review. For later local inspection, the existing PowerShell OTP helper remains available:
 
-The full Route and fresh available Route coexist deliberately. The original completed browser scenario remains inspectable, while the open Request/available Route allow a new human transaction. Local IDs and test phones are also in ignored `supabase/.temp/phase4-review.json`; rerunning the browser test creates a fresh manifest.
+~~~powershell
+Set-Location C:\Projects\traliukas
+$env:PARVEZK_TEST_PHONE = '37062557545' # use 37065603638 for Carrier
+node scripts/local-phone-auth.mjs
+Get-Content supabase/.temp/local-phone-auth.json
+~~~
+
+## Explicitly deferred
+
+- Realtime Chat/websockets.
+- Attachments/read receipts.
+- Full Booking operational lifecycle after Booked, including cancellation/capacity release and private operations gateway.
+- Notification persistence/provider delivery.
+- Reviews persistence.
+- Payments/escrow.
+- Route Distribution.
+- Full i18n.
+
+Request edit/close persistence and automatic expiry reconciliation remain deferred as previously recorded. Minimal internal events/system messages and internal read cursors do not constitute notification delivery, realtime or user-facing read receipts.
+
+## Validation and roadmap handoff
+
+Final lock checks: `npm.cmd test` — **141/141 PASS**; `npm.cmd run build` — **PASS**, including lint/types; `git diff --check` — **PASS**; `git status --short` reviewed, with existing implementation changes left uncommitted. Prior implementation evidence (not rerun against the persistent review DB in this lock task): 541/541 pgTAP assertions; concurrency/idempotency/rollback tests; owner/unrelated-Customer RLS checks; real browser flow and Dashboard checks at 390/768/1280/1440. Owner access succeeded, unrelated Customer access was denied, and private operations remained unavailable to ordinary clients. No security relaxation.
+
+The existing numbered roadmap names **Phase 5 — Carrier Marketplace** in `04_IMPLEMENTATION_PLAN.md`. That older numbering overlaps completed backend milestones; remaining scope must account for locked work. The detailed backend rollout (§19 of `06_BACKEND_FOUNDATION_ARCHITECTURE.md`) separately follows Acceptance/Booking with lifecycle/reviews/in-app Notifications. No new roadmap is invented and no deferred feature is started or authorized by this lock. Await the separate next-phase task.
+
+This lock task changes documentation only; pre-existing implementation changes remain uncommitted. No remote Supabase access, commit or push.
 
 ## Implementation report
 
@@ -78,24 +76,24 @@ The full Route and fresh available Route coexist deliberately. The original comp
 10. **Competing Offers:** Winning Offer accepted; remaining pending competitors become non-winning. A second winner conflicts; previously terminal decisions remain intact.
 11. **Conversation states:** Winner active; losers archived/read-only. Effective expiry/staleness/eligibility/capacity checks prevent sending against stale stored active status. Same thread continues after Booking.
 12. **Booking Detail:** Dynamic authenticated `/bookings/[uuid]`, participant RLS and not-found for inaccessible/unknown records; fixture IDs preserved.
-13. **Dashboard:** Real booked Request moves to Transports and links to persisted Booking. Explicit fixture views remain available.
+13. **Dashboard:** Customer-owned persisted Booking snapshots populate Transports exactly once, suppress active Request duplicates and link to canonical Bookings. Completed Bookings map to History. Configured tab queries never switch to mock data; visual fixtures remain available without Supabase configuration.
 14. **RLS/security:** No ordinary direct writes, carrier reassignment, reserved-capacity writes, self-admission or self-verification. Live-session active participant reads; private operations and internal events have no ordinary read projection. D-065 uses existing `identity`/`company` and trusted Auth-confirmed phone, never email/contact/CMR/badge gates.
 15. **pgTAP:** 541/541 PASS, including the prior 441 assertions; tested real PostgreSQL client roles and late-failure rollback.
 16. **DB validation:** Local reset, lint (no errors), generated types and exact type check PASS.
-17. **Unit tests:** Foundation PASS; 19/19 test files PASS, including immutable snapshot adapter and sequence-order regression tests.
+17. **Unit tests:** Final suite 141/141 PASS, including immutable snapshots, Dashboard lifecycle/tab routing, safe Auth returns and sequence-order regressions.
 18. **Browser/concurrency:** Real local managed Auth, browser submit/revise/chat/reload/accept/Booking/capacity/owner isolation/Dashboard PASS. Separate connections test double acceptance, last-slot contention, retry and verification revocation during a wait. Widths 390/768/1280/1440 pass with no overflow/runtime exceptions; screenshots inspected in `.next/phase4-review/`.
 19. **Build:** Production build PASS, including lint/types. Booking UUID route explicitly dynamic.
 20. **Diff:** `git diff --check` PASS. Working tree intentionally uncommitted.
 21. **Deferred:** Operational lifecycle/cancellation, operations gateway, Request edit/close persistence, automatic expiry worker, Notifications/providers, Reviews, payments, realtime, attachments, distribution and full i18n. Real P07 edit/close reports unavailable rather than pretending to save. Effective expired/stale reads/actions are enforced without a worker.
-22. **Human review:** Use the local URLs and phone-entry steps above. Approve/reject Phase 4; it is not LOCKED.
+22. **Human review:** PASSED. Explicit human approval locks Phase 4 on 2026-10-04; completed criteria and final Windows records are above.
 23. **UI:** Locked public design/layout preserved. Only data/action wiring, truthful persistence copy, participant labels and the minimum Carrier Offer form were added.
 24. **Later phases:** None implemented. Internal events are not Notifications persistence or provider delivery.
 25. **Supabase:** Local only; no remote login/link/push/project access.
 26. **Git:** No commit or push.
 
-## Reproduce validation
+## Historical full-suite reproduction (disposable database only)
 
-Run reset → pgTAP before persistent integration fixtures. The existing foundation test suite assumes an empty reset database; running it after browser/concurrency fixtures can fail fixture counts/keys. Reset is destructive only to disposable local review records.
+Do not run these reset/bootstrap commands against the accepted Windows review state. This is the historical full-suite recipe for a separate disposable local database. Run reset → pgTAP before persistent integration fixtures. The existing foundation test suite assumes an empty reset database; running it after browser/concurrency fixtures can fail fixture counts/keys. Reset is destructive only to disposable local review records.
 
 ```sh
 npm run db:reset
@@ -116,6 +114,25 @@ git diff --check
 Browser bootstrap is test-only: it uses local Auth administration to create disposable identities, obtains real managed sessions, and then exercises the UI with ordinary caller cookies. No administrative secret enters application code, screenshots or the review manifest.
 
 ## File inventory
+
+Final review fixes also include:
+
+- `scripts/local-phone-auth.mjs` (Windows CLI launch)
+- `src/features/carrier/routes/access.tsx` (server diagnostics)
+- `src/features/carrier/offers/eligibility.ts`
+- `src/app/(public)/login/page.tsx`
+- `src/components/layout/login-link.tsx`
+- `src/components/layout/public-header.tsx`
+- `src/features/public/sign-in/form.tsx`
+- `src/lib/auth/validation.ts`
+- `src/features/public/booking-detail/view.tsx`
+- `src/features/public/dashboard/logic.ts`
+- `src/features/public/dashboard/model.ts`
+- `src/features/public/dashboard/cards.tsx`
+- `tests/auth-foundation.test.mjs`
+- `tests/dashboard.test.mjs`
+
+Original transaction implementation inventory:
 
 - `docs/05_DECISIONS_LOG.md`
 - `docs/06_BACKEND_FOUNDATION_ARCHITECTURE.md`

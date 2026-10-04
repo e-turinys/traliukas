@@ -35,6 +35,7 @@ export type DashboardTransportItem = {
 
 export type DashboardHistoryItem = {
   id: string
+  bookingId?: string
   route: string
   vehicle: string
   vehicleCount: number

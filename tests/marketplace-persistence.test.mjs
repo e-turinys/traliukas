@@ -28,6 +28,15 @@ test('real messages use committed sequence when timestamps tie or transactions s
  const sorted=orderedMessages([{id:'z',sequence:1,createdAt:'2030-01-02'},{id:'a',sequence:2,createdAt:'2030-01-01'}])
  assert.deepEqual(sorted.map(m=>m.id),['z','a'])
 })
+
+test('Booking projection retains supported persisted lifecycle states without changing the snapshot',()=>{
+ for(const status of ['booked','pickup_scheduled','collected','in_transit','delivered','completed']) {
+   const booking=bookingProjection({...row,status})
+   assert.equal(booking.status,status)
+   assert.equal(booking.carrier.name,'Accepted identity')
+ }
+ assert.throws(()=>bookingProjection({...row,status:'unknown'}))
+})
 test('beta admission or identity approval never fabricates generic Carrier reputation',()=>{
  assert.deepEqual(safeCarrier('id','Carrier'),{id:'id',name:'Carrier',verification:'not_submitted',rating:null,reviewCount:0,completedTransports:0})
  assert.deepEqual(pickupWindow('anytime',null,null),{type:'anytime'})

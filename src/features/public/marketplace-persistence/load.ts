@@ -89,10 +89,16 @@ export async function loadCarrierRequests(id?: string) {
   ])
   return rows.map(r => requestProjection({...r,status:"active",created_at:r.published_at},vehicles.filter(v => v.request_id === r.id),places))
 }
-export async function loadDashboardRequests() {
+export async function loadDashboardData() {
   const client = await marketplaceClient()
-  if (!client) return []
-  const rows = await readPages((a,b) => client.from("my_requests").select("id").neq("status","draft").order("id").range(a,b))
-  const requests = await Promise.all(rows.map(r => loadRealRequest(r.id!)))
-  return requests.flatMap(r => r ? [r.request] : [])
+  if (!client) return { requests: [], bookings: [] }
+  const rows = await readPages((a,b) => client.from("my_requests").select("id,status").neq("status","draft").order("id").range(a,b))
+  const owned = new Set(rows.map(r => r.id))
+  // Booking RLS also permits the Carrier. The Customer dashboard includes only
+  // Bookings belonging to this caller's own Requests.
+  const bookings = (await readPages((a,b) => client.from("bookings").select("*").order("id").range(a,b)))
+    .filter(b => owned.has(b.request_id)).map(bookingProjection)
+  const booked = new Set(bookings.map(b => b.requestId))
+  const requests = await Promise.all(rows.filter(r => !booked.has(r.id!)).map(r => loadRealRequest(r.id!)))
+  return { requests: requests.flatMap(r => r ? [r.request] : []), bookings }
 }

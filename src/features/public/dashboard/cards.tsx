@@ -93,7 +93,7 @@ export function HistoryCard({ item }: { item: DashboardHistoryItem }) {
         <Detail label={item.dateLabel}>{item.date}</Detail>
         {item.carrier && <Detail label="Vežėjas">{item.carrier}</Detail>}
       </dl>
-      <DetailLink href={`/requests/${encodeURIComponent(item.id)}`}>Peržiūrėti informaciją</DetailLink>
+      <DetailLink href={item.bookingId ? `/bookings/${encodeURIComponent(item.bookingId)}` : `/requests/${encodeURIComponent(item.id)}`}>Peržiūrėti informaciją</DetailLink>
     </CardContent>
   </Card>
 }
