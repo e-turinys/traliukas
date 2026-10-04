@@ -28,6 +28,9 @@ select extensions.throws_ok($$update app.carrier_routes set capacity_total=0$$,'
 select extensions.throws_ok($$update app.carrier_routes set capacity_total=-1$$,'23514',null,'negative total rejected');
 select extensions.throws_ok($$update app.carrier_routes set capacity_reserved=-1$$,'23514',null,'negative reserved rejected');
 select extensions.throws_ok($$update app.carrier_routes set capacity_reserved=4$$,'23514',null,'reserved cannot exceed total');
+-- Phase 3 projection tests temporarily stage a synthetic counter. Phase 4
+-- reconciliation is checked explicitly after restoring it, before rollback.
+set constraints app.route_capacity_reconciliation deferred;
 update app.carrier_routes set capacity_reserved=2 where status='published';
 select extensions.throws_ok($$update app.carrier_routes set capacity_total=1 where status='published'$$,'23514',null,'total cannot drop below reserved');
 select extensions.throws_ok($$update app.carrier_routes set supported_categories=array['truck']$$,'23514',null,'unsupported category rejected');
@@ -77,5 +80,7 @@ set local role anon;
 select extensions.is((select count(*)::int from api.public_routes),0,'hidden route not public');
 select extensions.is((select count(*)::int from api.public_route_stops),0,'hidden route stops not public');
 reset role;
+update app.carrier_routes set capacity_reserved=0;
+set constraints app.route_capacity_reconciliation immediate;
 select * from extensions.finish();
 rollback;

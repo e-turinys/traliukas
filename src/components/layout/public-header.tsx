@@ -10,6 +10,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { PageContainer } from "@/components/layout/page-container"
+import { LoginLink } from "@/components/layout/login-link"
 import { cn } from "@/lib/utils"
 
 const navigation = [
@@ -49,12 +50,11 @@ export function PublicHeader() {
             </Link>
           ))}
 
-          <Link
-            href="/login"
+          <LoginLink
             className={cn(buttonVariants({ variant: "outline" }), "h-auto min-h-11 whitespace-normal px-4 py-2")}
           >
             Prisijungti
-          </Link>
+          </LoginLink>
         </nav>
 
         <div className="md:hidden">
@@ -94,15 +94,15 @@ export function PublicHeader() {
                   </Link>
                 ))}
 
-                <Link
-                  href="/login"
+                <LoginLink
+                  closeSheet
                   className={cn(
                     buttonVariants({ variant: "outline" }),
                     "mt-4 h-auto min-h-11 whitespace-normal py-3"
                   )}
                 >
                   Prisijungti
-                </Link>
+                </LoginLink>
               </nav>
             </SheetContent>
           </Sheet>

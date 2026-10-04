@@ -25,6 +25,15 @@ test("post-auth destinations use an explicit local allowlist", () => {
   assert.equal(safeAuthReturnPath("/request/new"), "/request/new")
   for (const value of ["//evil.test", "https://evil.test", "/\\evil.test", "javascript:alert(1)", "/%2f%2fevil.test", undefined]) assert.equal(safeAuthReturnPath(value), "/")
 })
+
+test("sign-in returns to app detail pages and preserves search state without open redirects", () => {
+  for (const path of ["/offers/1ed61c0a-8b13-4a33-add7-3f31c5ec76e5", "/requests/review", "/search?from=hamburg-de&to=kaunas-lt", "/offers/review?tab=terms#price", "/carrier/routes"]) {
+    assert.equal(safeAuthReturnPath(path), path)
+  }
+  for (const path of ["/login", "/login?returnTo=/login", "/offers/../login", "/offers/%2e%2e/login", "/%5cevil.test", "/\nevil.test", "/offers/test\\evil", "/unknown", "/api/auth"]) {
+    assert.equal(safeAuthReturnPath(path), "/")
+  }
+})
 test("mutation origin checks reject missing, cross-site and spoofed hosts", () => {
   assert.doesNotThrow(() => assertSameOrigin("https://example.test", "https://example.test", "same-origin"))
   for (const origin of [null,"null","https://evil.test","https://example.test.evil.test","http://example.test"]) assert.throws(() => assertSameOrigin(origin,"https://example.test"))

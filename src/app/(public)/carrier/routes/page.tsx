@@ -15,6 +15,7 @@ export default async function MyRoutesPage() {
     {!access.allowed ? <AccessMessage access={access} /> : <>
       <p>{access.carrier.display_name}</p>
       <Button nativeButton={false} render={<Link href="/carrier/routes/new" />} className="min-h-11">Sukurti maršrutą</Button>
+      <Button variant="outline" nativeButton={false} render={<Link href="/carrier/requests" />} className="min-h-11">Peržiūrėti užklausas</Button>
       {!routes.length && <p>Maršrutų dar nėra.</p>}
       <ul className="grid gap-4 sm:grid-cols-2">{routes.map(route => <li key={route.id} className="space-y-3 rounded-xl border bg-card p-6">
         <p className="text-sm text-muted-foreground">{labels[route.status]}{route.status === "published" && !route.acceptingNewRequests ? " · Naujos užklausos nepriimamos" : ""}</p>

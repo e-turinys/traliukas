@@ -11,7 +11,7 @@ function formatInboxTime(value: string) {
   return new Intl.DateTimeFormat("lt-LT", { timeZone: "Europe/Vilnius", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value))
 }
 
-export function MessagesInbox({ conversations }: { conversations: MockConversationDetail[] }) {
+export function MessagesInbox({ conversations }: { conversations: (MockConversationDetail & {viewer?: "customer" | "carrier"})[] }) {
   return <div className="mx-auto w-full max-w-5xl space-y-6 py-8 sm:py-12">
     <header className="space-y-2">
       <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Pokalbiai</h1>
@@ -22,7 +22,7 @@ export function MessagesInbox({ conversations }: { conversations: MockConversati
       {conversations.map(detail => {
         const { conversation, offer, messages } = detail
         const summary = mockConversationSummary(detail)
-        const unread = unreadMessageCount(messages, "customer")
+        const unread = unreadMessageCount(messages, detail.viewer ?? "customer")
         const secondary = conversation.status !== "active"
         return <li key={conversation.id}>
           <Card className={`min-w-0 border py-0 shadow-none ring-0 ${unread ? "border-primary/30 bg-primary/5" : secondary ? "bg-muted/30" : "bg-card"}`}>
@@ -30,7 +30,7 @@ export function MessagesInbox({ conversations }: { conversations: MockConversati
               <Link href={`/messages/${encodeURIComponent(conversation.id)}`} className="group flex min-w-0 flex-col gap-4 rounded-xl p-4 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:p-6">
                 <div className="min-w-0 space-y-2">
                   <div className="flex min-w-0 flex-wrap items-center gap-2">
-                    <h2 className="break-words text-lg font-semibold">{offer.carrier.name}</h2>
+                    <h2 className="break-words text-lg font-semibold">{detail.viewer === "carrier" ? "Pokalbis su klientu" : offer.carrier.name}</h2>
                     <Badge variant="secondary" className="h-auto whitespace-normal py-1">{conversation.bookingId && conversation.status === "active" ? "Aktyvus pervežimas" : statusLabels[conversation.status]}</Badge>
                     {unread > 0 && <span aria-label={`${unread} neperskaityta`} className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-sm font-semibold text-primary">{unread} neperskaityta</span>}
                   </div>

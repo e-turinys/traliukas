@@ -23,7 +23,25 @@ with expected(signature, owner_name) as (values
   ('private.lock_route_stop()', 'parvezk_authorization'),
   ('private.require_complete_route()', 'parvezk_authorization'),
   ('api.save_route(jsonb,boolean,uuid,integer,uuid,text)', 'parvezk_commands'),
-  ('api.close_route(uuid,integer)', 'parvezk_commands')
+  ('api.close_route(uuid,integer)', 'parvezk_commands'),
+  ('private.commercial_party(uuid,uuid)', 'parvezk_authorization'),
+  ('private.can_read_offer(uuid)', 'parvezk_authorization'),
+  ('private.can_read_conversation(uuid)', 'parvezk_authorization'),
+  ('private.can_read_booking(uuid)', 'parvezk_authorization'),
+  ('private.check_booking_context()', 'parvezk_authorization'),
+  ('private.reconcile_route_capacity()', 'parvezk_authorization'),
+  ('private.validate_read_cursor()', 'parvezk_authorization'),
+  ('private.validate_booking_operation()', 'parvezk_authorization'),
+  ('private.offer_carrier_eligible(uuid)', 'parvezk_authorization'),
+  ('private.lock_commercial_profiles(uuid)', 'parvezk_authorization'),
+  ('private.route_fits_request(uuid,uuid,date,date)', 'parvezk_authorization'),
+  ('private.effective_offer_status(uuid)', 'parvezk_authorization'),
+  ('private.effective_conversation_status(uuid)', 'parvezk_authorization'),
+  ('api.submit_offer(uuid,uuid,jsonb,integer,integer,integer)', 'parvezk_commands'),
+  ('api.accept_offer(uuid,integer,integer,integer)', 'parvezk_commands'),
+  ('api.send_message(uuid,text,uuid)', 'parvezk_commands'),
+  ('api.mark_conversation_read(uuid,bigint)', 'parvezk_commands'),
+  ('api.decline_offer(uuid,integer)', 'parvezk_commands')
 )
 select extensions.ok(
   coalesce(p.proowner = r.oid and p.prosecdef and 'search_path=""' = any(p.proconfig), false),
@@ -73,7 +91,18 @@ select extensions.is(
     'private.can_read_request(uuid)'::regprocedure,
     'private.owns_route(uuid)'::regprocedure,
     'api.save_route(jsonb,boolean,uuid,integer,uuid,text)'::regprocedure,
-    'api.close_route(uuid,integer)'::regprocedure),
+    'api.close_route(uuid,integer)'::regprocedure,
+    'private.commercial_party(uuid,uuid)'::regprocedure,
+    'private.can_read_offer(uuid)'::regprocedure,
+    'private.can_read_conversation(uuid)'::regprocedure,
+    'private.can_read_booking(uuid)'::regprocedure,
+    'private.effective_offer_status(uuid)'::regprocedure,
+    'private.effective_conversation_status(uuid)'::regprocedure,
+    'api.submit_offer(uuid,uuid,jsonb,integer,integer,integer)'::regprocedure,
+    'api.accept_offer(uuid,integer,integer,integer)'::regprocedure,
+    'api.send_message(uuid,text,uuid)'::regprocedure,
+    'api.mark_conversation_read(uuid,bigint)'::regprocedure,
+    'api.decline_offer(uuid,integer)'::regprocedure),
   clients.name || ' EXECUTE allowlist: ' || p.oid::regprocedure::text)
 from pg_catalog.pg_proc p
 join pg_catalog.pg_namespace n on n.oid = p.pronamespace

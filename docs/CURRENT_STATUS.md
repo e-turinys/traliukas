@@ -1,6 +1,6 @@
 # Parvezk.lt — Current Status
 
-**Date:** 2026-09-25
+**Date:** 2026-10-04
 **Backend Foundation Architecture = LOCKED.** Human approval of OD-1 through OD-5 is recorded in `06_BACKEND_FOUNDATION_ARCHITECTURE.md`; no implementation started under this approval.
 **P01 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. The current responsive P01 browser implementation is the approved V1 visual baseline and the visual reference for P02/P03. P01 search behavior remains locked and unchanged.
 **P02 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its responsive search-results implementation is the V1 visual reference for future results/discovery screens under D-052. P01 remains LOCKED and unchanged.
@@ -19,6 +19,21 @@
 **Supabase/Auth Foundation Phase 1 = LOCKED.** Full local Linux/PostgreSQL validation passed and human approval is recorded on 2026-09-24.
 
 **Customer Request Real Persistence Phase 2 = LOCKED.** Full local validation passed and human approval is recorded on 2026-09-24. P05 continues through managed phone OTP to atomic PostgreSQL publication; real P06 IDs load the owner's persisted Request and survive reload.
+
+## Phase 4 transaction lock — 2026-10-04
+
+**Phase 4 — Offer / Conversation / Booking Transaction = LOCKED.** Final human review PASSED; explicit human approval recorded on 2026-10-04. No next-phase implementation is authorized by this lock.
+
+- Human review confirmed Carrier authentication and eligible access to the real Customer Request; complete-request Route compatibility and exclusion of incompatible Routes; persisted Offers/revisions; one created/reused Conversation; persisted Customer/Carrier text messages and reload survival.
+- Customer visibility and acceptance passed. Atomic acceptance creates exactly one Booking, preserves the winning active Conversation and captures accepted price, payment terms, vehicles and routes in the immutable Booking snapshot. Request becomes Booked. Capacity changes from **2 total / 0 reserved / 2 available** to **2 total / 2 reserved / 0 available**.
+- Dashboard integration passed: the Request leaves active Užklausos; the Booking appears exactly once in Pervežimai, with the real Booking link and Vežėjas pasirinktas status. Booking and Dashboard survive reload; locked public UI remains preserved.
+- Final Windows record: Request `fc762fed-6dc9-4668-8bf3-2baf4fefabbe`; accepted Offer `1ed61c0a-8b13-4a33-add7-3f31c5ec76e5`; Booking `735b9cf9-bd2f-42b7-b0a6-246cbfd7e6f2`; winning Conversation `fcfde71b-85f1-429a-9451-bfa5afbfa271`; Route `cec6d9f1-bc8b-4a1e-8501-4d272bfe9be6`. The two vehicles are Volkswagen Golf Hamburg → Kaunas and Toyota Corolla Berlin → Kaunas; compatible Route Hamburg → Berlin → Kaunas.
+- Resolved review fixes: Carrier access diagnostics/session handling (observed local `PGRST303: JWT issued at future`, recovered with local Auth restart/fresh session; no security bypass); complete-request Route filtering/date bounds in the Offer form; global Customer phone OTP login with safe returnTo and existing-session recognition; persisted Dashboard integration using accepted Booking snapshots and real data for tab queries instead of mock fixtures.
+- Security remains unchanged: D-005/D-065 Offer verification and D-063 Route admission, active single ownership, beta access, trusted phone verification and caller-authenticated RLS. No browser service key, broad grants, self-admission or self-verification. Separate Customer and Carrier identities were reviewed.
+- Retained implementation evidence: 541/541 pgTAP assertions, concurrency/idempotency/rollback tests, DB lint/type generation, managed-Auth browser persistence and participant isolation. Final correction evidence: rollback-only owner/unrelated-Customer RLS checks and Dashboard browser checks at 390/768/1280/1440. Those DB/browser results were obtained during implementation; this lock does not reset or rerun the database fixtures.
+- Lock validation: `npm.cmd test` **141/141 PASS**; `npm.cmd run build` **PASS** (lint/types included); `git diff --check` **PASS**. `git status --short` reviewed; pre-existing implementation changes remain uncommitted.
+- Explicitly deferred: realtime Chat/websockets; attachments/read receipts; full Booking operational lifecycle after Booked (including cancellation/release and private operations gateway); notification persistence/provider delivery; Reviews persistence; payments/escrow; Route Distribution; full i18n. Request edit/close persistence and automatic expiry reconciliation also remain deferred. Manual chat reload is accepted for this locked phase.
+- Final review record and local URLs: [Phase 4 review](08_PHASE4_REVIEW.md). Historical Linux IDs and pre-acceptance bootstrap manifests are not the current transaction state. No remote Supabase access, next-phase implementation, commit or push in this lock task.
 
 ## Carrier Route Real Persistence Phase 3 lock — 2026-09-25
 
@@ -502,21 +517,23 @@ tests/route-persistence.test.mjs
 - Live domain: `parvezk.lt`
 - GitHub repo: `https://github.com/e-turinys/traliukas.git`
 - Branch: `main`
-- Canonical local path: `/home/cv95/Projects/traliukas`
+- Current Windows working tree: `C:\Projects\traliukas` (historical Linux path: `/home/cv95/Projects/traliukas`)
 - GitHub → Hostinger auto-deploy: working
-- Supabase: Auth Foundation Phase 1 and Customer Request Real Persistence Phase 2 LOCKED; Carrier Route Real Persistence Phase 3 LOCKED; 353/353 local PostgreSQL assertions passed; no remote project connected
+- Supabase: backend Phases 1–4 LOCKED; Phase 4 historical local PostgreSQL validation 541/541 assertions passed, with later focused RLS/browser corrections passed. Final human acceptance and capacity reservation confirmed on Windows; no remote project access in the Phase 4 lock task.
 - shadcn/ui: configured with Base UI, Nova preset and neutral tokens
 - Real product UI: public layout, shared pickers and P01–P09 implemented with mock data; P01–P09 and the Multi-Vehicle, Multi-Location and Carrier Capacity V1 baseline are locked and browser-reviewed.
 
 ## Immediate next task
 
-**PHASE 4 — REAL OFFER → CHAT → ACCEPT → BOOKING + CAPACITY RESERVATION**
+**Phase 5 — Carrier Marketplace**, as already named in [04_IMPLEMENTATION_PLAN.md](04_IMPLEMENTATION_PLAN.md#phase-5--carrier-marketplace). Record the next phase only; wait for a separate scope/implementation instruction. Do not restart capabilities already completed in locked backend Phases 1–4.
 
-Recorded as the next phase only. **Do NOT start Phase 4 yet.** Wait for a separate implementation instruction and scope. Supabase/Auth Foundation Phase 1, Customer Request Real Persistence Phase 2 and Carrier Route Real Persistence Phase 3 remain LOCKED.
+The master plan's numbering predates the later backend milestones. Its Phase 5 covers C01–C15 core Carrier screens, verification gating, Route management, matching, Request browse, Offer create/update/withdraw, versioning and capacity; several are already delivered. The more detailed backend rollout in `06_BACKEND_FOUNDATION_ARCHITECTURE.md` §19 separately places lifecycle/reviews/in-app Notifications after Acceptance/Booking. This lock does not renumber either roadmap or authorize those deferred features; reconcile remaining scope against the locked work when the next phase is explicitly requested.
+
+Phase 4 is LOCKED. No next-phase implementation has started in this task.
 
 ## Locked baseline handoff
 
-P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior, Carrier Route Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are approved, browser-reviewed and LOCKED. D-043–D-050 lock the final pre-backend architecture. Start no new phase until it is separately selected and scoped. Supabase/Auth Foundation Phase 1 and Customer Request Real Persistence Phase 2 are LOCKED after full local validation and human approval. Carrier Route Real Persistence Phase 3 is LOCKED after human review and explicit approval under the D-063 beta admission policy. Phase 4 — Real Offer → Chat → Accept → Booking + Capacity Reservation is recorded next only and must not start without a separate instruction. Other marketplace persistence, realtime messaging, production provider delivery, Route-distribution adapters and full i18n translation rollout remain unstarted. Do not commit or push without a separate instruction.
+P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior, Carrier Route Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are approved, browser-reviewed and LOCKED. D-043–D-050 lock the final pre-backend architecture. Start no new phase until it is separately selected and scoped. Supabase/Auth Foundation Phase 1 and Customer Request Real Persistence Phase 2 are LOCKED after full local validation and human approval. Carrier Route Real Persistence Phase 3 is LOCKED after human review and explicit approval under the D-063 beta admission policy. Phase 4 — Offer / Conversation / Booking Transaction is LOCKED after final human review on 2026-10-04, as recorded above. Realtime messaging, production provider delivery, Route-distribution adapters and full i18n translation rollout remain unstarted. Do not commit or push without a separate instruction.
 
 ## Do not reopen without a blocker
 

@@ -243,6 +243,14 @@ Human-approved Route create/publish/manage eligibility is: live Auth session + a
 
 Phase 3 reuses `profiles.beta_access` and the Carrier's admin-controlled public eligibility (`visibility='published'`, no suspension) through the existing audited bootstrap mechanism. No client can self-admit. The policy is isolated in a narrow internal helper; owner resolution and parent locks remain unchanged. This clarification does not change future Offer verification policy or authorize later-phase persistence.
 
+**Phase 4 human clarification — 2026-09-25 (D-064):** D-005 remains the Offer submission/revision gate in addition to authenticated single ownership, active/non-suspended Carrier and beta admission. Acceptance revalidates that verification gate and current Offer/Route/capacity atomically. D-063 is Route-only; no contradiction remains. Do not substitute Route admission for Offer verification. The previously missing concrete category/contact predicate is now defined by D-065 below.
+
+**Concrete Closed Beta D-005 policy — 2026-09-25 (D-065):** Submission/revision requires a live caller session and active single ownership. Owner profile must be active, beta-admitted, and have a current Auth-confirmed phone (`phone_e164` and trusted `phone_verified_at` non-null). Carrier must be explicitly admitted/public (`visibility='published'`) and not suspended. For `business_kind='individual'`, require existing category `identity`; for `business_kind='company'`, require existing category `company`. The applicable row must be `approved`, with expiry absent or strictly later than execution-time `clock_timestamp()`; other statuses, missing approval and elapsed expiry fail. Existing reviewer/time constraints remain. There is no confirmed-email, separate contact-category, CMR, invoice, tracking or generic badge requirement. Beta admission/identity eligibility does not manufacture a public aggregate Verified Carrier claim.
+
+`private.offer_carrier_eligible` isolates the policy from ownership. Acceptance locks acting Customer and resolved Carrier owner profiles in UUID order before the Request, then follows the existing Carrier → Route → sorted Offers → sorted Conversations → Booking/children order; it rechecks ownership after acquiring Carrier and revalidates eligibility/expiry after waits. Auth phone changes/admission revocation serialize on profiles; membership/verification changes serialize on Carrier. A failure rolls back all commercial writes and capacity. The D-063 Route helper is not changed.
+
+**Phase 4 scope override:** The implementation records only minimal internal Offer/Message/Booking events and system messages. Per the explicit Phase 4 instruction, Notifications persistence and all provider delivery remain deferred despite the broader eventual-beta design in sections 12/15.
+
 ### 9.2 Authorized write commands and column boundaries
 
 | Command family | Caller / allowed changes |

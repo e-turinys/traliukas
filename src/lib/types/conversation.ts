@@ -19,6 +19,7 @@ export const messageSenderTypes = ["customer", "carrier", "system"] as const
 export type MessageSenderType = (typeof messageSenderTypes)[number]
 
 export type Message = {
+  sequence?: number
   id: string
   conversationId: string
   type: MessageType

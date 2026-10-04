@@ -6,7 +6,9 @@ import { formatEur } from "@/lib/format-money"
 import type { RequestOffer } from "../request-detail/model"
 import { vehicleTransportScope } from "../vehicle-summary"
 
-export function OfferDecisionDialog({ open, onOpenChange, decision, offer, vehicleCount, onConfirm, finalFocus }: {
+export function OfferDecisionDialog({ open, onOpenChange, decision, offer, vehicleCount, onConfirm, finalFocus, persisted = false, busy = false }: {
+  persisted?: boolean
+  busy?: boolean
   open: boolean
   onOpenChange: (open: boolean) => void
   decision: "accept" | "decline"
@@ -23,7 +25,7 @@ export function OfferDecisionDialog({ open, onOpenChange, decision, offer, vehic
         <DialogTitle className="leading-snug">{accepting ? "Priimti pasiūlymą?" : "Atmesti pasiūlymą?"}</DialogTitle>
         <DialogDescription>{accepting
           ? `Priimate ${formatEur(offer.totalPriceEur)} pasiūlymą už ${vehicleTransportScope(vehicleCount)} pagal visus užklausoje nurodytus maršrutus. Pasirinkus šį vežėją, kiti pasiūlymai taptų nebepasirenkami.`
-          : "Šioje demonstracijoje pasiūlymas bus atmestas tik šiame puslapyje."}</DialogDescription>
+          : persisted ? "Pasiūlymas bus atmestas. Šis pokalbis liks tik peržiūrai." : "Šioje demonstracijoje pasiūlymas bus atmestas tik šiame puslapyje."}</DialogDescription>
       </DialogHeader>
       <dl className="grid gap-4 rounded-lg border bg-background p-4 text-sm sm:grid-cols-2">
         <div className="min-w-0 sm:col-span-2"><dt className="text-muted-foreground">Vežėjas</dt><dd className="break-words font-medium">{offer.carrier.name}</dd></div>
@@ -33,8 +35,8 @@ export function OfferDecisionDialog({ open, onOpenChange, decision, offer, vehic
         <div className="min-w-0"><dt className="text-muted-foreground">Apmokėjimas</dt><dd className="break-words">{offer.paymentTerms}</dd></div>
       </dl>
       <DialogFooter>
-        <Button ref={cancel} variant="outline" className="h-auto min-h-11 py-3 whitespace-normal" onClick={() => onOpenChange(false)}>Atšaukti</Button>
-        <Button variant={accepting ? "default" : "destructive"} className="h-auto min-h-11 py-3 whitespace-normal" onClick={onConfirm}>{accepting ? "Patvirtinti pasirinkimą" : "Patvirtinti atmetimą"}</Button>
+        <Button disabled={busy} ref={cancel} variant="outline" className="h-auto min-h-11 py-3 whitespace-normal" onClick={() => onOpenChange(false)}>Atšaukti</Button>
+        <Button disabled={busy} variant={accepting ? "default" : "destructive"} className="h-auto min-h-11 py-3 whitespace-normal" onClick={onConfirm}>{accepting ? "Patvirtinti pasirinkimą" : "Patvirtinti atmetimą"}</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

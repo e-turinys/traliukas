@@ -14,7 +14,7 @@ import { OfferCard } from "./offer-card"
 import { ConfirmRequestDialog } from "./confirm-dialog"
 import { findMockConversationByContext } from "@/lib/mock/conversations"
 
-export function RequestDetailView({ initialRequest, reviewNow }: { initialRequest: RequestDetailPayload; reviewNow: string }) {
+export function RequestDetailView({ initialRequest, reviewNow, persisted }: { initialRequest: RequestDetailPayload; reviewNow: string; persisted?: { conversations: {id:string;carrierId:string;canSend:boolean}[] } }) {
   const [request, setRequest] = useState(() => hydrateRequestDetail(initialRequest))
   const [editing, setEditing] = useState(false)
   const [closing, setClosing] = useState(false)
@@ -25,12 +25,13 @@ export function RequestDetailView({ initialRequest, reviewNow }: { initialReques
   const offerGroups = requestOfferGroups(request)
   const summary = publishedRequestSummary(request)
   const conversationFor = (carrierId: string) => {
+    if (persisted) return persisted.conversations.find(c => c.carrierId === carrierId)
     const detail = findMockConversationByContext(request.id, carrierId)
     return detail ? { id: detail.conversation.id, canSend: detail.conversation.status === "active" } : undefined
   }
   const finishEditing = () => { setEditing(false); requestAnimationFrame(() => heading.current?.focus()) }
   return <div className="mx-auto max-w-6xl space-y-6">
-    <p className="flex items-start gap-3 rounded-lg border p-4 text-sm text-muted-foreground"><Info aria-hidden="true" className="size-4 shrink-0" /><span>Demonstracinė užklausa. Pakeitimai galioja tik šiame puslapyje ir atnaujinus puslapį dingsta. Duomenys neišsaugomi ir vežėjams nesiunčiami.</span></p>
+    {!persisted && <p className="flex items-start gap-3 rounded-lg border p-4 text-sm text-muted-foreground"><Info aria-hidden="true" className="size-4 shrink-0" /><span>Demonstracinė užklausa. Pakeitimai galioja tik šiame puslapyje ir atnaujinus puslapį dingsta. Duomenys neišsaugomi ir vežėjams nesiunčiami.</span></p>}
     <header className="space-y-4 rounded-xl border bg-card p-4 sm:p-6">
       <div className="flex flex-wrap items-center gap-3"><p className="text-sm font-medium text-muted-foreground">Jūsų pervežimas</p><Badge variant="secondary" className="h-auto whitespace-normal py-1">{requestStatusLabels[request.status]}</Badge></div>
       <h1 ref={heading} tabIndex={-1} className="break-words text-2xl font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-3xl">{summary.route}</h1>
@@ -40,10 +41,11 @@ export function RequestDetailView({ initialRequest, reviewNow }: { initialReques
         <div className="min-w-0"><dt className="text-muted-foreground">Matomumas</dt><dd className="break-words">{publicationCopy(summary).audience}</dd></div>
       </dl>
       {!editing && <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        {actions.edit && <Button variant="outline" className="h-auto min-h-11 px-4 py-3 whitespace-normal" onClick={() => setEditing(true)}>Redaguoti užklausą</Button>}
-        {actions.close && <Button ref={closeButton} variant="outline" className="h-auto min-h-11 px-4 py-3 whitespace-normal" onClick={() => setClosing(true)}>Uždaryti užklausą</Button>}
+        {actions.edit && <Button variant="outline" className="h-auto min-h-11 px-4 py-3 whitespace-normal" onClick={() => persisted ? setNotice("Užklausos keitimas šiuo metu nepasiekiamas.") : setEditing(true)}>Redaguoti užklausą</Button>}
+        {actions.close && <Button ref={closeButton} variant="outline" className="h-auto min-h-11 px-4 py-3 whitespace-normal" onClick={() => persisted ? setNotice("Užklausos uždarymas šiuo metu nepasiekiamas.") : setClosing(true)}>Uždaryti užklausą</Button>}
         {actions.booking && <Button nativeButton={false} render={<Link href={`/bookings/${request.bookingId}`} />} className="h-auto min-h-11 px-4 py-3 whitespace-normal">Atidaryti pervežimą</Button>}
         {actions.repeat && <Button className="h-auto min-h-11 px-4 py-3 whitespace-normal" onClick={() => {
+          if (persisted) { setNotice("Naują užklausą galite paskelbti užklausos formoje."); return }
           setRequest(repeatRequest(request))
           setNotice("Sukurtas naujas vietinis juodraštis su nukopijuotais duomenimis. Pradinė užklausa lieka uždaryta. Juodraštis neišsaugotas ir nepaskelbtas.")
         }}>Pakartoti užklausą</Button>}

@@ -16,7 +16,7 @@ const token = String(randomInt(0, 1000000)).padStart(6, "0")
 const destination = new URL("../supabase/.temp/local-phone-auth.json", import.meta.url)
 mkdirSync(new URL("../supabase/.temp/", import.meta.url), { recursive: true })
 function cli(command) {
-  const result = spawnSync("npx", ["--no-install", "supabase", command], { cwd: root, stdio: ["ignore", "pipe", "pipe"], encoding: "utf8" })
+  const result = spawnSync(process.execPath, [fileURLToPath(new URL("../node_modules/supabase/dist/supabase.js", import.meta.url)), command], { cwd: root, stdio: ["ignore", "pipe", "pipe"], encoding: "utf8", windowsHide: true })
   if (result.status !== 0) throw new Error(`Local Supabase ${command} failed`)
 }
 try {

@@ -31,6 +31,8 @@ This file records important product/architecture decisions that should not be ca
 **Decision:** Carrier may create profile/routes, browse Requests and see matches before full verification; required verification is enforced before Send Offer.  
 **Reason:** Let carriers see product value before hitting the trust/compliance wall.
 
+**Phase 4 clarification — 2026-09-25:** D-005 remains the locked Offer submission/revision gate and must be revalidated at acceptance. D-063 exempts Route publication/manage only; it does not exempt Offers. See D-064 and the concrete D-065 policy.
+
 ### D-006 — One directional Carrier Route
 
 **Decision:** Each Carrier Route represents one ordered travel direction. Return travel is a separate Route if needed.  
@@ -375,6 +377,32 @@ This file records important product/architecture decisions that should not be ca
 **Implementation mapping:** Reuse the admin-controlled owner `profiles.beta_access` and Carrier `visibility='published'`/`suspended_at` fields for explicit admission/public eligibility; ordinary users cannot write these. The trusted bootstrap records both approvals in `audit_log`. Carrier display/legal name, legal business kind and registration country remain schema-validated. No second role model, self-approval endpoint or category policy is introduced. The internal Route eligibility helper can change for a future approved production policy without changing ownership.
 
 **Boundary:** This decision applies to Route supply only. It does not authorize Offer/Booking/Message/Notification/Review persistence, production document rules or distribution providers. Real carriers receive no fabricated verification or reputation.
+
+### D-064 — Phase 4 Offer verification and Route exemption scope
+
+**Date:** 2026-09-25. **Status:** Approved by explicit human clarification; Phase 4 remains IN PROGRESS.
+
+**Decision:** D-005 remains LOCKED for Offer submission and revision. In addition to a live authenticated session, active single ownership, active/non-suspended Carrier and explicit beta admission, the Carrier must satisfy the platform-required verification predicate. D-063 is the Route-only Closed Beta exemption: Route publication/manage retains its approved gate without the additional Offer verification gate. These decisions have distinct scopes; no contradiction remains.
+
+Acceptance must revalidate the current/actionable Offer, selected Carrier activity/suspension, beta admission and D-005 verification, plus the linked Route's validity and complete capacity. A failed check must atomically leave no Booking or capacity reservation. Beta admission is not verification, and no generic badge or capability declaration substitutes for required approved checks.
+
+**Implementation boundary:** Use the existing `carrier_verifications` model; do not invent categories or document requirements. If the exact database predicate is undefined, stop and report it before implementing the gate. This clarification does not itself choose the required category set or contact-verification mapping.
+
+**Historical repository finding (resolved by D-065):** Backend architecture section 6.3 delegates required categories to a current server-side platform verification policy, but no concrete policy/helper is defined in the repository. The foundation stores one current check per `(carrier_id,category)`, approval reviewer/time and optional expiry; its allowed category enumeration is not a required category set. The blueprint lists separate checks, including company when applicable, and requires contact verification without mapping that requirement to an approved `contact` row versus specific Auth-confirmed profile contacts. The remaining decision is the exact required checks/applicability and contact-state predicate for D-005, not whether D-005 applies.
+
+### D-065 — Concrete Closed Beta D-005 Offer verification predicate
+
+**Date:** 2026-09-25. **Status:** LOCKED policy by explicit human decision; Phase 4 implementation remains subject to human review.
+
+**Decision:** Offer submission/revision requires a live authenticated Supabase session, the active single Carrier owner, an active/non-suspended explicitly beta-admitted Carrier, the owner's Auth-confirmed current phone, and current approved applicable identity verification. Use existing `identity` for `carrier_private_details.business_kind='individual'`, and existing `company` for `business_kind='company'`. No new category is introduced.
+
+**Database predicate:** Resolve the active owner from `carrier_memberships`; require owner `profiles.account_status='active'`, `beta_access=true`, non-null `phone_e164` and Auth-synchronized `phone_verified_at`; require Carrier `visibility='published'` and `suspended_at IS NULL`. The applicable `carrier_verifications` row must have `status='approved'` and `expires_at IS NULL OR expires_at > clock_timestamp()`. Approval already requires trusted reviewer/time under the foundation schema. Missing, pending, rejected or expired approval fails; revocation is represented by leaving approved status. Null expiry means no recorded expiry. A stale public trust badge is never authority.
+
+**Not required:** Auth-confirmed email, separate `contact` verification row, CMR approval, invoice or tracking capability, generic Verified Carrier badge, or other optional categories. These never substitute for the applicable identity approval and must not be fabricated.
+
+**Acceptance:** Revalidate this same selected-Carrier/owner predicate in the atomic acceptance transaction after relevant locks, including current phone, admission, activity and approval expiry. Failure creates no Booking, reservation or partial state. Lock affected profiles in UUID order before Request → Carrier → Route → Offers → Conversations → Booking/children. Recheck the owner after the Carrier lock to reject an intervening transfer. D-063 remains the separate Route-only exemption and is unchanged.
+
+**Resolution:** D-005 remains the Offer gate; D-063 remains Route-only. This decision resolves the missing required-category/contact predicate identified under D-064 without expanding later-phase scope.
 
 ## How to add a new decision
 

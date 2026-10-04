@@ -1,3 +1,5 @@
+import { isRouteId } from "@/features/public/route-persistence/adapter"
+import { loadRealConversations } from "@/features/public/marketplace-persistence/load"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { PageContainer } from "@/components/layout/page-container"
@@ -8,7 +10,7 @@ export const metadata: Metadata = { title: "Pokalbis", robots: { index: false, f
 
 export default async function ConversationPage({ params }: { params: Promise<{ conversationId: string }> }) {
   const { conversationId } = await params
-  const detail = findMockConversation(conversationId)
+  const detail = isRouteId(conversationId) ? (await loadRealConversations()).find(c => c.conversation.id === conversationId) : findMockConversation(conversationId)
   if (!detail) notFound()
   return <div className="marketplace-theme bg-background text-foreground"><PageContainer className="py-8 sm:py-12"><MessageThread detail={detail} /></PageContainer></div>
 }

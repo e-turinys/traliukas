@@ -53,7 +53,7 @@ export function BookingDetailView({ initialBooking }: { initialBooking: BookingP
   }
 
   return <div className="mx-auto w-full max-w-6xl space-y-6 pb-8">
-    <Link href={completed ? "/dashboard?view=history" : "/dashboard?view=transport"} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+    <Link href={completed ? "/dashboard?tab=history" : "/dashboard?tab=transports"} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
       <ArrowLeft aria-hidden="true" className="size-4" />{completed ? "Grįžti į istoriją" : "Grįžti į skydelį"}
     </Link>
 

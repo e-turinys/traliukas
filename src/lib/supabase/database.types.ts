@@ -12,6 +12,245 @@ export type Database = {
       [_ in never]: never
     }
     Views: {
+      bookings: {
+        Row: {
+          accepted_offer_id: string | null
+          accepted_offer_version: number | null
+          agreed_total_price: number | null
+          agreement_snapshot: Json | null
+          carrier_id: string | null
+          conversation_id: string | null
+          created_at: string | null
+          currency: string | null
+          id: string | null
+          payment_terms: string | null
+          planned_delivery_date: string | null
+          planned_pickup_date: string | null
+          request_id: string | null
+          route_id: string | null
+          snapshot_schema_version: number | null
+          status: string | null
+          vehicle_count: number | null
+        }
+        Insert: {
+          accepted_offer_id?: string | null
+          accepted_offer_version?: number | null
+          agreed_total_price?: number | null
+          agreement_snapshot?: Json | null
+          carrier_id?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string | null
+          payment_terms?: string | null
+          planned_delivery_date?: string | null
+          planned_pickup_date?: string | null
+          request_id?: string | null
+          route_id?: string | null
+          snapshot_schema_version?: number | null
+          status?: string | null
+          vehicle_count?: number | null
+        }
+        Update: {
+          accepted_offer_id?: string | null
+          accepted_offer_version?: number | null
+          agreed_total_price?: number | null
+          agreement_snapshot?: Json | null
+          carrier_id?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string | null
+          payment_terms?: string | null
+          planned_delivery_date?: string | null
+          planned_pickup_date?: string | null
+          request_id?: string | null
+          route_id?: string | null
+          snapshot_schema_version?: number | null
+          status?: string | null
+          vehicle_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_accepted_offer_id_accepted_offer_version_fkey"
+            columns: ["accepted_offer_id", "accepted_offer_version"]
+            isOneToOne: false
+            referencedRelation: "offer_revisions"
+            referencedColumns: ["offer_id", "version"]
+          },
+          {
+            foreignKeyName: "bookings_accepted_offer_id_request_id_carrier_id_fkey"
+            columns: ["accepted_offer_id", "request_id", "carrier_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id", "request_id", "carrier_id"]
+          },
+          {
+            foreignKeyName: "bookings_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "my_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "public_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_conversation_id_request_id_carrier_id_fkey"
+            columns: ["conversation_id", "request_id", "carrier_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id", "request_id", "carrier_id"]
+          },
+          {
+            foreignKeyName: "bookings_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: true
+            referencedRelation: "marketplace_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: true
+            referencedRelation: "my_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "my_routes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "public_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commercial_carriers: {
+        Row: {
+          display_name: string | null
+          id: string | null
+          registration_country: string | null
+        }
+        Insert: {
+          display_name?: string | null
+          id?: string | null
+          registration_country?: string | null
+        }
+        Update: {
+          display_name?: string | null
+          id?: string | null
+          registration_country?: string | null
+        }
+        Relationships: []
+      }
+      commercial_request_terms: {
+        Row: {
+          public_terms_snapshot: Json | null
+          request_id: string | null
+          version: number | null
+        }
+        Insert: {
+          public_terms_snapshot?: Json | null
+          request_id?: string | null
+          version?: number | null
+        }
+        Update: {
+          public_terms_snapshot?: Json | null
+          request_id?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_revisions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_revisions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "my_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          booking_id: string | null
+          carrier_id: string | null
+          created_at: string | null
+          current_offer_id: string | null
+          id: string | null
+          last_message_at: string | null
+          request_id: string | null
+          status: string | null
+          viewer_side: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "my_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "public_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_current_offer_id_request_id_carrier_id_fkey"
+            columns: ["current_offer_id", "request_id", "carrier_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id", "request_id", "carrier_id"]
+          },
+          {
+            foreignKeyName: "conversations_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "my_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketplace_requests: {
         Row: {
           budget_amount: number | null
@@ -83,6 +322,13 @@ export type Database = {
             foreignKeyName: "transport_requests_target_carrier_id_fkey"
             columns: ["target_carrier_id"]
             isOneToOne: false
+            referencedRelation: "commercial_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_requests_target_carrier_id_fkey"
+            columns: ["target_carrier_id"]
+            isOneToOne: false
             referencedRelation: "my_carriers"
             referencedColumns: ["id"]
           },
@@ -92,6 +338,51 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_carriers"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          body: string | null
+          conversation_id: string | null
+          created_at: string | null
+          id: string | null
+          kind: string | null
+          sender_side: string | null
+          sequence: number | null
+        }
+        Insert: {
+          body?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          kind?: string | null
+          sender_side?: string | null
+          sequence?: number | null
+        }
+        Update: {
+          body?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          kind?: string | null
+          sender_side?: string | null
+          sequence?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["conversation_id"]
           },
         ]
       }
@@ -121,6 +412,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "carrier_memberships_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_carriers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "carrier_memberships_carrier_id_fkey"
             columns: ["carrier_id"]
@@ -195,6 +493,13 @@ export type Database = {
             foreignKeyName: "carrier_private_details_carrier_id_fkey"
             columns: ["carrier_id"]
             isOneToOne: true
+            referencedRelation: "commercial_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carrier_private_details_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: true
             referencedRelation: "my_carriers"
             referencedColumns: ["id"]
           },
@@ -242,6 +547,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "carrier_verifications_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_carriers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "carrier_verifications_carrier_id_fkey"
             columns: ["carrier_id"]
@@ -386,6 +698,39 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      my_read_cursors: {
+        Row: {
+          conversation_id: string | null
+          last_read_sequence: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          conversation_id?: string | null
+          last_read_sequence?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          conversation_id?: string | null
+          last_read_sequence?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_reads_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_reads_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["conversation_id"]
+          },
+        ]
       }
       my_request_private_details: {
         Row: {
@@ -687,6 +1032,13 @@ export type Database = {
             foreignKeyName: "carrier_routes_carrier_id_fkey"
             columns: ["carrier_id"]
             isOneToOne: false
+            referencedRelation: "commercial_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carrier_routes_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
             referencedRelation: "my_carriers"
             referencedColumns: ["id"]
           },
@@ -695,6 +1047,153 @@ export type Database = {
             columns: ["carrier_id"]
             isOneToOne: false
             referencedRelation: "public_carriers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offer_revisions: {
+        Row: {
+          carrier_comment: string | null
+          created_at: string | null
+          currency: string | null
+          expires_at: string | null
+          offer_id: string | null
+          payment_terms: string | null
+          pickup_time_from: string | null
+          pickup_time_to: string | null
+          pickup_time_zone: string | null
+          planned_delivery_date: string | null
+          planned_pickup_date: string | null
+          request_id: string | null
+          request_version: number | null
+          route_id: string | null
+          route_version: number | null
+          total_price: number | null
+          version: number | null
+        }
+        Insert: {
+          carrier_comment?: string | null
+          created_at?: string | null
+          currency?: string | null
+          expires_at?: string | null
+          offer_id?: string | null
+          payment_terms?: string | null
+          pickup_time_from?: string | null
+          pickup_time_to?: string | null
+          pickup_time_zone?: string | null
+          planned_delivery_date?: string | null
+          planned_pickup_date?: string | null
+          request_id?: string | null
+          request_version?: number | null
+          route_id?: string | null
+          route_version?: number | null
+          total_price?: number | null
+          version?: number | null
+        }
+        Update: {
+          carrier_comment?: string | null
+          created_at?: string | null
+          currency?: string | null
+          expires_at?: string | null
+          offer_id?: string | null
+          payment_terms?: string | null
+          pickup_time_from?: string | null
+          pickup_time_to?: string | null
+          pickup_time_zone?: string | null
+          planned_delivery_date?: string | null
+          planned_pickup_date?: string | null
+          request_id?: string | null
+          request_version?: number | null
+          route_id?: string | null
+          route_version?: number | null
+          total_price?: number | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_revisions_offer_id_request_id_route_id_fkey"
+            columns: ["offer_id", "request_id", "route_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id", "request_id", "route_id"]
+          },
+          {
+            foreignKeyName: "offer_revisions_request_id_request_version_fkey"
+            columns: ["request_id", "request_version"]
+            isOneToOne: false
+            referencedRelation: "commercial_request_terms"
+            referencedColumns: ["request_id", "version"]
+          },
+        ]
+      }
+      offers: {
+        Row: {
+          carrier_id: string | null
+          conversation_id: string | null
+          created_at: string | null
+          current_version: number | null
+          id: string | null
+          request_id: string | null
+          route_id: string | null
+          status: string | null
+          updated_at: string | null
+          viewer_side: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_current_revision"
+            columns: ["id", "current_version"]
+            isOneToOne: false
+            referencedRelation: "offer_revisions"
+            referencedColumns: ["offer_id", "version"]
+          },
+          {
+            foreignKeyName: "offers_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "commercial_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "my_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "public_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "my_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "my_routes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "public_routes"
             referencedColumns: ["id"]
           },
         ]
@@ -825,6 +1324,13 @@ export type Database = {
             foreignKeyName: "carrier_routes_carrier_id_fkey"
             columns: ["carrier_id"]
             isOneToOne: false
+            referencedRelation: "commercial_carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carrier_routes_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
             referencedRelation: "my_carriers"
             referencedColumns: ["id"]
           },
@@ -910,6 +1416,15 @@ export type Database = {
       }
     }
     Functions: {
+      accept_offer: {
+        Args: {
+          p_expected_offer_version: number
+          p_expected_request_version: number
+          p_expected_route_version: number
+          p_offer_id: string
+        }
+        Returns: Json
+      }
       close_route: {
         Args: { p_expected_version: number; p_route_id: string }
         Returns: string
@@ -924,6 +1439,14 @@ export type Database = {
         }
         Returns: string
       }
+      decline_offer: {
+        Args: { p_expected_version: number; p_offer_id: string }
+        Returns: undefined
+      }
+      mark_conversation_read: {
+        Args: { p_conversation_id: string; p_sequence: number }
+        Returns: undefined
+      }
       publish_request: {
         Args: { p_client_publish_key: string; p_payload: Json }
         Returns: string
@@ -936,6 +1459,25 @@ export type Database = {
           p_payload: Json
           p_publish: boolean
           p_route_id?: string
+        }
+        Returns: string
+      }
+      send_message: {
+        Args: {
+          p_body: string
+          p_client_key: string
+          p_conversation_id: string
+        }
+        Returns: string
+      }
+      submit_offer: {
+        Args: {
+          p_expected_offer_version?: number
+          p_expected_request_version: number
+          p_expected_route_version: number
+          p_request_id: string
+          p_route_id: string
+          p_terms: Json
         }
         Returns: string
       }
@@ -1009,6 +1551,222 @@ export type Database = {
             columns: ["actor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_vehicle_operations: {
+        Row: {
+          booking_id: string
+          city: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          country_code: string | null
+          created_at: string
+          eta: string | null
+          instructions: string | null
+          operation_version: number
+          postcode: string | null
+          scheduled_from: string | null
+          scheduled_to: string | null
+          side: string
+          street: string | null
+          updated_at: string
+          updated_by: string
+          vehicle_id: string
+        }
+        Insert: {
+          booking_id: string
+          city?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country_code?: string | null
+          created_at?: string
+          eta?: string | null
+          instructions?: string | null
+          operation_version?: number
+          postcode?: string | null
+          scheduled_from?: string | null
+          scheduled_to?: string | null
+          side: string
+          street?: string | null
+          updated_at?: string
+          updated_by: string
+          vehicle_id: string
+        }
+        Update: {
+          booking_id?: string
+          city?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country_code?: string | null
+          created_at?: string
+          eta?: string | null
+          instructions?: string | null
+          operation_version?: number
+          postcode?: string | null
+          scheduled_from?: string | null
+          scheduled_to?: string | null
+          side?: string
+          street?: string | null
+          updated_at?: string
+          updated_by?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_vehicle_operations_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_vehicle_operations_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_vehicle_operations_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "request_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          accepted_offer_id: string
+          accepted_offer_version: number
+          agreed_total_price: number
+          agreement_snapshot: Json
+          cancelled_at: string | null
+          capacity_released_at: string | null
+          carrier_id: string
+          completed_at: string | null
+          conversation_id: string
+          created_at: string
+          currency: string
+          customer_id: string
+          id: string
+          payment_terms: string
+          planned_delivery_date: string
+          planned_pickup_date: string
+          request_id: string
+          route_id: string
+          snapshot_schema_version: number
+          status: string
+          status_changed_at: string
+          status_version: number
+          updated_at: string
+          vehicle_count: number
+        }
+        Insert: {
+          accepted_offer_id: string
+          accepted_offer_version: number
+          agreed_total_price: number
+          agreement_snapshot: Json
+          cancelled_at?: string | null
+          capacity_released_at?: string | null
+          carrier_id: string
+          completed_at?: string | null
+          conversation_id: string
+          created_at?: string
+          currency: string
+          customer_id: string
+          id?: string
+          payment_terms: string
+          planned_delivery_date: string
+          planned_pickup_date: string
+          request_id: string
+          route_id: string
+          snapshot_schema_version?: number
+          status?: string
+          status_changed_at?: string
+          status_version?: number
+          updated_at?: string
+          vehicle_count: number
+        }
+        Update: {
+          accepted_offer_id?: string
+          accepted_offer_version?: number
+          agreed_total_price?: number
+          agreement_snapshot?: Json
+          cancelled_at?: string | null
+          capacity_released_at?: string | null
+          carrier_id?: string
+          completed_at?: string | null
+          conversation_id?: string
+          created_at?: string
+          currency?: string
+          customer_id?: string
+          id?: string
+          payment_terms?: string
+          planned_delivery_date?: string
+          planned_pickup_date?: string
+          request_id?: string
+          route_id?: string
+          snapshot_schema_version?: number
+          status?: string
+          status_changed_at?: string
+          status_version?: number
+          updated_at?: string
+          vehicle_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_accepted_offer_id_accepted_offer_version_fkey"
+            columns: ["accepted_offer_id", "accepted_offer_version"]
+            isOneToOne: false
+            referencedRelation: "offer_revisions"
+            referencedColumns: ["offer_id", "version"]
+          },
+          {
+            foreignKeyName: "bookings_accepted_offer_id_request_id_carrier_id_fkey"
+            columns: ["accepted_offer_id", "request_id", "carrier_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id", "request_id", "carrier_id"]
+          },
+          {
+            foreignKeyName: "bookings_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_conversation_id_request_id_carrier_id_fkey"
+            columns: ["conversation_id", "request_id", "carrier_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id", "request_id", "carrier_id"]
+          },
+          {
+            foreignKeyName: "bookings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: true
+            referencedRelation: "transport_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "carrier_routes"
             referencedColumns: ["id"]
           },
         ]
@@ -1289,6 +2047,413 @@ export type Database = {
           visibility?: string
         }
         Relationships: []
+      }
+      conversation_reads: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          last_read_sequence: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          last_read_sequence?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          last_read_sequence?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_reads_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_reads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          carrier_id: string
+          created_at: string
+          current_offer_id: string
+          id: string
+          last_message_at: string
+          request_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          carrier_id: string
+          created_at?: string
+          current_offer_id: string
+          id?: string
+          last_message_at?: string
+          request_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          carrier_id?: string
+          created_at?: string
+          current_offer_id?: string
+          id?: string
+          last_message_at?: string
+          request_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_current_offer_id_request_id_carrier_id_fkey"
+            columns: ["current_offer_id", "request_id", "carrier_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id", "request_id", "carrier_id"]
+          },
+          {
+            foreignKeyName: "conversations_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "transport_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      domain_events: {
+        Row: {
+          actor_id: string | null
+          booking_id: string | null
+          conversation_id: string | null
+          created_at: string
+          dedupe_key: string
+          event_type: string
+          id: string
+          offer_id: string | null
+          payload: Json
+          payload_schema_version: number
+          request_id: string
+          route_id: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          booking_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          dedupe_key: string
+          event_type: string
+          id?: string
+          offer_id?: string | null
+          payload?: Json
+          payload_schema_version?: number
+          request_id: string
+          route_id?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          booking_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          dedupe_key?: string
+          event_type?: string
+          id?: string
+          offer_id?: string | null
+          payload?: Json
+          payload_schema_version?: number
+          request_id?: string
+          route_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_events_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_events_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_events_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_events_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "transport_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domain_events_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "carrier_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          body: string
+          client_message_key: string | null
+          conversation_id: string
+          created_at: string
+          event_id: string | null
+          id: string
+          kind: string
+          sender_side: string
+          sender_user_id: string | null
+          sequence: number
+        }
+        Insert: {
+          body: string
+          client_message_key?: string | null
+          conversation_id: string
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          kind: string
+          sender_side: string
+          sender_user_id?: string | null
+          sequence: number
+        }
+        Update: {
+          body?: string
+          client_message_key?: string | null
+          conversation_id?: string
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          kind?: string
+          sender_side?: string
+          sender_user_id?: string | null
+          sequence?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "domain_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_user_id_fkey"
+            columns: ["sender_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offer_revisions: {
+        Row: {
+          carrier_comment: string | null
+          created_at: string
+          currency: string
+          expires_at: string
+          offer_id: string
+          payment_terms: string
+          pickup_time_from: string | null
+          pickup_time_to: string | null
+          pickup_time_zone: string
+          planned_delivery_date: string
+          planned_pickup_date: string
+          request_id: string
+          request_version: number
+          revised_by: string
+          route_id: string
+          route_version: number
+          total_price: number
+          version: number
+        }
+        Insert: {
+          carrier_comment?: string | null
+          created_at?: string
+          currency?: string
+          expires_at: string
+          offer_id: string
+          payment_terms: string
+          pickup_time_from?: string | null
+          pickup_time_to?: string | null
+          pickup_time_zone: string
+          planned_delivery_date: string
+          planned_pickup_date: string
+          request_id: string
+          request_version: number
+          revised_by: string
+          route_id: string
+          route_version: number
+          total_price: number
+          version: number
+        }
+        Update: {
+          carrier_comment?: string | null
+          created_at?: string
+          currency?: string
+          expires_at?: string
+          offer_id?: string
+          payment_terms?: string
+          pickup_time_from?: string | null
+          pickup_time_to?: string | null
+          pickup_time_zone?: string
+          planned_delivery_date?: string
+          planned_pickup_date?: string
+          request_id?: string
+          request_version?: number
+          revised_by?: string
+          route_id?: string
+          route_version?: number
+          total_price?: number
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_revisions_offer_id_request_id_route_id_fkey"
+            columns: ["offer_id", "request_id", "route_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id", "request_id", "route_id"]
+          },
+          {
+            foreignKeyName: "offer_revisions_request_id_request_version_fkey"
+            columns: ["request_id", "request_version"]
+            isOneToOne: false
+            referencedRelation: "request_revisions"
+            referencedColumns: ["request_id", "version"]
+          },
+          {
+            foreignKeyName: "offer_revisions_revised_by_fkey"
+            columns: ["revised_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offer_revisions_route_id_route_version_fkey"
+            columns: ["route_id", "route_version"]
+            isOneToOne: false
+            referencedRelation: "route_revisions"
+            referencedColumns: ["route_id", "version"]
+          },
+        ]
+      }
+      offers: {
+        Row: {
+          carrier_id: string
+          created_at: string
+          created_by: string
+          current_version: number
+          id: string
+          request_id: string
+          route_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          carrier_id: string
+          created_at?: string
+          created_by: string
+          current_version?: number
+          id?: string
+          request_id: string
+          route_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          carrier_id?: string
+          created_at?: string
+          created_by?: string
+          current_version?: number
+          id?: string
+          request_id?: string
+          route_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_current_revision"
+            columns: ["id", "current_version"]
+            isOneToOne: false
+            referencedRelation: "offer_revisions"
+            referencedColumns: ["offer_id", "version"]
+          },
+          {
+            foreignKeyName: "offers_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "transport_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "carrier_routes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       platform_roles: {
         Row: {

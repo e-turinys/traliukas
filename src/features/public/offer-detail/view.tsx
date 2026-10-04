@@ -1,6 +1,8 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { commandClient, commandError } from "../marketplace-persistence/client"
 import { useRef, useState } from "react"
 import { ArrowLeft, ArrowRight, ChevronDown, CircleCheck, MessageSquare } from "lucide-react"
 import { CarrierTrust } from "@/components/shared/carrier-trust"
@@ -20,9 +22,11 @@ import {
 } from "./logic"
 import { findMockConversationByContext } from "@/lib/mock/conversations"
 
-export function OfferDetailView({ initialRequest, offerId, reviewNow }: {
-  initialRequest: RequestDetailPayload; offerId: string; reviewNow: string
+export function OfferDetailView({ initialRequest, offerId, reviewNow, persisted }: {
+  initialRequest: RequestDetailPayload; offerId: string; reviewNow: string; persisted?: { conversationId: string; canSend: boolean; viewer: "customer" | "carrier" }
 }) {
+  const router = useRouter()
+  const [busy,setBusy] = useState(false)
   const [request] = useState(() => hydrateRequestDetail(initialRequest))
   const [offer, setOffer] = useState<RequestOffer>(() => {
     const found = request.offers.find(candidate => candidate.id === offerId)
@@ -34,14 +38,33 @@ export function OfferDetailView({ initialRequest, offerId, reviewNow }: {
   const acceptButton = useRef<HTMLButtonElement>(null)
   const declineButton = useRef<HTMLButtonElement>(null)
   const status = offerDetailStatus(request, offer, reviewNow)
-  const actionable = isOfferActionable(status)
+  const actionable = isOfferActionable(status) && (!persisted || persisted.viewer === "customer")
   const requestSummary = publishedRequestSummary(request)
   const revisions = offerRevisionHistory(offer)
   const readOnlyCopy = offerReadOnlyCopy(request, offer, reviewNow)
-  const conversation = findMockConversationByContext(request.id, offer.carrier.id)
+  const conversation = persisted ? { conversation: { id: persisted.conversationId, status: persisted.canSend ? "active" : "archived" } } : findMockConversationByContext(request.id, offer.carrier.id)
 
-  const confirm = () => {
-    if (!decision) return
+  const confirm = async () => {
+    if (!decision || busy) return
+    if (persisted) {
+      setBusy(true)
+      try {
+        const client = await commandClient()
+        if (decision === "accept") {
+          const {data,error} = await client.rpc("accept_offer",{p_offer_id:offer.id,p_expected_offer_version:offer.offerVersion,p_expected_request_version:offer.requestVersion,p_expected_route_version:offer.routeVersion})
+          if(error) throw error
+          if(!data || typeof data !== "object" || Array.isArray(data) || typeof data.booking_id !== "string") throw new Error("Missing Booking")
+          router.push(`/bookings/${data.booking_id}`)
+        } else {
+          const {error} = await client.rpc("decline_offer",{p_offer_id:offer.id,p_expected_version:offer.offerVersion})
+          if(error) throw error
+          router.refresh()
+        }
+        setDecision(null)
+      } catch(error) { setNotice(commandError(error)); setDecision(null) }
+      finally { setBusy(false) }
+      return
+    }
     setOffer(applyMockOfferDecision(request, offer, decision, reviewNow))
     setNotice(decision === "accept"
       ? ""
@@ -50,7 +73,7 @@ export function OfferDetailView({ initialRequest, offerId, reviewNow }: {
   }
 
   return <div className="mx-auto w-full max-w-6xl space-y-6 pb-8">
-    <Link href={`/requests/${encodeURIComponent(request.id)}`} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+    <Link href={`${persisted?.viewer === "carrier" ? "/carrier/requests" : "/requests"}/${encodeURIComponent(request.id)}`} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
       <ArrowLeft aria-hidden="true" className="size-4" />Grįžti į užklausą
     </Link>
 
@@ -76,8 +99,8 @@ export function OfferDetailView({ initialRequest, offerId, reviewNow }: {
           <h2 className="text-lg font-semibold">Jūsų sprendimas</h2>
           {actionable ? <div className="space-y-3">
             <p className="text-sm text-muted-foreground">Peržiūrėkite naujausias sąlygas ir pasirinkite, ar šis pasiūlymas jums tinka.</p>
-            <Button ref={acceptButton} className="h-auto min-h-11 w-full py-3 whitespace-normal" onClick={() => setDecision("accept")}>Priimti pasiūlymą<ArrowRight aria-hidden="true" /></Button>
-            <Button ref={declineButton} variant="outline" className="h-auto min-h-11 w-full py-3 whitespace-normal" onClick={() => setDecision("decline")}>Atmesti pasiūlymą</Button>
+            <Button ref={acceptButton} disabled={busy} className="h-auto min-h-11 w-full py-3 whitespace-normal" onClick={() => setDecision("accept")}>Priimti pasiūlymą<ArrowRight aria-hidden="true" /></Button>
+            <Button ref={declineButton} disabled={busy} variant="outline" className="h-auto min-h-11 w-full py-3 whitespace-normal" onClick={() => setDecision("decline")}>Atmesti pasiūlymą</Button>
           </div> : <p className="text-sm leading-relaxed text-muted-foreground">{readOnlyCopy}</p>}
           {status === "accepted" && request.bookingId && <Button nativeButton={false} render={<Link href={`/bookings/${encodeURIComponent(request.bookingId)}`} />} className="h-auto min-h-11 w-full py-3 whitespace-normal">Atidaryti pervežimą<ArrowRight aria-hidden="true" /></Button>}
         </CardContent></Card>
@@ -91,7 +114,7 @@ export function OfferDetailView({ initialRequest, offerId, reviewNow }: {
           </div>
           <Button nativeButton={false} variant="outline" render={<Link href={`/carriers/${encodeURIComponent(offer.carrier.id)}`} />} className="h-auto min-h-11 w-full py-3 whitespace-normal">Peržiūrėti vežėjo profilį</Button>
           {conversation && <Button nativeButton={false} variant="outline" render={<Link href={`/messages/${encodeURIComponent(conversation.conversation.id)}`} />} className="h-auto min-h-11 w-full py-3 whitespace-normal">
-            <MessageSquare aria-hidden="true" />{conversation.conversation.status === "active" ? "Rašyti vežėjui" : "Peržiūrėti pokalbį"}
+            <MessageSquare aria-hidden="true" />{conversation.conversation.status === "active" ? persisted?.viewer === "carrier" ? "Rašyti klientui" : "Rašyti vežėjui" : "Peržiūrėti pokalbį"}
           </Button>}
         </CardContent></Card>
       </aside>
@@ -141,6 +164,6 @@ export function OfferDetailView({ initialRequest, offerId, reviewNow }: {
       </div>
     </div>
 
-    {decision && <OfferDecisionDialog open onOpenChange={open => { if (!open) setDecision(null) }} decision={decision} offer={offer} vehicleCount={requestSummary.vehicleCount} onConfirm={confirm} finalFocus={decision === "accept" ? acceptButton : declineButton} />}
+    {decision && <OfferDecisionDialog persisted={!!persisted} busy={busy} open onOpenChange={open => { if (!open) setDecision(null) }} decision={decision} offer={offer} vehicleCount={requestSummary.vehicleCount} onConfirm={confirm} finalFocus={decision === "accept" ? acceptButton : declineButton} />}
   </div>
 }
