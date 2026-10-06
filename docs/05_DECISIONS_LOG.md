@@ -404,7 +404,15 @@ Acceptance must revalidate the current/actionable Offer, selected Carrier activi
 
 **Resolution:** D-005 remains the Offer gate; D-063 remains Route-only. This decision resolves the missing required-category/contact predicate identified under D-064 without expanding later-phase scope.
 
-## How to add a new decision
+### D-066 — Booking operational lifecycle next after locked Phase 4
+
+**Date:** 2026-10-04. **Status:** Approved by explicit human roadmap correction.
+
+**Decision:** Phase 5 — Booking Operational Lifecycle is the immediate next implementation phase, initially IN PROGRESS and subject to human review before LOCKED. Carrier performs Booked → PickupScheduled → Collected → InTransit → Delivered; Customer explicitly confirms Delivered → Completed. No skips/backwards transitions or per-vehicle status. Customer or selected Carrier owner may cancel only before Collected; cancellation is a terminal exception preserving agreement/audit and atomically releasing exactly the Booking vehicle count. Normal progression and completion do not release historical Route capacity. Completed/cancelled Conversations become read-only; Dashboard has no duplicate tabs.
+
+**Reason:** The prior Carrier Marketplace-next sequence predates implemented backend Phases 3–4. Required closed-beta Carrier and marketplace transaction capabilities already exist. Implementation order evolved; historical roadmap entries are retained, not silently erased. Phase 4 stays LOCKED. No Notifications/Reviews persistence or providers, payments, realtime, attachments/read receipts, Route Distribution, full i18n or staff accounts are authorized by this phase.
+
+## How to add a new decision (template)
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:
 

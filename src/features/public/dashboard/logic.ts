@@ -24,8 +24,8 @@ export function derivePersistedDashboard(requests: RequestDetail[], bookings: Bo
       vehicle: compactVehicleSummary(booking.vehicles), vehicleCount: booking.vehicles.length,
       carrier: booking.carrier.name, status: bookingStatusLabel(booking.status, booking.vehicles.length),
     }
-    if (booking.status === "completed") {
-      view.history.push({ ...item, dateLabel: "Pristatyta", date: formatDateRange(booking.plannedDelivery) })
+    if (booking.status === "completed" || booking.status === "cancelled") {
+      view.history.push({ ...item, dateLabel: booking.status === "cancelled" ? "Planuotas pristatymas" : "Pristatyta", date: formatDateRange(booking.plannedDelivery) })
     } else {
       view.transports.push({ ...item, pickupDate: formatDateRange(booking.plannedPickup), deliveryDate: formatDateRange(booking.plannedDelivery) })
     }

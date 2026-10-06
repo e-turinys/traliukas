@@ -30,7 +30,9 @@ export type Database = {
           route_id: string | null
           snapshot_schema_version: number | null
           status: string | null
+          status_version: number | null
           vehicle_count: number | null
+          viewer_side: string | null
         }
         Insert: {
           accepted_offer_id?: string | null
@@ -49,7 +51,9 @@ export type Database = {
           route_id?: string | null
           snapshot_schema_version?: number | null
           status?: string | null
+          status_version?: number | null
           vehicle_count?: number | null
+          viewer_side?: never
         }
         Update: {
           accepted_offer_id?: string | null
@@ -68,7 +72,9 @@ export type Database = {
           route_id?: string | null
           snapshot_schema_version?: number | null
           status?: string | null
+          status_version?: number | null
           vehicle_count?: number | null
+          viewer_side?: never
         }
         Relationships: [
           {
@@ -1425,6 +1431,15 @@ export type Database = {
         }
         Returns: Json
       }
+      booking_pickups: { Args: { p_booking_id: string }; Returns: Json }
+      cancel_booking: {
+        Args: {
+          p_booking_id: string
+          p_expected_version: number
+          p_reason: string
+        }
+        Returns: Json
+      }
       close_route: {
         Args: { p_expected_version: number; p_route_id: string }
         Returns: string
@@ -1480,6 +1495,15 @@ export type Database = {
           p_terms: Json
         }
         Returns: string
+      }
+      transition_booking: {
+        Args: {
+          p_booking_id: string
+          p_expected_version: number
+          p_next_status: string
+          p_pickups?: Json
+        }
+        Returns: Json
       }
       update_my_carrier: {
         Args: {
@@ -1551,6 +1575,51 @@ export type Database = {
             columns: ["actor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_actions: {
+        Row: {
+          actor_id: string
+          booking_id: string
+          created_at: string
+          from_status: string
+          from_version: number
+          payload_hash: string
+          to_status: string
+        }
+        Insert: {
+          actor_id: string
+          booking_id: string
+          created_at?: string
+          from_status: string
+          from_version: number
+          payload_hash: string
+          to_status: string
+        }
+        Update: {
+          actor_id?: string
+          booking_id?: string
+          created_at?: string
+          from_status?: string
+          from_version?: number
+          payload_hash?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_actions_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_actions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
             referencedColumns: ["id"]
           },
         ]

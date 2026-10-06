@@ -41,7 +41,10 @@ with expected(signature, owner_name) as (values
   ('api.accept_offer(uuid,integer,integer,integer)', 'parvezk_commands'),
   ('api.send_message(uuid,text,uuid)', 'parvezk_commands'),
   ('api.mark_conversation_read(uuid,bigint)', 'parvezk_commands'),
-  ('api.decline_offer(uuid,integer)', 'parvezk_commands')
+  ('api.decline_offer(uuid,integer)', 'parvezk_commands'),
+  ('api.transition_booking(uuid,integer,text,jsonb)', 'parvezk_commands'),
+  ('api.cancel_booking(uuid,integer,text)', 'parvezk_commands'),
+  ('api.booking_pickups(uuid)', 'parvezk_commands')
 )
 select extensions.ok(
   coalesce(p.proowner = r.oid and p.prosecdef and 'search_path=""' = any(p.proconfig), false),
@@ -102,7 +105,10 @@ select extensions.is(
     'api.accept_offer(uuid,integer,integer,integer)'::regprocedure,
     'api.send_message(uuid,text,uuid)'::regprocedure,
     'api.mark_conversation_read(uuid,bigint)'::regprocedure,
-    'api.decline_offer(uuid,integer)'::regprocedure),
+    'api.decline_offer(uuid,integer)'::regprocedure,
+    'api.transition_booking(uuid,integer,text,jsonb)'::regprocedure,
+    'api.cancel_booking(uuid,integer,text)'::regprocedure,
+    'api.booking_pickups(uuid)'::regprocedure),
   clients.name || ' EXECUTE allowlist: ' || p.oid::regprocedure::text)
 from pg_catalog.pg_proc p
 join pg_catalog.pg_namespace n on n.oid = p.pronamespace

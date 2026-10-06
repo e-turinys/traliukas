@@ -158,3 +158,15 @@ test("Booking return query chooses tabs without selecting fixture data", () => {
   assert.equal(dashboardTabFromQuery(undefined), "requests")
   assert.equal(dashboardTabFromQuery("mixed"), "requests")
 })
+
+test("cancelled Booking is a terminal history item, never an active transport or duplicate Request", () => {
+  const request = findMockRequestDetail("booked-demo-001")
+  const booking = createBookingSnapshot({ id: "cancelled-real", request, offer: request.offers.find(o => o.status === "accepted"), conversationId: "thread", createdAt: requestReviewNow })
+  const view = derivePersistedDashboard([request], [{ ...booking, status: "cancelled" }, { ...booking, status: "cancelled" }], requestReviewNow)
+  assert.equal(view.requests.length, 0)
+  assert.equal(view.transports.length, 0)
+  assert.equal(view.history.length, 1)
+  assert.equal(view.history[0].status, "Pervežimas atšauktas")
+  assert.equal(view.history[0].bookingId, booking.id)
+  assert.equal(view.history[0].dateLabel, "Planuotas pristatymas")
+})

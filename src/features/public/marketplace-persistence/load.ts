@@ -4,6 +4,7 @@ import { hasSupabaseEnvironment } from "@/lib/supabase/env"
 import { readPages } from "../route-persistence/load"
 import { bookingProjection, historicalRequest, offerProjection, requestProjection } from "./adapter"
 import type { MockConversationDetail } from "@/lib/mock/conversations"
+import type { BookingPickup } from "@/lib/types/booking"
 
 export type PersistedConversationDetail = MockConversationDetail & { viewer: "customer" | "carrier"; persisted: true }
 export async function marketplaceClient() {
@@ -57,7 +58,10 @@ export async function loadRealBooking(id: string) {
   if (!client) return null
   const {data,error} = await client.from("bookings").select("*").eq("id",id).maybeSingle()
   if (error) throw new Error("Nepavyko įkelti pervežimo.")
-  return data ? bookingProjection(data) : null
+  if (!data) return null
+  const pickups = await client.rpc("booking_pickups", { p_booking_id: id })
+  if (pickups.error) throw new Error("Nepavyko įkelti paėmimo detalių.")
+  return { ...bookingProjection(data), pickups: pickups.data as BookingPickup[] }
 }
 export async function loadRealConversations(): Promise<PersistedConversationDetail[]> {
   const data = await loadCommercialData()

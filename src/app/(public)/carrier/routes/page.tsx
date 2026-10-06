@@ -12,6 +12,7 @@ export default async function MyRoutesPage() {
   const routes = access.allowed ? await loadRoutes({owner:true}) : []
   return <div className="marketplace-theme"><PageContainer className="space-y-6 py-8">
     <h1 className="text-3xl font-semibold">Mano maršrutai</h1>
+    <Button variant="outline" nativeButton={false} render={<Link href="/carrier/bookings" />} className="min-h-11">Mano pervežimai</Button>
     {!access.allowed ? <AccessMessage access={access} /> : <>
       <p>{access.carrier.display_name}</p>
       <Button nativeButton={false} render={<Link href="/carrier/routes/new" />} className="min-h-11">Sukurti maršrutą</Button>

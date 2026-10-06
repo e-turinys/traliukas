@@ -20,6 +20,14 @@
 
 **Customer Request Real Persistence Phase 2 = LOCKED.** Full local validation passed and human approval is recorded on 2026-09-24. P05 continues through managed phone OTP to atomic PostgreSQL publication; real P06 IDs load the owner's persisted Request and survive reload.
 
+## Phase 5 — Booking Operational Lifecycle
+
+**Phase 5 — Booking Operational Lifecycle = IN REVIEW.** Started IN PROGRESS under the human-approved sequencing correction, 2026-10-04 (D-066); implementation is now ready for human review, not LOCKED. Real Carrier progression through Delivered, Customer completion and pre-collection cancellation are persisted through narrow transactional commands with audited private pickup details, immutable agreement, exact-once capacity release and terminal read-only Chat. Dashboard places active Bookings in Pervežimai and completed/cancelled Bookings only in Istorija. Minimal controls use the existing Booking Detail plus `/carrier/bookings`.
+
+Validation: 636 pgTAP assertions (80 lifecycle), four concurrency scenarios, 143 application tests and 6 Auth foundation tests; local DB lint/types, build and diff checks pass. Browser review covers the real two-party flow, completion/cancellation, reload and controls at 390/768/1280/1440. Human review Bookings remain Booked: `f6a9d4fd-d69b-4d7b-a2fa-d469096d3d2f` (lifecycle) and `42863b3c-74be-42a9-8532-9f409350aa5b` (cancellation), each 2 total / 2 reserved / 0 available. See [Phase 5 review guide](09_PHASE5_REVIEW.md) for OTP commands, exact URLs, authorization and acceptance steps.
+
+Phase 4 remains LOCKED; its transaction and UI baseline are not reopened. Realtime, attachments/read receipts, Notifications/Reviews persistence or delivery, payments, Route Distribution, i18n and Carrier staff accounts remain outside this phase. Local Supabase only; no commit/push.
+
 ## Phase 4 transaction lock — 2026-10-04
 
 **Phase 4 — Offer / Conversation / Booking Transaction = LOCKED.** Final human review PASSED; explicit human approval recorded on 2026-10-04. No next-phase implementation is authorized by this lock.
@@ -525,11 +533,11 @@ tests/route-persistence.test.mjs
 
 ## Immediate next task
 
-**Phase 5 — Carrier Marketplace**, as already named in [04_IMPLEMENTATION_PLAN.md](04_IMPLEMENTATION_PLAN.md#phase-5--carrier-marketplace). Record the next phase only; wait for a separate scope/implementation instruction. Do not restart capabilities already completed in locked backend Phases 1–4.
+**Phase 5 — Booking Operational Lifecycle**, explicitly authorized on 2026-10-04 (D-066). Implement the locked Carrier progression, Customer receipt confirmation and pre-collection cancellation with atomic capacity release. Then stop for human review; do not mark Phase 5 LOCKED.
 
-The master plan's numbering predates the later backend milestones. Its Phase 5 covers C01–C15 core Carrier screens, verification gating, Route management, matching, Request browse, Offer create/update/withdraw, versioning and capacity; several are already delivered. The more detailed backend rollout in `06_BACKEND_FOUNDATION_ARCHITECTURE.md` §19 separately places lifecycle/reviews/in-app Notifications after Acceptance/Booking. This lock does not renumber either roadmap or authorize those deferred features; reconcile remaining scope against the locked work when the next phase is explicitly requested.
+Historical handoff: the older master plan named Carrier Marketplace next. Phases 3–4 now provide the closed-beta Carrier ownership, Routes, matching, Request browse, Offers, Chat and acceptance/capacity flow. Human decision D-066 supersedes that sequencing, without deleting its historical scope or reopening completed work. The backend rollout's next lifecycle work is now explicitly scoped to operations/cancellation; Notifications and Reviews remain deferred.
 
-Phase 4 is LOCKED. No next-phase implementation has started in this task.
+Phase 4 is LOCKED. Phase 5 moved from IN PROGRESS to IN REVIEW under the separate human implementation instruction. Stop for its human review; no later phase is authorized here.
 
 ## Locked baseline handoff
 

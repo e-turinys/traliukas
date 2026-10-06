@@ -1,9 +1,11 @@
 import { spawnSync } from "node:child_process"
 import { readFileSync, writeFileSync, renameSync } from "node:fs"
+import { fileURLToPath } from "node:url"
 
 // Always local; never accepts --linked, a project ID or a connection URL.
 const output = new URL("../src/lib/supabase/database.types.ts", import.meta.url)
-const result = spawnSync("npx", ["--no-install", "supabase", "gen", "types", "typescript", "--local", "--schema", "app,api"], { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 })
+const cli = fileURLToPath(new URL("../node_modules/supabase/dist/supabase.js", import.meta.url))
+const result = spawnSync(process.execPath, [cli, "gen", "types", "typescript", "--local", "--schema", "app,api"], { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 })
 if (result.status !== 0) {
   process.stderr.write(result.stderr || "Local database type generation failed\n")
   process.exit(1)

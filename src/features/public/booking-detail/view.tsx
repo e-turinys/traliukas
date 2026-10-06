@@ -2,6 +2,9 @@
 
 import Link from "next/link"
 import { useRef, useState } from "react"
+import { useRouter } from "next/navigation"
+import { commandClient, commandError } from "../marketplace-persistence/client"
+import { BookingOperations } from "./operations"
 import { ArrowLeft, Car, Check, CircleCheck, MessageCircle, Truck } from "lucide-react"
 import { CarrierTrust } from "@/components/shared/carrier-trust"
 import { Badge } from "@/components/ui/badge"
@@ -16,6 +19,7 @@ import { vehicleCountLabel, vehicleName, vehiclePriceScope } from "../vehicle-su
 import {
   bookingChatHref, bookingCompletionCopy, bookingConversationCopy, bookingStatusLabel,
   canCustomerConfirmDelivery, completeDeliveredBooking, hydrateBooking, type BookingPayload,
+  bookingCommandResult,
 } from "./logic"
 import { BookingCompletionDialog } from "./completion-dialog"
 import { BookingStatusTimeline } from "./status-timeline"
@@ -26,6 +30,7 @@ const nextStepCopy = {
   collected: "Automobiliai paimti. Kitas etapas – pervežimas į pristatymo vietą.",
   in_transit: "Pervežimas vyksta. Kai vežėjas pažymės pristatymą, galėsite patvirtinti gavimą.",
   completed: "Gavimas patvirtintas. Sutartos sąlygos ir susirašinėjimo istorija lieka prieinamos.",
+  cancelled: "Pervežimas atšauktas. Sutartos sąlygos ir pokalbio istorija lieka prieinamos. Rezervuota maršruto talpa atlaisvinta.",
 } as const
 
 const conditionLabels = { running: "Važiuojantis", "non-running": "Nevažiuojantis" } as const
@@ -36,6 +41,9 @@ function Detail({ label, children, className = "" }: { label: string; children: 
 }
 
 export function BookingDetailView({ initialBooking }: { initialBooking: BookingPayload }) {
+  const router = useRouter()
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState("")
   const [booking, setBooking] = useState(() => hydrateBooking(initialBooking))
   const [confirming, setConfirming] = useState(false)
   const completionButton = useRef<HTMLButtonElement>(null)
@@ -43,18 +51,32 @@ export function BookingDetailView({ initialBooking }: { initialBooking: BookingP
   const vehicleCount = booking.vehicles.length
   const completionCopy = bookingCompletionCopy(vehicleCount)
   const conversationCopy = bookingConversationCopy(booking.status)
-  const canComplete = canCustomerConfirmDelivery(booking.status)
+  const canComplete = canCustomerConfirmDelivery(booking.status) && booking.viewer !== "carrier"
   const completed = booking.status === "completed"
+  const historical = completed || booking.status === "cancelled"
   const statusHeading = useRef<HTMLHeadingElement>(null)
 
-  const confirmCompletion = () => {
-    setBooking(current => completeDeliveredBooking(current))
-    setConfirming(false)
+  const confirmCompletion = async () => {
+    if (busy) return
+    setBusy(true); setError("")
+    try {
+      if (booking.statusVersion) {
+        const client = await commandClient()
+        const result = await client.rpc("transition_booking", { p_booking_id: booking.id, p_expected_version: booking.statusVersion, p_next_status: "completed" })
+        if (result.error) throw result.error
+        setBooking(current => ({ ...current, ...bookingCommandResult(result.data, booking.id) }))
+      } else {
+        setBooking(current => completeDeliveredBooking(current))
+      }
+      setConfirming(false)
+      if (booking.statusVersion) router.refresh()
+    } catch (cause) { setError(commandError(cause)) }
+    finally { setBusy(false) }
   }
 
   return <div className="mx-auto w-full max-w-6xl space-y-6 pb-8">
-    <Link href={completed ? "/dashboard?tab=history" : "/dashboard?tab=transports"} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-      <ArrowLeft aria-hidden="true" className="size-4" />{completed ? "Grįžti į istoriją" : "Grįžti į skydelį"}
+    <Link href={booking.viewer === "carrier" ? "/carrier/bookings" : historical ? "/dashboard?tab=history" : "/dashboard?tab=transports"} className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <ArrowLeft aria-hidden="true" className="size-4" />{booking.viewer === "carrier" ? "Grįžti į pervežimus" : historical ? "Grįžti į istoriją" : "Grįžti į skydelį"}
     </Link>
 
     <header className="flex min-w-0 flex-col items-start justify-between gap-6 rounded-xl border bg-card p-4 sm:flex-row sm:items-end sm:p-6">
@@ -79,11 +101,13 @@ export function BookingDetailView({ initialBooking }: { initialBooking: BookingP
       <div className="flex flex-col gap-4 border-t pt-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0 space-y-2" role="status">
           <h3 ref={statusHeading} tabIndex={-1} className="font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{completed ? "Pervežimas užbaigtas" : canComplete ? "Patvirtinkite gavimą" : "Kas toliau?"}</h3>
-          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{booking.status === "delivered" ? completionCopy.cardDescription : booking.status === "collected" && vehicleCount === 1 ? "Automobilis paimtas. Kitas etapas – pervežimas į pristatymo vietą." : booking.status === "pickup_scheduled" && vehicleCount === 1 ? "Pasiruoškite sutartam paėmimui. Kitas etapas – automobilio paėmimas." : nextStepCopy[booking.status]}</p>
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{booking.status === "delivered" ? booking.viewer === "carrier" ? "Laukiama kliento gavimo patvirtinimo." : completionCopy.cardDescription : booking.status === "collected" && vehicleCount === 1 ? "Automobilis paimtas. Kitas etapas – pervežimas į pristatymo vietą." : booking.status === "pickup_scheduled" && vehicleCount === 1 ? "Pasiruoškite sutartam paėmimui. Kitas etapas – automobilio paėmimas." : nextStepCopy[booking.status]}</p>
         </div>
         {canComplete ? <Button ref={completionButton} className="h-auto min-h-11 w-full whitespace-normal py-3 lg:w-auto lg:max-w-sm" onClick={() => setConfirming(true)}>{completionCopy.cta}<Check aria-hidden="true" /></Button> : <Button nativeButton={false} variant="outline" render={<Link href={bookingChatHref(booking)} />} className="h-auto min-h-11 w-full whitespace-normal py-3 lg:w-auto lg:shrink-0">{conversationCopy.cta}<MessageCircle aria-hidden="true" /></Button>}
       </div>
     </CardContent></Card>
+
+    <BookingOperations booking={booking} onSaved={state => setBooking(current => ({ ...current, ...state }))} />
 
     <div className="grid min-w-0 items-start gap-6 lg:grid-cols-3">
       <div className="min-w-0 space-y-6 lg:col-span-2">
@@ -151,6 +175,6 @@ export function BookingDetailView({ initialBooking }: { initialBooking: BookingP
       </aside>
     </div>
 
-    <BookingCompletionDialog open={confirming} onOpenChange={setConfirming} onConfirm={confirmCompletion} finalFocus={completed ? statusHeading : completionButton} vehicleCount={vehicleCount} />
+    <BookingCompletionDialog open={confirming} onOpenChange={setConfirming} onConfirm={() => void confirmCompletion()} busy={busy} error={error} finalFocus={completed ? statusHeading : completionButton} vehicleCount={vehicleCount} />
   </div>
 }

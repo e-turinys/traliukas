@@ -9,11 +9,21 @@ export const bookingStatusLabels: Record<BookingStatus, string> = {
   in_transit: "Vežama",
   delivered: "Pristatyta",
   completed: "Pervežimas užbaigtas",
+  cancelled: "Pervežimas atšauktas",
 }
 
 export function bookingStatusLabel(status: BookingStatus, vehicleCount: number) {
   if (status === "collected" && vehicleCount === 1) return "Automobilis paimtas"
   return bookingStatusLabels[status]
+}
+
+export function bookingCommandResult(value: unknown, bookingId: string): { status: BookingStatus; statusVersion: number } {
+  if (!value || typeof value !== "object" || !("booking_id" in value) || value.booking_id !== bookingId
+    || !("status" in value) || ![...bookingStatuses, "cancelled"].includes(String(value.status))
+    || !("status_version" in value) || !Number.isInteger(value.status_version) || Number(value.status_version) < 1) {
+    throw new Error("Invalid Booking command response")
+  }
+  return { status: value.status as BookingStatus, statusVersion: Number(value.status_version) }
 }
 
 function cloneDate(value: Date | undefined) {
@@ -83,7 +93,7 @@ export function hydrateBooking(payload: BookingPayload): Booking {
 }
 
 export function bookingTimeline(status: BookingStatus, vehicleCount: number) {
-  const currentIndex = bookingStatuses.indexOf(status)
+  const currentIndex = bookingStatuses.findIndex(step => step === status)
   return bookingStatuses.map((step, index) => ({
     status: step,
     label: bookingStatusLabel(step, vehicleCount),
@@ -106,7 +116,7 @@ export function bookingCompletionCopy(vehicleCount: number) {
 }
 
 export function bookingConversationCopy(status: BookingStatus) {
-  return status === "completed"
+  return status === "completed" || status === "cancelled"
     ? { description: "Peržiūrėkite susirašinėjimo istoriją.", cta: "Peržiūrėti pokalbį" }
     : { description: "Susisiekite su pasirinktu vežėju tame pačiame pasiūlymo pokalbyje.", cta: "Atidaryti pokalbį" }
 }
@@ -131,4 +141,5 @@ export const bookingDomainEvents = [
   "booking.inTransit",
   "booking.delivered",
   "booking.completed",
+  "booking.cancelled",
 ] as const

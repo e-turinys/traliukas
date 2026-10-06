@@ -22,6 +22,7 @@ test("phone and OTP validation preserves channel proof inputs", () => {
   for (const value of ["12345", "1234567", "123abc", "123456\n"]) assert.throws(() => requireOtp(value))
 })
 test("post-auth destinations use an explicit local allowlist", () => {
+  assert.equal(safeAuthReturnPath("/carrier/bookings"), "/carrier/bookings")
   assert.equal(safeAuthReturnPath("/request/new"), "/request/new")
   for (const value of ["//evil.test", "https://evil.test", "/\\evil.test", "javascript:alert(1)", "/%2f%2fevil.test", undefined]) assert.equal(safeAuthReturnPath(value), "/")
 })
