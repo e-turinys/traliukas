@@ -1,6 +1,6 @@
 # Parvezk.lt — Current Status
 
-**Date:** 2026-10-06
+**Date:** 2026-10-19
 **Backend Foundation Architecture = LOCKED.** Human approval of OD-1 through OD-5 is recorded in `06_BACKEND_FOUNDATION_ARCHITECTURE.md`; no implementation started under this approval.
 **P01 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. The current responsive P01 browser implementation is the approved V1 visual baseline and the visual reference for P02/P03. P01 search behavior remains locked and unchanged.
 **P02 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its responsive search-results implementation is the V1 visual reference for future results/discovery screens under D-052. P01 remains LOCKED and unchanged.
@@ -22,19 +22,17 @@
 
 ## Phase 5 — Booking Operational Lifecycle
 
-**Phase 5 — Booking Operational Lifecycle = IN REVIEW.** Started IN PROGRESS under the human-approved sequencing correction, 2026-10-04 (D-066); implementation is now ready for human review, not LOCKED. Real Carrier progression through Delivered, Customer completion and pre-collection cancellation are persisted through narrow transactional commands with audited private pickup details, immutable agreement, exact-once capacity release and terminal read-only Chat. Dashboard places active Bookings in Pervežimai and completed/cancelled Bookings only in Istorija. Minimal controls use the existing Booking Detail plus `/carrier/bookings`.
+**Phase 5 — Booking Operational Lifecycle = LOCKED.** Final human review PASSED; explicit human approval recorded on 2026-10-19. This lock continues the existing implementation without reopening Phase 5 or authorizing a later phase.
 
-Validation: 636 pgTAP assertions (80 lifecycle), four concurrency scenarios, 143 application tests and 6 Auth foundation tests; local DB lint/types, build and diff checks pass. Browser review covers the real two-party flow, completion/cancellation, reload and controls at 390/768/1280/1440. Human review Bookings remain Booked: `14387c8f-1992-4f6d-85ec-c5a6a8cb60c1` (lifecycle) and `e4e16da6-19f9-4c9c-8ffc-c552581bb775` (cancellation), each 2 total / 2 reserved / 0 available. See [Phase 5 review guide](09_PHASE5_REVIEW.md) for OTP commands, exact URLs, authorization and acceptance steps.
+- Carrier progresses Booked → PickupScheduled → Collected → InTransit → Delivered; only the Customer confirms Delivered → Completed. No skipping or backwards transitions.
+- Customer or selected Carrier may cancel only before Collected. Terminal cancellation releases exactly the reserved vehicle count atomically and once. Normal progression and Completed retain historical Route capacity; the agreement snapshot stays immutable.
+- Active Conversations remain writable; Completed/cancelled Conversations retain readable history and reject further sends. Realtime remains deferred.
+- Customer Dashboard: active Booking → **Pervežimai**; Completed/cancelled → **Istorija**. Carrier `/carrier/bookings`: **Aktyvūs pervežimai** and **Istorija** separate active and terminal Bookings.
+- Human review approved role-aware Booking Detail and clear operational controls, removal of duplicate Chat/price/identity information, authenticated Customer/Carrier header navigation, anonymous Prisijungti and working logout.
+- Similar Bookings/Routes seen during review were deterministic local fixtures, not duplicate production transactions. The final reset replaced earlier review records; old IDs in the review guide are historical. Fresh local test IDs are in ignored `supabase/.temp/phase5-review.json`.
+- Final validation: local reset applied all 11 migrations; **636/636 pgTAP**, **6/6 foundation**, **143/143 unit**, **4/4 Phase 5 concurrency**, **3/3 Phase 4 concurrency**; DB lint, generated types/check and production build passed. Final browser/diff results are recorded in [Phase 5 review](09_PHASE5_REVIEW.md).
 
-Linux revalidation on 2026-10-06: all 11 existing migrations applied from zero; all requested checks passed. The existing Phase 5 browser test now selects Chrome by platform (or `CHROME_PATH`). Fresh review fixtures were recreated with the existing bootstrap; the manifest and URLs in the review guide supersede Windows IDs. Phase 5 remains IN REVIEW, pending human approval.
-
-Human-review UX correction: Booking Detail now separates Customer information from Carrier operations, removes repeated price/Carrier/Chat presentations, and groups saved pickup details with each vehicle. This is presentation-only; Phase 5 remains IN REVIEW.
-
-Carrier Bookings review correction: `/carrier/bookings` now separates **Aktyvūs pervežimai** from **Istorija** (`?tab=history`). Completed/cancelled Bookings appear only in History. Tests (143/143), build, responsive browser checks and diff validation pass; Customer placement is unchanged. Phase 5 remains IN REVIEW.
-
-Global header Auth correction: removed unconditional Prisijungti for authenticated visitors. Existing Supabase Auth and caller-scoped Carrier ownership now select Mano užklausos or Mano pervežimai, with logout in desktop/mobile navigation. Anonymous/Customer/Carrier/logout browser checks, 143 unit tests, build and diff checks pass; public static rendering preserved. Phase 5 remains IN REVIEW.
-
-Phase 4 remains LOCKED; its transaction and UI baseline are not reopened. Realtime, attachments/read receipts, Notifications/Reviews persistence or delivery, payments, Route Distribution, i18n and Carrier staff accounts remain outside this phase. Local Supabase only; no commit/push.
+Phase 4 remains LOCKED and unchanged. No application, migration or test changes were needed for this lock. Historical review/correction evidence is preserved in [Phase 5 review](09_PHASE5_REVIEW.md); historical roadmap and decisions remain intact. Realtime, attachments/read receipts, Notifications persistence/provider delivery, Reviews persistence, payments/escrow, Route Distribution, full i18n and Carrier staff accounts remain deferred. Local Supabase only; no commit/push.
 
 ## Phase 4 transaction lock — 2026-10-04
 
@@ -541,15 +539,15 @@ tests/route-persistence.test.mjs
 
 ## Immediate next task
 
-**Phase 5 — Booking Operational Lifecycle**, explicitly authorized on 2026-10-04 (D-066). Implement the locked Carrier progression, Customer receipt confirmation and pre-collection cancellation with atomic capacity release. Then stop for human review; do not mark Phase 5 LOCKED.
+**Resolve the documented post-Phase-5 sequencing conflict in a separately scoped instruction; do not implement a next phase.** Phase 5 — Booking Operational Lifecycle is now LOCKED after successful human review.
 
-Historical handoff: the older master plan named Carrier Marketplace next. Phases 3–4 now provide the closed-beta Carrier ownership, Routes, matching, Request browse, Offers, Chat and acceptance/capacity flow. Human decision D-066 supersedes that sequencing, without deleting its historical scope or reopening completed work. The backend rollout's next lifecycle work is now explicitly scoped to operations/cancellation; Notifications and Reviews remain deferred.
+The numbered [implementation plan](04_IMPLEMENTATION_PLAN.md) still lists **Phase 6 — Booking and Conversation** after the corrected Phase 5 section. Its acceptance/snapshot/Conversation continuity work is already covered by locked Phase 4, and its operations/lifecycle/cancellation/delivery confirmation work by locked Phase 5; review flow remains deferred. D-066 and the [backend rollout](06_BACKEND_FOUNDATION_ARCHITECTURE.md) corrected the immediate Phase 5 scope but did not select a new post-Phase-5 successor. The rollout groups lifecycle, reviews and in-app Notifications in step 7, whereas the numbered plan places Notifications in Phase 7. These are unreconciled scope/sequence records, not authorization to silently select Reviews, Notifications or repeat Booking work.
 
-Phase 4 is LOCKED. Phase 5 moved from IN PROGRESS to IN REVIEW under the separate human implementation instruction. Stop for its human review; no later phase is authorized here.
+Historical Carrier Marketplace-first sequencing and D-066 remain preserved. No Phase 6 or other next-phase implementation starts in this lock task.
 
 ## Locked baseline handoff
 
-P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior, Carrier Route Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are approved, browser-reviewed and LOCKED. D-043–D-050 lock the final pre-backend architecture. Start no new phase until it is separately selected and scoped. Supabase/Auth Foundation Phase 1 and Customer Request Real Persistence Phase 2 are LOCKED after full local validation and human approval. Carrier Route Real Persistence Phase 3 is LOCKED after human review and explicit approval under the D-063 beta admission policy. Phase 4 — Offer / Conversation / Booking Transaction is LOCKED after final human review on 2026-10-04, as recorded above. Realtime messaging, production provider delivery, Route-distribution adapters and full i18n translation rollout remain unstarted. Do not commit or push without a separate instruction.
+P01–P09, Multi-Vehicle Requests, per-vehicle Multi-Location transport, Multi-Vehicle + Multi-Location Booking behavior, Carrier Route Capacity V1, Conversation / Chat V1, the Messages Inbox, B01 Booking Detail and Notifications V1 / N01 are approved, browser-reviewed and LOCKED. D-043–D-050 lock the final pre-backend architecture. Start no new phase until it is separately selected and scoped. Supabase/Auth Foundation Phase 1 and Customer Request Real Persistence Phase 2 are LOCKED after full local validation and human approval. Carrier Route Real Persistence Phase 3 is LOCKED after human review and explicit approval under the D-063 beta admission policy. Phase 4 — Offer / Conversation / Booking Transaction is LOCKED after final human review on 2026-10-04, as recorded above. Phase 5 — Booking Operational Lifecycle is LOCKED after final human review on 2026-10-19. Realtime messaging, production provider delivery, Route-distribution adapters and full i18n translation rollout remain unstarted. Do not commit or push without a separate instruction.
 
 ## Do not reopen without a blocker
 

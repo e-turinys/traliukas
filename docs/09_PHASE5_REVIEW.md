@@ -1,6 +1,20 @@
 # Phase 5 — Booking Operational Lifecycle
 
-Status: **IN REVIEW**. Human review is required before LOCKED. Implementation order was corrected by human approval on 2026-10-04 (D-066); the historical Carrier Marketplace roadmap remains recorded. Phase 4 acceptance, immutable agreement creation and reservation semantics are unchanged.
+Status: **LOCKED**. Final human review PASSED; explicit human approval recorded on 2026-10-19. Implementation order was corrected by human approval on 2026-10-04 (D-066); the historical Carrier Marketplace roadmap remains recorded. Phase 4 acceptance, immutable agreement creation and reservation semantics are unchanged.
+
+## Final human review and lock — 2026-10-19
+
+**Phase 5 — Booking Operational Lifecycle = LOCKED.** The human review supplied with this lock task passed the full aggregate lifecycle, actor authorization, pre-collection terminal cancellation/exact atomic capacity release, immutable agreement and retained capacity through completion. No skips or backwards transitions are permitted; the authorization matrix below remains final.
+
+Human review also passed Customer Pervežimai/History placement; Carrier Active/History separation; role-aware Booking Detail with clear operational controls and no duplicate Chat CTA or repeated price/identity information; active Chat and terminal historical/read-only Chat; anonymous Prisijungti, authenticated Customer/Carrier navigation and logout. Similar review Bookings/Routes were deterministic local fixtures, not duplicate production transactions.
+
+Final validation continued the clean `wip/phase5-booking-lifecycle` tree. Local reset applied all 11 existing migrations. `npm run db:test` passed **636/636 assertions across 8 files** (80 lifecycle); `db:lint`, `db:types` and `db:types:check` passed without generated-type changes. `test:foundation` passed **6/6**; `npm test` passed **143/143**. Phase 5 concurrency passed **4/4**, and existing Phase 4 transaction concurrency passed **3/3**. `npm run build` passed, including lint and TypeScript checks. Sandbox restrictions required rerunning local CLI/test/build commands outside the sandbox; no code or tests were changed to obtain passing results.
+
+Final browser reruns against the production build passed the real two-party lifecycle, completion/reload/Customer History/read-only Chat, cancellation/exact capacity release and layouts at **390/768/1280/1440**. Header checks passed anonymous/Customer/Carrier desktop/mobile navigation, logout, cleared cookies and private-page isolation. The separate Carrier Active/History and role-aware UI human-review results above are confirmed by the supplied final human approval; their earlier dedicated browser evidence is retained below. `git diff --check` passed; `git status --short` shows only this review document and CURRENT_STATUS modified. No genuine regression was found; no application, migration or test edits were required.
+
+The installed Next.js 15.5.25 package has no `node_modules/next/dist/docs/` directory. No application code changes were needed. Phase 4 acceptance, snapshots, reservation behavior, migrations and tests are unchanged. Historical roadmap/decision records are preserved. The numbered roadmap still names Phase 6 — Booking and Conversation, overlapping completed Phase 4/5 work; D-066 does not designate a successor. CURRENT_STATUS records this conflict without choosing or implementing a next phase.
+
+Realtime Chat/websockets, attachments/read receipts, Notifications persistence/provider delivery, Reviews persistence, payments/escrow, Route Distribution and full i18n remain deferred. No remote Supabase access, commit or push.
 
 ## Persisted operations and authorization
 
@@ -26,7 +40,9 @@ Normal stages, including Completed, retain reserved capacity. Completion marks t
 
 Customer Dashboard shows active Bookings only in **Pervežimai**, Completed/cancelled only in **Istorija**, using snapshot route/count/Carrier and the canonical `/bookings/[id]` link. No duplicate Request/Booking across tabs. All six Lithuanian status labels and singular/plural Collected wording remain unchanged.
 
-## Local human review
+## Historical local human-review procedure — 2026-10-06
+
+**Historical evidence:** the pending-review statements, fixture IDs and instructions below describe the earlier review sessions. They are superseded by the final lock record above; the 2026-10-19 reset replaced these records. Use the ignored current `supabase/.temp/phase5-review.json` manifest for fresh local fixture IDs. Multiple similar Bookings/Routes were deterministic local review fixtures, not duplicate production transactions.
 
 The requested local reset replaced the old Phase 4 database records; historical Phase 4 review IDs remain in its lock document. These are newly accepted real €1,000 agreements, each with Volkswagen Golf Hamburg → Kaunas and Toyota Corolla Berlin → Kaunas. Each compatible Route is Hamburg → Berlin → Kaunas, capacity **2 total / 2 reserved / 0 available**. Separate automation agreements were consumed by browser tests; the following two remain Booked for human review.
 
@@ -111,4 +127,4 @@ Validation: `npm test` **143/143 PASS**, `npm run build` **PASS**, `git diff --c
 - Browser: real Carrier → Delivered, Customer → Completed, refresh/History/read-only chat; cancellation/release; separate sessions; new controls at four widths. Screenshots are ignored local artifacts under `supabase/.temp/phase5-screens/`.
 - Browser validation found that cancellation could commit while the page remained stale. Controls now immediately apply the RPC's validated canonical Booking ID/status/version and then refresh server data; the complete rerun passed. No optimistic state transition precedes database success.
 
-Phase 4 remains LOCKED. Phase 5 awaits human review; do not mark LOCKED. Realtime/websockets, attachments/read receipts, Notifications persistence/provider delivery, Reviews persistence, payments/escrow, Route Distribution, full i18n and Carrier staff accounts remain deferred. No remote Supabase access, commit or push.
+Historical pre-lock boundary: Phase 4 remained LOCKED and Phase 5 awaited human review. The final 2026-10-19 approval supersedes that pending status. Realtime/websockets, attachments/read receipts, Notifications persistence/provider delivery, Reviews persistence, payments/escrow, Route Distribution, full i18n and Carrier staff accounts remain deferred. No remote Supabase access, commit or push.
