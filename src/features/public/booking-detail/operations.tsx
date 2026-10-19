@@ -4,7 +4,6 @@ import { useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import type { Booking, BookingPickup } from "@/lib/types/booking"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { commandClient, commandError } from "../marketplace-persistence/client"
 import { vehicleName } from "../vehicle-summary"
@@ -57,21 +56,13 @@ export function BookingOperations({ booking, onSaved }: { booking: Booking; onSa
   }
 
   return <>
-    {booking.pickups?.length ? <Card className="border py-0 shadow-none ring-0"><CardContent className="space-y-4 p-4 sm:p-6">
-      <h2 className="text-xl font-semibold">Suderintas paėmimas</h2>
-      <div className="grid gap-4 sm:grid-cols-2">{booking.pickups.map(pickup => <div key={pickup.vehicle_id} className="min-w-0 space-y-2 break-words rounded-lg border p-4 text-sm">
-        <h3 className="font-semibold">{vehicleName(booking.vehicles.find(v => v.id === pickup.vehicle_id)!)}</h3>
-        <p>{pickup.street}</p><p>{pickup.contact_name} · {pickup.contact_phone}</p>
-        <p>{new Date(pickup.scheduled_from).toLocaleString("lt-LT", { timeZone: "UTC" })} – {new Date(pickup.scheduled_to).toLocaleString("lt-LT", { timeZone: "UTC" })} (UTC)</p>
-      </div>)}</div>
-    </CardContent></Card> : null}
-    {action || canCancel ? <Card className="border py-0 shadow-none ring-0"><CardContent className="space-y-5 p-4 sm:p-6">
-      <h2 className="text-xl font-semibold">Pervežimo valdymas</h2>
+    {action || canCancel ? <div className={booking.viewer === "carrier" ? "space-y-5 rounded-xl border bg-card p-4 sm:p-6" : "space-y-4"}>
+      {action && <h2 className="text-xl font-semibold">{action.label}</h2>}
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
       {action && !cancelling && <form onSubmit={event => void submit(event, false)} className="space-y-5">
         {booking.status === "booked" ? <>
           <p className="text-sm text-muted-foreground">Įveskite suderintas kiekvieno automobilio paėmimo detales. Laikas pagal jūsų įrenginio laiko juostą.</p>
-          <div className="grid gap-4 lg:grid-cols-2">{booking.vehicles.map(vehicle => <fieldset key={vehicle.id} disabled={busy} className="min-w-0 space-y-4 rounded-lg border p-4">
+          <div className="grid gap-4 md:grid-cols-2">{booking.vehicles.map(vehicle => <fieldset key={vehicle.id} disabled={busy} className="min-w-0 space-y-3 rounded-lg border p-4">
             <legend className="max-w-full px-1 font-medium break-words">{vehicleName(vehicle)} · {vehicle.pickupLocation?.city}</legend>
             <label className="block space-y-2 text-sm">Adresas<Input name={`${vehicle.id}:street`} required maxLength={300} autoComplete="off" /></label>
             <label className="block space-y-2 text-sm">Kontaktinis asmuo<Input name={`${vehicle.id}:contact_name`} required maxLength={150} autoComplete="off" /></label>
@@ -87,7 +78,7 @@ export function BookingOperations({ booking, onSaved }: { booking: Booking; onSa
         <label className="block space-y-2 text-sm">Atšaukimo priežastis<Input name="reason" required maxLength={2000} disabled={busy} /></label>
         <div className="flex flex-wrap gap-3"><Button type="submit" variant="destructive" disabled={busy}>Patvirtinti atšaukimą</Button><Button type="button" variant="outline" disabled={busy} onClick={() => setCancelling(false)}>Grįžti</Button></div>
       </form> : <Button variant="outline" disabled={busy} onClick={() => setCancelling(true)}>Atšaukti pervežimą</Button>)}
-    </CardContent></Card> : null}
+    </div> : null}
     {!canCancel && booking.status !== "completed" && booking.status !== "cancelled" && <p className="text-sm text-muted-foreground">Po paėmimo pervežimo atšaukti savarankiškai negalima. Dėl išimčių kreipkitės į pagalbą.</p>}
   </>
 }

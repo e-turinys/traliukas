@@ -1,6 +1,6 @@
 # Parvezk.lt — Current Status
 
-**Date:** 2026-10-04
+**Date:** 2026-10-06
 **Backend Foundation Architecture = LOCKED.** Human approval of OD-1 through OD-5 is recorded in `06_BACKEND_FOUNDATION_ARCHITECTURE.md`; no implementation started under this approval.
 **P01 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. The current responsive P01 browser implementation is the approved V1 visual baseline and the visual reference for P02/P03. P01 search behavior remains locked and unchanged.
 **P02 High-Fidelity = LOCKED.** Human desktop and mobile browser review passed. Its responsive search-results implementation is the V1 visual reference for future results/discovery screens under D-052. P01 remains LOCKED and unchanged.
@@ -24,7 +24,15 @@
 
 **Phase 5 — Booking Operational Lifecycle = IN REVIEW.** Started IN PROGRESS under the human-approved sequencing correction, 2026-10-04 (D-066); implementation is now ready for human review, not LOCKED. Real Carrier progression through Delivered, Customer completion and pre-collection cancellation are persisted through narrow transactional commands with audited private pickup details, immutable agreement, exact-once capacity release and terminal read-only Chat. Dashboard places active Bookings in Pervežimai and completed/cancelled Bookings only in Istorija. Minimal controls use the existing Booking Detail plus `/carrier/bookings`.
 
-Validation: 636 pgTAP assertions (80 lifecycle), four concurrency scenarios, 143 application tests and 6 Auth foundation tests; local DB lint/types, build and diff checks pass. Browser review covers the real two-party flow, completion/cancellation, reload and controls at 390/768/1280/1440. Human review Bookings remain Booked: `f6a9d4fd-d69b-4d7b-a2fa-d469096d3d2f` (lifecycle) and `42863b3c-74be-42a9-8532-9f409350aa5b` (cancellation), each 2 total / 2 reserved / 0 available. See [Phase 5 review guide](09_PHASE5_REVIEW.md) for OTP commands, exact URLs, authorization and acceptance steps.
+Validation: 636 pgTAP assertions (80 lifecycle), four concurrency scenarios, 143 application tests and 6 Auth foundation tests; local DB lint/types, build and diff checks pass. Browser review covers the real two-party flow, completion/cancellation, reload and controls at 390/768/1280/1440. Human review Bookings remain Booked: `14387c8f-1992-4f6d-85ec-c5a6a8cb60c1` (lifecycle) and `e4e16da6-19f9-4c9c-8ffc-c552581bb775` (cancellation), each 2 total / 2 reserved / 0 available. See [Phase 5 review guide](09_PHASE5_REVIEW.md) for OTP commands, exact URLs, authorization and acceptance steps.
+
+Linux revalidation on 2026-10-06: all 11 existing migrations applied from zero; all requested checks passed. The existing Phase 5 browser test now selects Chrome by platform (or `CHROME_PATH`). Fresh review fixtures were recreated with the existing bootstrap; the manifest and URLs in the review guide supersede Windows IDs. Phase 5 remains IN REVIEW, pending human approval.
+
+Human-review UX correction: Booking Detail now separates Customer information from Carrier operations, removes repeated price/Carrier/Chat presentations, and groups saved pickup details with each vehicle. This is presentation-only; Phase 5 remains IN REVIEW.
+
+Carrier Bookings review correction: `/carrier/bookings` now separates **Aktyvūs pervežimai** from **Istorija** (`?tab=history`). Completed/cancelled Bookings appear only in History. Tests (143/143), build, responsive browser checks and diff validation pass; Customer placement is unchanged. Phase 5 remains IN REVIEW.
+
+Global header Auth correction: removed unconditional Prisijungti for authenticated visitors. Existing Supabase Auth and caller-scoped Carrier ownership now select Mano užklausos or Mano pervežimai, with logout in desktop/mobile navigation. Anonymous/Customer/Carrier/logout browser checks, 143 unit tests, build and diff checks pass; public static rendering preserved. Phase 5 remains IN REVIEW.
 
 Phase 4 remains LOCKED; its transaction and UI baseline are not reopened. Realtime, attachments/read receipts, Notifications/Reviews persistence or delivery, payments, Route Distribution, i18n and Carrier staff accounts remain outside this phase. Local Supabase only; no commit/push.
 

@@ -24,7 +24,10 @@ async function cookies(email) {
   assert.equal((await client.auth.setSession(await verified.json())).error, null)
   return values.map(row => ({ name: row.name, value: row.value, url: base, path: '/', httpOnly: false, secure: false, sameSite: 'Lax' }))
 }
-const chrome = spawn('C:/Program Files/Google/Chrome/Application/chrome.exe', ['--headless=new', '--disable-gpu', '--no-first-run', '--remote-debugging-port=0', `--user-data-dir=${mkdtempSync(path.join(tmpdir(), 'phase5-browser-'))}`, 'about:blank'], { windowsHide: true, stdio: ['ignore', 'ignore', 'pipe'] })
+const chromePath = process.env.CHROME_PATH ?? (process.platform === 'win32'
+  ? 'C:/Program Files/Google/Chrome/Application/chrome.exe'
+  : process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : 'google-chrome')
+const chrome = spawn(chromePath, ['--headless=new', '--disable-gpu', '--no-first-run', '--remote-debugging-port=0', `--user-data-dir=${mkdtempSync(path.join(tmpdir(), 'phase5-browser-'))}`, 'about:blank'], { windowsHide: true, stdio: ['ignore', 'ignore', 'pipe'] })
 const endpoint = await new Promise((resolve, reject) => { chrome.on('error', reject); chrome.stderr.on('data', chunk => { const match = String(chunk).match(/DevTools listening on (ws:\/\/\S+)/); if (match) resolve(match[1]) }) })
 const socket = new WebSocket(endpoint)
 await new Promise(resolve => socket.addEventListener('open', resolve, { once: true }))
