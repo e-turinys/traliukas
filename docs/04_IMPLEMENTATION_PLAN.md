@@ -175,7 +175,13 @@ Replace customer mock flows with live data.
 - Saved Carriers;
 - customer authorization/privacy.
 
-## Phase 5 — Carrier Marketplace
+## Current Phase 5 — Booking Operational Lifecycle (2026-10-04 correction)
+
+Human decision D-066 explicitly places Booking Operational Lifecycle immediately after locked backend Phase 4. Carrier ownership/Routes/Request browse/complete matching/Offers/Chat/acceptance/capacity already support the closed-beta transaction; do not rebuild or redesign them. Implementation order evolved from the historical plan below.
+
+Deliver the locked aggregate Booked → PickupScheduled → Collected → InTransit → Delivered → Completed chain, selected-Carrier operational authorization, Customer receipt confirmation, and Customer/Carrier pre-collection cancellation with atomic exact capacity release. Preserve the immutable agreement, terminal read-only Conversation and Dashboard placement. No Notifications/Reviews/payments/realtime/Route Distribution scope. Start IN PROGRESS; finish IN REVIEW pending human approval.
+
+## Historical Phase 5 — Carrier Marketplace
 
 ### Deliver
 

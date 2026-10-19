@@ -414,6 +414,8 @@ Auth → Supabase/Postgres schema → roles/permissions → persistence → end-
 
 ## 19. Fixture-to-production rollout sequence
 
+**2026-10-04 human sequencing correction (D-066):** After locked backend Phase 4 Acceptance/Booking, the immediate implementation phase is **Phase 5 — Booking Operational Lifecycle**. The lifecycle portion of step 7 below is authorized, including pre-collection cancellation/capacity release; Reviews and Notifications remain deferred. The older master plan's Carrier Marketplace-first handoff is superseded because closed-beta Carrier capabilities already exist. Historical scope/order is retained below for traceability.
+
 1. Freeze UI contracts and create data-access adapters; domain data no longer imported directly from mock modules in production paths. Keep isolated fixture mode for local/browser review only. Never fall back to fixtures on a production authorization/network error.
 2. Auth/profiles: gated publication returns to the original local draft. Stage only after authentication, publish idempotently after verification. Test phone conflict/change, revoked session, publish retries and form/photo retention.
 3. Catalog + carrier onboarding + verified Route reads/writes: public discovery uses safe projections. Import only vetted geography, not mock carriers/reviews/prices. Map real UUIDs to the existing route parameters through adapters; no new navigation model.

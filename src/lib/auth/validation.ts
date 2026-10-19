@@ -12,7 +12,7 @@ export function requireOtp(value: string) {
 export function safeAuthReturnPath(value: string | null | undefined) {
   if (!value?.startsWith("/") || value.startsWith("//") || /[\\\u0000-\u0020\u007f]/.test(value)) return "/"
   const pathname = value.split(/[?#]/, 1)[0]
-  const pages = ["/", "/search", "/dashboard", "/request/new", "/carrier", "/carrier/routes", "/carrier/routes/new", "/carrier/requests", "/messages", "/notifications"]
+  const pages = ["/", "/search", "/dashboard", "/request/new", "/carrier", "/carrier/routes", "/carrier/routes/new", "/carrier/requests", "/carrier/bookings", "/messages", "/notifications"]
   const detail = /^\/(?:offers|requests|routes|carriers|bookings|messages)\/[a-zA-Z0-9-]+$/.test(pathname)
     || /^\/carrier\/(?:routes|requests)\/[a-zA-Z0-9-]+(?:\/edit)?$/.test(pathname)
     || /^\/request\/[a-zA-Z0-9-]+\/published$/.test(pathname)

@@ -18,7 +18,16 @@ const {
   bookingChatHref, bookingCompletionCopy, bookingConversationCopy, bookingStatusLabel,
   bookingStatusLabels, bookingTimeline, canCustomerConfirmDelivery, completeDeliveredBooking,
   createBookingSnapshot, hydrateBooking, serializeBooking,
+  bookingCommandResult,
 } = await import("../src/features/public/booking-detail/logic.ts")
+
+test("persisted command result updates canonical status/version and rejects wrong identity or unsupported state", () => {
+  assert.deepEqual(bookingCommandResult({ booking_id: "b", status: "cancelled", status_version: 2 }, "b"), { status: "cancelled", statusVersion: 2 })
+  assert.deepEqual(bookingCommandResult({ booking_id: "b", status: "completed", status_version: 6 }, "b"), { status: "completed", statusVersion: 6 })
+  for (const result of [null, { booking_id: "other", status: "booked", status_version: 1 }, { booking_id: "b", status: "unknown", status_version: 1 }, { booking_id: "b", status: "completed", status_version: 0 }]) {
+    assert.throws(() => bookingCommandResult(result, "b"))
+  }
+})
 
 test("Booking snapshot retains accepted Offer identity, version, price and payment terms", () => {
   const request = findMockRequestDetail("booked-demo-001")
@@ -76,10 +85,14 @@ test("Booking lifecycle labels and timeline progression use one aggregate status
     in_transit: "Vežama",
     delivered: "Pristatyta",
     completed: "Pervežimas užbaigtas",
+    cancelled: "Pervežimas atšauktas",
   })
   const timeline = bookingTimeline("in_transit", 1)
   assert.deepEqual(timeline.map(step => step.state), ["complete", "complete", "complete", "current", "upcoming", "upcoming"])
   assert.equal(timeline.filter(step => step.state === "current").length, 1)
+  assert.equal(bookingTimeline("cancelled", 2).length, 6)
+  assert.equal(bookingTimeline("cancelled", 2).some(step => step.state === "current"), false)
+  assert.equal(bookingConversationCopy("cancelled").cta, "Peržiūrėti pokalbį")
 })
 
 test("Booking lifecycle and Delivered confirmation wording follow vehicle count", () => {

@@ -14,5 +14,5 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
   const { id } = await params
   const booking = isRouteId(id) ? await loadRealBooking(id) : findMockBooking(id)
   if (!booking) notFound()
-  return <PageContainer className="py-8 sm:py-12"><BookingDetailView key={id} initialBooking={serializeBooking(booking)} /></PageContainer>
+  return <PageContainer className="py-8 sm:py-12"><BookingDetailView key={`${id}:${booking.statusVersion ?? booking.status}`} initialBooking={serializeBooking(booking)} /></PageContainer>
 }

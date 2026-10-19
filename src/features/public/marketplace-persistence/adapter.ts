@@ -77,9 +77,10 @@ export function bookingProjection(row: Views["bookings"]["Row"]): Booking {
     void _photos; void _default
     return result
   })
-  if (!row.id || !bookingStatuses.includes(row.status as BookingStatus) || row.snapshot_schema_version !== 1) throw new Error("Unsupported persisted Booking")
+  if (!row.id || ![...bookingStatuses, "cancelled"].includes(row.status ?? "") || row.snapshot_schema_version !== 1) throw new Error("Unsupported persisted Booking")
   return { id: row.id, requestId: row.request_id!, acceptedOfferId: row.accepted_offer_id!, acceptedOfferVersion: row.accepted_offer_version!,
     carrierId: string(carrier.id), carrier: safeCarrier(string(carrier.id),string(carrier.display_name)), conversationId: row.conversation_id!, vehicles,
     agreedTotalPrice: row.agreed_total_price!, currency: "EUR", paymentTerms: row.payment_terms!, plannedPickup: row.planned_pickup_date!, plannedDelivery: row.planned_delivery_date!,
-    requestedPickupWindow: pickupWindow(string(pickup.kind),pickup.from as string | null,pickup.to as string | null), status: row.status as BookingStatus, createdAt: row.created_at! }
+    requestedPickupWindow: pickupWindow(string(pickup.kind),pickup.from as string | null,pickup.to as string | null), status: row.status as BookingStatus, createdAt: row.created_at!,
+    statusVersion: row.status_version!, viewer: row.viewer_side === "customer" ? "customer" : "carrier" }
 }
