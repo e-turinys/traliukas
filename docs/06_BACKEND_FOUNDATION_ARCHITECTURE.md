@@ -4,6 +4,16 @@
 
 This is the approved database/Auth/security contract, not SQL, migrations, project configuration or application code. It preserves the locked product rules and High-Fidelity screens. Section 22 records the approved OD-1 through OD-5 architecture decisions and the remaining non-blocking legal/operations retention item.
 
+## Current implementation and release-scope addendum — 2026-10-19
+
+Backend Phases 1–5 are LOCKED and Phase 5 is merged into main. The original inspected baseline/table proposal below is architecture history, not a claim that Auth, Routes, Offers, Chat, acceptance or lifecycle remain unimplemented. `08_PHASE4_REVIEW.md` and `09_PHASE5_REVIEW.md` record completed behavior; the [active implementation plan](04_IMPLEMENTATION_PLAN.md) and D-067 now govern the recommended remaining sequence. No schema or domain authorization rule changes in this documentation task.
+
+Recommended gates: **Notifications Persistence → Hosted Release and Beta Acceptance → CLOSED BETA READY → Public V1 Trust and Launch Acceptance → PUBLIC V1 READY**. Section 19's old rollout order is superseded as a task queue. Section 15's in-app Notification contract remains required before beta; domain event persistence alone does not satisfy it.
+
+For this release recommendation, the blanket section 2 inclusion of eligible Reviews in closed beta is superseded by **Reviews before Public V1**, using approved OD-4's explicit deferral allowance. Completed-only eligibility, unique direction, public Customer→Carrier/private Carrier→Customer and truthful reputation remain unchanged. An invited beta may omit Reviews with no fabricated ratings or nonfunctional review promises. This is a roadmap recommendation, not permission to deploy or an implementation instruction.
+
+Before real users: hosted configuration, real phone OTP delivery, public Auth abuse controls, restricted audited operations, legal/privacy/retention decisions, monitoring, tested backup/recovery and hosted E2E acceptance are mandatory. SMTP is required for any enabled email Auth flow, not for a phone-only release with email Auth disabled. Business delivery providers remain deferred. The earlier statement that retention periods do not block architecture/migrations is not permission to collect production data without an approved handling policy. No retention duration is invented here.
+
 ## 1. Executive summary
 
 Use one Supabase project per environment, managed Supabase Auth, Postgres as the authoritative domain store, and private Supabase Storage. Keep the existing Next.js application and screen contracts. Use normalized operational tables, immutable version records and one immutable Booking agreement snapshot. No microservices, event-sourcing framework, payment system or realtime dependency.
@@ -412,7 +422,7 @@ No migrations are created in this task. Proposed dependency batches, all applied
 
 Auth → Supabase/Postgres schema → roles/permissions → persistence → end-to-end remains D-062's project sequence. Default-deny RLS must accompany initial tables; this does not justify postponing access control until after data becomes reachable. All table/constraint changes are additive/reviewed; no ad-hoc production SQL through the browser.
 
-## 19. Fixture-to-production rollout sequence
+## 19. Historical fixture-to-production rollout sequence (superseded by D-067)
 
 **2026-10-04 human sequencing correction (D-066):** After locked backend Phase 4 Acceptance/Booking, the immediate implementation phase is **Phase 5 — Booking Operational Lifecycle**. The lifecycle portion of step 7 below is authorized, including pre-collection cancellation/capacity release; Reviews and Notifications remain deferred. The older master plan's Carrier Marketplace-first handoff is superseded because closed-beta Carrier capabilities already exist. Historical scope/order is retained below for traceability.
 

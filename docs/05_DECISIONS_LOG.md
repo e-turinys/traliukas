@@ -412,6 +412,20 @@ Acceptance must revalidate the current/actionable Offer, selected Carrier activi
 
 **Reason:** The prior Carrier Marketplace-next sequence predates implemented backend Phases 3–4. Required closed-beta Carrier and marketplace transaction capabilities already exist. Implementation order evolved; historical roadmap entries are retained, not silently erased. Phase 4 stays LOCKED. No Notifications/Reviews persistence or providers, payments, realtime, attachments/read receipts, Route Distribution, full i18n or staff accounts are authorized by this phase.
 
+### D-067 — Post-Phase-5 roadmap reconciliation and launch gates
+
+**Date:** 2026-10-19. **Status:** Recommended roadmap recorded under the explicit documentation-only reconciliation instruction; no implementation, provider selection, remote access or release approval.
+
+**Recommendation:** Replace the obsolete master-plan phase sequence with **Notifications Persistence → Hosted Release and Beta Acceptance → CLOSED BETA READY → Public V1 Trust and Launch Acceptance → PUBLIC V1 READY**. Backend Phases 1–5 are LOCKED, with Phase 5 merged into main; do not rebuild their identity, Request, Route, Offer, Chat, acceptance, capacity or Booking lifecycle capabilities. Exact A/B/C classifications, exclusions and acceptance gates are in `04_IMPLEMENTATION_PLAN.md`.
+
+**Supersession:** Old Phase 5 Carrier Marketplace and old Phase 6 Booking and Conversation overlap backend Phases 3–5. Old Phases 7–10 mix mandatory release controls with optional admin/provider/analytics features and are superseded as sequencing instructions. Their original records remain historical. The Phase 4/5 lock reports remain evidence of what was approved at those dates.
+
+**Scope recommendation:** In-app Notifications remains required before beta under section 15/D-042/D-061. Use OD-4's deferral allowance to put eligible Reviews before Public V1, superseding section 2's broad beta inclusion for this recommended release plan without changing either review direction or authorization. Phone OTP requires real SMS before beta. Email Auth needs tested SMTP only if enabled; disable unused channels. Business notification delivery, realtime, attachments/read receipts, distribution, full i18n and advanced analytics are not automatic launch blockers. Payments/escrow remain outside V1.
+
+**Operational boundary:** A bounded invite-only beta may use manual onboarding, Carrier verification and support, but must have audited restricted operator access, abuse protection, legal/retention decisions, monitoring, recovery and hosted end-to-end proof. Public V1 additionally needs Reviews, reachable public admission/support, narrow unbooked Request closure and pilot/release evidence. Public admission policy must be explicitly approved before changing current beta gates; this roadmap grants no self-admission or verification authority.
+
+**Reason:** Local transaction correctness is substantially proven; the largest remaining safety gaps are production operations, genuine communication/trust data and onboarding. Historical frontend deployment and local test OTP do not prove hosted readiness. The smallest practical plan is three remaining phases, not a repeat of completed marketplace work. Each phase remains separately executable only on instruction.
+
 ## How to add a new decision (template)
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:
