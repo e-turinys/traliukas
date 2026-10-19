@@ -361,6 +361,8 @@ Completed Bookings keep agreement/history access, no progression action and read
 
 ## 15. Notifications and domain-event handling
 
+**Implementation update — 2026-10-19 (D-068):** Notifications Persistence is IN REVIEW. `20261019000100_notifications.sql` projects existing domain events transactionally with a dedicated restricted trigger owner; it does not rewrite prior command functions. Event+recipient uniqueness, own-feed RLS, immutable safe content/stored href and a narrow read-one/all command are implemented locally. The earlier Phase 4 provider/notification deferral is historical; provider delivery still remains deferred. See `10_NOTIFICATIONS_REVIEW.md` for evidence and human-review steps.
+
 Persist in-app Notifications synchronously with their successful domain command for beta. Event key examples are Booking ID + status_version, Offer ID + revision + event kind, or Message ID + message.created. Retry uses the same event identity. Unique event dedupe + `(source_event_id,recipient_id)` prevents repeated records. No asynchronous external broker is needed for the in-app happy path.
 
 | Event | Recipients before actor suppression | In-app now | Future channel intent only |
@@ -373,6 +375,7 @@ Persist in-app Notifications synchronously with their successful domain command 
 | booking.collected / booking.inTransit | Customer | Yes | Email |
 | booking.delivered | Customer | Yes | Email + SMS |
 | booking.completed | Customer + carrier responsible user | Yes | Email |
+| booking.cancelled | Customer + carrier responsible user | Yes | None specified; in-app only (D-068) |
 
 Remove actor after recipient resolution. Consequently, normal customer-triggered acceptance does **not** send a self-Notification to that same customer; the carrier gets booking.created, and the customer sees the transactional success/Booking. An actor-free system/admin-triggered event may notify both eligible parties. Do not duplicate a customer notification via offer.accepted to compensate. This follows the existing helper tests and locked self-suppression rule.
 

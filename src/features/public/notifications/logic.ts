@@ -23,6 +23,7 @@ export const notificationPolicies: Record<NotificationEventType, NotificationPol
   "booking.collected": { recipients: "customer", inApp: true, email: "immediate", sms: false },
   "booking.inTransit": { recipients: "customer", inApp: true, email: "immediate", sms: false },
   "booking.delivered": { recipients: "customer", inApp: true, email: "immediate", sms: true },
+  "booking.cancelled": { recipients: "customer_and_carrier", inApp: true, email: "none", sms: false },
   "booking.completed": { recipients: "customer_and_carrier", inApp: true, email: "immediate", sms: false },
 }
 

@@ -127,3 +127,21 @@ test("review fixture and filter selectors have safe defaults and explicit empty 
   assert.equal(listMockNotifications("empty").length, 0)
   assert.equal(unreadNotifications(listMockNotifications("all-read")).length, 0)
 })
+
+test("cancellation is in-app only and notifies the other participant", () => {
+  assert.deepEqual(notificationPolicy("booking.cancelled"), { recipients: "customer_and_carrier", inApp: true, email: "none", sms: false })
+  assert.deepEqual(resolveNotificationRecipients(event("booking.cancelled", { actorId: "customer" })), ["carrier"])
+  assert.deepEqual(resolveNotificationRecipients(event("booking.cancelled", { actorId: "carrier" })), ["customer"])
+  for (const type of ["booking.created", "booking.completed"]) {
+    assert.deepEqual(resolveNotificationRecipients(event(type, { actorId: "customer" })), ["carrier"])
+  }
+})
+
+test("persisted notification adapter preserves read state and rejects unsafe destinations", async () => {
+  const { notificationProjection } = await import("../src/features/public/notifications/adapter.ts")
+  const row = { id:"n", source_event_id:"e", recipient_id:"u", actor_id:"c", event_type:"offer.created", title:"New offer", body:"View offer", href:"/offers/o", entity_type:"offer", entity_id:"o", created_at:"2026-10-19T10:00:00Z", read_at:"2026-10-19T11:00:00Z" }
+  assert.equal(notificationProjection(row).readAt, row.read_at)
+  assert.equal(notificationProjection(row).href, row.href)
+  for (const href of ["https://evil.test", "//evil.test", "/offers/other", "javascript:alert(1)"]) assert.throws(() => notificationProjection({...row,href}))
+  assert.throws(() => notificationProjection({...row,event_type:"offer.accepted"}))
+})

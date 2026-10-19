@@ -55,7 +55,9 @@ A = required before Closed Beta (and therefore also Public V1). B = additional r
 | Targeted publication, Saved Carriers, optional budget UI | Targeted publication falls back explicitly to marketplace; Saved Carriers not persisted; budget payload/schema support exists but UI remains deferred. | **C:** retain explicit marketplace consent and truthful unavailable controls. No duplicate Request persistence work. |
 | Maps/KYC/staff/native/GPS | Outside current minimal transaction implementation. | **C:** full maps/geocoding, automated KYC, staff permissions, native app/live tracking, segment capacity/reuse and expanded trust badges. |
 
-### Next phase — Notifications Persistence
+### Notifications Persistence — IN REVIEW (human review is the immediate next task)
+
+**Implementation update, 2026-10-19:** persisted implementation and local validation are complete; see `10_NOTIFICATIONS_REVIEW.md`. Human approval is pending. The user explicitly authorized cancellation notifications to the other affected participant; D-068 adds `booking.cancelled` in-app only. Earlier recommendation not to add it without a separate instruction is now satisfied. Hosted readiness remains unstarted.
 
 **Objective:** make the existing Notifications screen reflect the user's actual marketplace activity. **Gate: A, required before Closed Beta.**
 

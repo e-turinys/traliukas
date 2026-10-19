@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { persistNotificationRead } from "./client"
 import { ArrowRight, Bell, CalendarDays, CheckCheck, CircleCheck, FileText, MessageSquare, PackageCheck, Truck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -27,15 +29,35 @@ function EmptyState({ allEmpty }: { allEmpty: boolean }) {
   </Card>
 }
 
-export function NotificationsView({ initialNotifications, initialFilter = "all" }: {
+export function NotificationsView({ initialNotifications, initialFilter = "all", persisted = false }: {
+  persisted?: boolean
   initialNotifications: Notification[]
   initialFilter?: NotificationFilter
 }) {
   const [notifications, setNotifications] = useState(initialNotifications)
   const [filter, setFilter] = useState<NotificationFilter>(initialFilter)
+  const router = useRouter()
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState("")
+  const [previousNotifications, setPreviousNotifications] = useState(initialNotifications)
+  if (previousNotifications !== initialNotifications) {
+    setPreviousNotifications(initialNotifications)
+    setNotifications(initialNotifications)
+  }
+  async function markRead(id?: string, href?: string) {
+    if (busy) return
+    setBusy(true); setError("")
+    try {
+      const stamp = persisted ? await persistNotificationRead(id) : new Date().toISOString()
+      setNotifications(current => id ? markNotificationRead(current, id, stamp) : markAllNotificationsRead(current, stamp))
+      if (href) router.push(href)
+      if (persisted) router.refresh()
+    } catch {
+      setError("Nepavyko pažymėti pranešimų. Bandykite dar kartą.")
+    } finally { setBusy(false) }
+  }
   const unread = unreadNotifications(notifications)
   const visible = filter === "unread" ? unread : notifications
-  const now = () => new Date().toISOString()
 
   return <div className="mx-auto w-full max-w-4xl space-y-6 pb-8">
     <header className="space-y-2">
@@ -48,10 +70,11 @@ export function NotificationsView({ initialNotifications, initialFilter = "all" 
         <Button aria-pressed={filter === "all"} variant={filter === "all" ? "outline" : "ghost"} className="h-auto min-h-11 whitespace-normal px-3 py-2" onClick={() => setFilter("all")}>Visi</Button>
         <Button aria-pressed={filter === "unread"} variant={filter === "unread" ? "outline" : "ghost"} className="h-auto min-h-11 whitespace-normal px-3 py-2" onClick={() => setFilter("unread")}>Neperskaityti</Button>
       </div>
-      {notifications.length > 0 && <Button variant="ghost" className="h-auto min-h-11 w-full whitespace-normal py-2 sm:w-auto" disabled={!unread.length} onClick={() => setNotifications(current => markAllNotificationsRead(current, now()))}>
+      {notifications.length > 0 && <Button variant="ghost" className="h-auto min-h-11 w-full whitespace-normal py-2 sm:w-auto" disabled={busy || !unread.length} onClick={() => void markRead()}>
         <CheckCheck aria-hidden="true" />Pažymėti visus kaip perskaitytus
       </Button>}
     </div>
+    {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     <p role="status" className="sr-only">Neperskaityti pranešimai: {unread.length}. Rodoma: {visible.length}.</p>
 
     {visible.length > 0 ? <ol aria-label="Pranešimų sąrašas" className="space-y-3">
@@ -65,7 +88,11 @@ export function NotificationsView({ initialNotifications, initialFilter = "all" 
         return <li key={notification.id}>
           <Card data-notification-id={notification.id} data-notification-read={!isUnread} className={`min-w-0 border py-0 shadow-none ring-0 ${isUnread ? "border-primary/20 bg-primary/5" : "bg-card"}`}>
             <CardContent className="p-0">
-              <Link href={notificationDestination(notification)} onClick={() => setNotifications(current => markNotificationRead(current, notification.id, now()))} className="group flex min-h-24 min-w-0 items-start gap-3 rounded-xl p-4 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:p-6">
+              <Link href={notificationDestination(notification)} onClick={event => {
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+                event.preventDefault()
+                void markRead(notification.id, notificationDestination(notification))
+              }} className="group flex min-h-24 min-w-0 items-start gap-3 rounded-xl p-4 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:p-6">
                 <span className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${isUnread ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}><Icon aria-hidden="true" className="size-5" /></span>
                 <div className="min-w-0 flex-1 space-y-2">
                   <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">

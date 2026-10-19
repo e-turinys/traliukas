@@ -426,6 +426,16 @@ Acceptance must revalidate the current/actionable Offer, selected Carrier activi
 
 **Reason:** Local transaction correctness is substantially proven; the largest remaining safety gaps are production operations, genuine communication/trust data and onboarding. Historical frontend deployment and local test OTP do not prove hosted readiness. The smallest practical plan is three remaining phases, not a repeat of completed marketplace work. Each phase remains separately executable only on instruction.
 
+### D-068 — Persisted in-app Notifications and cancellation recipient scope
+
+**Date:** 2026-10-19. **Status:** Explicit implementation instruction; Notifications Persistence is IN REVIEW pending human approval.
+
+**Decision:** Project the existing trusted Offer/Message/Booking events transactionally into recipient-owned persisted in-app Notifications. Source event identity plus recipient deduplicates creation; all recipients are resolved before suppressing the actor. `offer.accepted` remains internal-only and `booking.created` is canonical. Normal Customer acceptance and completion notify only the Carrier after suppression; this does not manufacture a Customer self-notification to satisfy “both sides”.
+
+**Cancellation clarification:** The new user instruction authorizes `booking.cancelled` to the other affected participant, in-app only. Extend the previous notification allowlist accordingly. Do not include private cancellation reason or operational details in its body; do not invent email/SMS delivery semantics for cancellation.
+
+**Boundary:** Preserve existing transaction/lifecycle/capacity semantics and the locked N01 visual layout. Store safe canonical links and monotonic read state, expose no client creation/content edits, and keep provider deliveries and global realtime outside this phase. Prior D-042/D-061 future-channel policy is unchanged for other events. No hosted deployment or next-phase work is authorized.
+
 ## How to add a new decision (template)
 
 Add a new `D-XXX` entry only for a material product/architecture decision. Include:

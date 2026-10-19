@@ -9,6 +9,7 @@ export const notificationEventTypes = [
   "booking.inTransit",
   "booking.delivered",
   "booking.completed",
+  "booking.cancelled",
 ] as const
 
 export type NotificationEventType = (typeof notificationEventTypes)[number]

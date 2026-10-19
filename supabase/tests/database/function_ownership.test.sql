@@ -44,7 +44,10 @@ with expected(signature, owner_name) as (values
   ('api.decline_offer(uuid,integer)', 'parvezk_commands'),
   ('api.transition_booking(uuid,integer,text,jsonb)', 'parvezk_commands'),
   ('api.cancel_booking(uuid,integer,text)', 'parvezk_commands'),
-  ('api.booking_pickups(uuid)', 'parvezk_commands')
+  ('api.booking_pickups(uuid)', 'parvezk_commands'),
+  ('private.notification_reader()', 'parvezk_authorization'),
+  ('private.notify_domain_event()', 'parvezk_notifications'),
+  ('api.mark_notifications_read(uuid)', 'parvezk_commands')
 )
 select extensions.ok(
   coalesce(p.proowner = r.oid and p.prosecdef and 'search_path=""' = any(p.proconfig), false),
@@ -54,7 +57,7 @@ left join pg_catalog.pg_proc p on p.oid = to_regprocedure(e.signature)
 left join pg_catalog.pg_roles r on r.rolname = e.owner_name;
 
 with owners(name) as (values ('parvezk_auth_sync'), ('parvezk_commands'),
-  ('parvezk_authorization'), ('parvezk_verification_audit'))
+  ('parvezk_authorization'), ('parvezk_verification_audit'), ('parvezk_notifications'))
 select extensions.ok(
   not r.rolcanlogin and not r.rolsuper and not r.rolbypassrls and not r.rolinherit
   and not has_schema_privilege(r.oid, 'private', 'CREATE')
@@ -63,7 +66,7 @@ select extensions.ok(
 from owners join pg_catalog.pg_roles r on r.rolname = name;
 
 with owners(name) as (values ('parvezk_auth_sync'), ('parvezk_commands'),
-  ('parvezk_authorization'), ('parvezk_verification_audit')),
+  ('parvezk_authorization'), ('parvezk_verification_audit'), ('parvezk_notifications')),
 clients(name) as (values ('anon'), ('authenticated'), ('authenticator'), ('service_role'))
 select extensions.ok(
   not pg_has_role(clients.name, owners.name, 'SET')
@@ -76,7 +79,7 @@ select extensions.ok(not exists (
   join pg_catalog.pg_roles owner_role on owner_role.oid = m.roleid
   join pg_catalog.pg_roles executor on executor.oid = m.member
   where owner_role.rolname in ('parvezk_auth_sync','parvezk_commands',
-    'parvezk_authorization','parvezk_verification_audit')
+    'parvezk_authorization','parvezk_verification_audit','parvezk_notifications')
     and executor.rolname = current_user and (m.set_option or m.inherit_option)
 ), 'migration executor retains no temporary SET/inherited membership privileges');
 
@@ -108,7 +111,9 @@ select extensions.is(
     'api.decline_offer(uuid,integer)'::regprocedure,
     'api.transition_booking(uuid,integer,text,jsonb)'::regprocedure,
     'api.cancel_booking(uuid,integer,text)'::regprocedure,
-    'api.booking_pickups(uuid)'::regprocedure),
+    'api.booking_pickups(uuid)'::regprocedure,
+    'private.notification_reader()'::regprocedure,
+    'api.mark_notifications_read(uuid)'::regprocedure),
   clients.name || ' EXECUTE allowlist: ' || p.oid::regprocedure::text)
 from pg_catalog.pg_proc p
 join pg_catalog.pg_namespace n on n.oid = p.pronamespace
@@ -122,7 +127,7 @@ select extensions.ok(not exists (
 ), 'no foundation function grants PUBLIC EXECUTE');
 
 with roles(name) as (values ('anon'), ('authenticated'), ('parvezk_commands'),
-  ('parvezk_auth_sync'), ('parvezk_authorization'), ('parvezk_verification_audit'))
+  ('parvezk_auth_sync'), ('parvezk_authorization'), ('parvezk_verification_audit'), ('parvezk_notifications'))
 select extensions.ok(not has_any_column_privilege(name,'auth.users','SELECT'),
   name || ' has no Auth user reads') from roles;
 
@@ -136,7 +141,7 @@ select extensions.ok(not has_table_privilege(name,'private.current_session','SEL
   name || ' cannot read the private Auth boundary') from clients;
 
 with roles(name) as (values ('anon'), ('authenticated'), ('service_role'),
-  ('parvezk_commands'), ('parvezk_verification_audit'))
+  ('parvezk_commands'), ('parvezk_verification_audit'), ('parvezk_notifications'))
 select extensions.ok(
   not has_table_privilege(name,'app.audit_log','UPDATE')
   and not has_table_privilege(name,'app.audit_log','DELETE')

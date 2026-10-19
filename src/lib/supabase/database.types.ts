@@ -1057,6 +1057,69 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          body: string | null
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string | null
+          event_type: string | null
+          href: string | null
+          id: string | null
+          locale: string | null
+          read_at: string | null
+          recipient_id: string | null
+          source_event_id: string | null
+          title: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          body?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type?: string | null
+          href?: string | null
+          id?: string | null
+          locale?: string | null
+          read_at?: string | null
+          recipient_id?: string | null
+          source_event_id?: string | null
+          title?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          body?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type?: string | null
+          href?: string | null
+          id?: string | null
+          locale?: string | null
+          read_at?: string | null
+          recipient_id?: string | null
+          source_event_id?: string | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "my_profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "my_profile"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       offer_revisions: {
         Row: {
           carrier_comment: string | null
@@ -1461,6 +1524,10 @@ export type Database = {
       mark_conversation_read: {
         Args: { p_conversation_id: string; p_sequence: number }
         Returns: undefined
+      }
+      mark_notifications_read: {
+        Args: { p_notification_id?: string }
+        Returns: string
       }
       publish_request: {
         Args: { p_client_publish_key: string; p_payload: Json }
@@ -2356,6 +2423,106 @@ export type Database = {
             columns: ["sender_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          body: string
+          booking_id: string | null
+          conversation_id: string | null
+          created_at: string
+          entity_id: string
+          entity_type: string
+          event_type: string
+          href: string
+          id: string
+          locale: string
+          offer_id: string | null
+          read_at: string | null
+          recipient_id: string
+          source_event_id: string
+          title: string
+        }
+        Insert: {
+          actor_id?: string | null
+          body: string
+          booking_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          event_type: string
+          href: string
+          id?: string
+          locale: string
+          offer_id?: string | null
+          read_at?: string | null
+          recipient_id: string
+          source_event_id: string
+          title: string
+        }
+        Update: {
+          actor_id?: string | null
+          body?: string
+          booking_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          event_type?: string
+          href?: string
+          id?: string
+          locale?: string
+          offer_id?: string | null
+          read_at?: string | null
+          recipient_id?: string
+          source_event_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_source_event_id_fkey"
+            columns: ["source_event_id"]
+            isOneToOne: false
+            referencedRelation: "domain_events"
             referencedColumns: ["id"]
           },
         ]

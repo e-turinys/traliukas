@@ -20,6 +20,16 @@
 
 **Customer Request Real Persistence Phase 2 = LOCKED.** Full local validation passed and human approval is recorded on 2026-09-24. P05 continues through managed phone OTP to atomic PostgreSQL publication; real P06 IDs load the owner's persisted Request and survive reload.
 
+## Notifications Persistence — IN REVIEW
+
+**Notifications Persistence = IN REVIEW**, 2026-10-19. Real in-app Notifications now persist at existing Offer/Message/Booking event transaction boundaries. Recipient-only RLS, event+recipient deduplication, actor suppression, stored canonical href and narrow persistent read-one/all commands replace the configured Notifications fixture path without redesigning N01.
+
+`offer.accepted` remains internal-only. Customer acceptance/completion notify the Carrier after self-suppression; Carrier stages notify the Customer. Cancellation now notifies the other participant in-app only (D-068). No external delivery or realtime was added.
+
+Local validation: **714 pgTAP**, **6 foundation**, **145 unit**, **1 Notifications concurrency**, **4 Phase 5 concurrency**, **3 Phase 4 concurrency** passed; reset/lint/types/check/build/diff passed. Real browser feeds/read-state/navigation/reload/errors/isolation passed at 390/768/1280/1440. Human review is pending: [review guide and local OTP/URLs](10_NOTIFICATIONS_REVIEW.md), entry **http://127.0.0.1:3002/notifications**. Human and automation fixtures are separate. Do not reset accepted review data or mark LOCKED without approval.
+
+Backend Phases 1–5 remain LOCKED; their migrations and command implementations are unchanged. No remote Supabase, production deployment, providers, commit or push.
+
 ## Roadmap reconciliation — 2026-10-19
 
 Backend Phases 1–5 are LOCKED; Phase 5 is merged into `main`. The active [implementation plan](04_IMPLEMENTATION_PLAN.md#active-roadmap--reconciled-after-locked-backend-phases-15) replaces the overlapping historical master-plan sequence. This is documentation-only planning (D-067), not implementation or release authorization.
@@ -30,7 +40,7 @@ Backend Phases 1–5 are LOCKED; Phase 5 is merged into `main`. The active [impl
 - **Before Public V1:** Completed-only Reviews under OD-4; public onboarding/admission/help and reporting/moderation; narrow owner close of unbooked Requests; aggregate pilot measurements, bounded-load/accessibility checks and public go/no-go. Carrier verification remains controlled. Reviews are deferred from the beta gate under OD-4, not dropped from V1.
 - **After launch:** realtime/user-visible read receipts; uploads/attachments; business notification providers; full i18n; Route Distribution; advanced analytics; full admin screens, automated KYC and other optional extensions. Payments/escrow remain outside V1. Optional email login can remain disabled; real SMS for the current phone flow cannot be deferred.
 
-Repo inspection found Notifications still using fixtures/local read state, no Reviews persistence, local-only provider configuration, missing linked terms/privacy/help pages and no documented hosted recovery/monitoring acceptance. Earlier Hostinger auto-deploy evidence does not prove backend production readiness. Full findings, A/B/C classification and each phase's scope/exclusions/acceptance are in the implementation plan. Historical decisions and lock reviews are preserved.
+At the roadmap-reconciliation baseline (before the Notifications implementation above), repo inspection found Notifications using fixtures/local read state, no Reviews persistence, local-only provider configuration, missing linked terms/privacy/help pages and no documented hosted recovery/monitoring acceptance. Earlier Hostinger auto-deploy evidence does not prove backend production readiness. Full findings, A/B/C classification and each phase's scope/exclusions/acceptance are in the implementation plan. Historical decisions and lock reviews are preserved.
 
 **Estimated readiness:** Closed Beta **~70%**, Public V1 **~55%**, ±10 points as planning judgment; not a release approval. Required gates remain blocking regardless of percentage. Hosted state was not inspected. No code, migration, provider configuration, remote Supabase, deployment, commit or push in this reconciliation.
 
@@ -546,14 +556,14 @@ tests/route-persistence.test.mjs
 - Recorded domain/repository: `parvezk.lt`, `https://github.com/e-turinys/traliukas.git`.
 - Prior GitHub → Hostinger frontend auto-deploy was recorded as working; current hosted runtime, environment, credentials, Auth delivery and database rollout are **unverified** in this repo-only reconciliation.
 - Supabase: local migrations/RLS/commands and validation exist; latest lock records 636 pgTAP assertions and full local lifecycle/browser validation. No hosted readiness claim or remote access.
-- Product: core marketplace and Booking lifecycle use real persistence; Notifications remains fixture-based and Reviews unimplemented. Demo paths still require production isolation.
+- Product: core marketplace and Booking lifecycle use real persistence; Notifications persistence is IN REVIEW and Reviews remains unimplemented. Demo paths still require production isolation.
 - Visual baseline remains locked; no UI redesign is planned.
 
 ## Immediate next task
 
-**Recommended next phase: Notifications Persistence**, narrowly scoped in [the active implementation plan](04_IMPLEMENTATION_PLAN.md). Obtain a separate execution instruction before beginning; this task reconciles documentation only.
+**Human review of Notifications Persistence; implementation is IN REVIEW, not LOCKED.** Follow [the review guide](10_NOTIFICATIONS_REVIEW.md). No later phase begins before separate authorization after review.
 
-Then **Hosted Release and Beta Acceptance → CLOSED BETA READY → Public V1 Trust and Launch Acceptance → PUBLIC V1 READY**. The obsolete Phase 6 Booking/Conversation work is already covered by locked Phases 4–5; its remaining Reviews scope is assigned to Public V1 under OD-4. Old phases 7–10 are redistributed into these gates or explicitly deferred. D-067 records the rationale; no historical decisions are deleted and no remaining numbering implies duplicate implementation.
+The subsequent recommended phase remains **Hosted Release and Beta Acceptance → CLOSED BETA READY**, then **Public V1 Trust and Launch Acceptance → PUBLIC V1 READY**. D-067's reconciled roadmap and historical phase records remain preserved. This task implements only Notifications and stops for human review.
 
 ## Locked baseline handoff
 
